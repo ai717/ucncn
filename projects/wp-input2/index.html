@@ -1,0 +1,302 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WP Structured Draft Importer - WordPress 结构化 JSON 草稿一键导入插件 - 菜鸟笔记实验室</title>
+  <meta name="description" content="专为内容创作者与 AI 辅助写作打造的 WordPress 轻量插件。通过结构化 JSON 一键导入文章标题、纯 HTML 富文本正文、固定链接 Slug、分类、标签、摘要，并深度集成 Yoast SEO 焦点关键词与元描述。">
+  <meta name="keywords" content="WordPress插件, WP导入插件, JSON导入草稿, Yoast SEO集成, AI文章导入, 菜鸟笔记">
+  <meta name="author" content="菜鸟笔记 (ucncn.cn)">
+  <link rel="icon" type="image/svg+xml" href="../../assets/images/favicon.svg">
+  <link rel="canonical" href="https://ucncn.cn/projects/wp-input2/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="WP Structured Draft Importer - WordPress 结构化 JSON 草稿导入插件">
+  <meta property="og:description" content="配合大语言模型，将 AI 生成的结构化文章一键无损导入 WordPress，原生支持 Yoast SEO。">
+  <meta property="og:url" content="https://ucncn.cn/projects/wp-input2/">
+  <meta property="og:site_name" content="菜鸟笔记">
+
+  <!-- Schema.org 结构化数据 (SoftwareApplication) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "WP Structured Draft Importer",
+    "applicationCategory": "PluginApplication",
+    "operatingSystem": "WordPress 5.8+",
+    "softwareVersion": "1.0.3",
+    "downloadUrl": "https://ucncn.cn/projects/wp-input2/wp-structured-draft-importer-v1.0.3.zip",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "CNY"
+    },
+    "description": "通过结构化 JSON 一键导入 WordPress 草稿与 Yoast SEO 字段的轻量插件",
+    "author": {
+      "@type": "Person",
+      "name": "菜鸟笔记"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .wp-hero {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 40px 30px;
+      margin-bottom: 36px;
+      text-align: center;
+      position: relative;
+    }
+    .wp-badge-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .wp-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #7c3aed;
+      background: rgba(124, 58, 237, 0.12);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .wp-badge.green {
+      color: #059669;
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .wp-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .wp-title span {
+      color: #7c3aed;
+    }
+    .wp-sub {
+      font-size: 1.08rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+    .download-cta-box {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 12px 28px;
+      border-radius: 30px;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+      transition: all 0.2s ease;
+    }
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+    }
+    .download-meta {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 22px;
+    }
+    .feature-icon {
+      font-size: 1.7rem;
+      margin-bottom: 10px;
+    }
+    .feature-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .schema-table th {
+      background: var(--bg-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 头部导航 -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../../" class="logo-area">
+        <img src="../../assets/images/favicon.svg" alt="菜鸟笔记 Logo" width="28" height="28" style="vertical-align:middle; border-radius: 6px;">
+        <span class="logo-text">菜鸟笔记 · 实验室</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="../../" class="nav-link">返回主站</a>
+        <a href="../../#articles" class="nav-link">菜鸟笔记</a>
+        <a href="../../#projects" class="nav-link">其他项目</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="切换深浅模式" title="切换深浅模式"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        <a href="../../">首页</a>
+        <span>/</span>
+        <a href="../../#projects">实验室</a>
+        <span>/</span>
+        <span>WP Structured Draft Importer</span>
+      </div>
+
+      <!-- Hero 介绍区 -->
+      <section class="wp-hero">
+        <div class="wp-badge-wrap">
+          <span class="wp-badge">WordPress 实用插件</span>
+          <span class="wp-badge green">支持 Yoast SEO</span>
+          <span class="wp-badge">智能容错引擎</span>
+        </div>
+        <h1 class="wp-title">WP Structured Draft Importer <span>📝</span></h1>
+        <p class="wp-sub">
+          配合大语言模型写作，将 AI 生成的结构化 JSON 数据一键全量转化为标准的 WordPress 草稿，原生同步 SEO 字段，彻底告别格式错乱。
+        </p>
+        
+        <!-- 下载按钮 -->
+        <div class="download-cta-box">
+          <a href="wp-structured-draft-importer-v1.0.3.zip" download="wp-structured-draft-importer-v1.0.3.zip" class="download-btn">
+            <span>📦</span> 立即下载插件安装包 (ZIP)
+          </a>
+          <span class="download-meta">版本：v1.0.3 · 体积：43 KB · 兼容 WordPress 5.8+ 及 PHP 7.4~8.2+</span>
+        </div>
+      </section>
+
+      <!-- 文章与特性主体 -->
+      <article class="prose">
+        <h2>💡 为什么需要这款插件？</h2>
+        <p>
+          在利用 AI（ChatGPT、Claude、通义千问、豆包、DeepSeek 等）辅助产出专业博客、SEO 资讯或评测文章时，传统做法是将正文一段段复制粘贴到 WordPress 古腾堡或经典编辑器中。这一过程存在严重痛点：
+        </p>
+        <ul>
+          <li><strong>格式反复折腾：</strong>从 Markdown 转为 HTML 时容易丢失标题层级（H2/H3）、对比表格错位、代码块高亮失效；</li>
+          <li><strong>元数据重复填写：</strong>固定链接 Slug、分类目录、多标签、文章摘要往往需要反复人工手动输入；</li>
+          <li><strong>SEO 字段割裂：</strong>如果使用 Yoast SEO，必须手动逐篇填写焦点关键词、SEO 标题与 Meta Description，耗时耗力。</li>
+        </ul>
+        <p>
+          <strong>WP Structured Draft Importer 通过一份纯净的标准 JSON 彻底解决了所有问题。</strong>大模型一次性输出 JSON，在后台粘贴即可秒级生成排版完美的待审草稿！
+        </p>
+
+        <h2>✨ 五大核心特性</h2>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🚀</div>
+            <div class="feature-name">全要素一键入库</div>
+            <div class="feature-desc">单次导入完整覆盖标题、富文本正文（纯 HTML）、英文固定链接 Slug、分类、标签数组与摘要。</div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-name">Yoast SEO 深度集成</div>
+            <div class="feature-desc">原生解析 <code>yoast_seo</code> 对象，自动映射焦点关键词、SEO 自定义标题与元描述，无需再手动复制。</div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <div class="feature-name">严谨的分类安全保护</div>
+            <div class="feature-desc">绝不自动创建未知的乱七八糟新分类。仅精确匹配站点已有的分类名称或 ID，保持分类架构严谨干净。</div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🧠</div>
+            <div class="feature-name">启发式智能容错引擎</div>
+            <div class="feature-desc">自动剥离 Markdown 代码块包裹，自动修复 HTML 属性内未转义双引号与换行控制字符，避免 JSON 解析报错。</div>
+          </div>
+        </div>
+
+        <h2>📋 标准 JSON 输入规范示例</h2>
+        <pre><code class="language-json">{
+  "title": "2026年家用扫地机器人选购指南与避坑指南",
+  "slug": "robot-vacuum-cleaner-buying-guide-2026",
+  "category": "数码家电",
+  "tags": ["扫地机器人", "智能家居", "避坑指南", "家电评测"],
+  "excerpt": "本文梳理 2026 年主流激光导航、双线激光避障及全自动上下水扫地机的实测表现与选购要点。",
+  "content": "&lt;h2&gt;一、核心避坑要点&lt;/h2&gt;&lt;p&gt;选购扫地机首看避障与吸力协同...&lt;/p&gt;",
+  "yoast_seo": {
+    "focus_keyword": "扫地机器人选购指南",
+    "seo_title": "2026家用扫地机器人深度选购与避坑指南 - 极客家电",
+    "meta_description": "全面对比各档位主流扫地机清洁效果与自动化维护成本，助你少花冤枉钱。"
+  }
+}
+</code></pre>
+
+        <h2>🚀 快速安装使用方法</h2>
+        <ol>
+          <li>点击上方下载按钮获取 <code>wp-structured-draft-importer-v1.0.3.zip</code>；</li>
+          <li>登录你的 WordPress 网站后台，进入 <strong>「插件」 &rarr; 「安装插件」 &rarr; 「上传插件」</strong>；</li>
+          <li>选择刚下载的 ZIP 文件并点击“现在安装”，安装完毕后点击<strong>“启用插件”</strong>；</li>
+          <li>在 WordPress 左侧主菜单中即可看到<strong>「草稿导入器」</strong>，将 AI 生成的 JSON 粘贴进去，点击“解析预览”或“直接创建草稿”即可！</li>
+        </ol>
+
+        <h2>🔒 纯净安全承诺</h2>
+        <p>
+          本插件完全遵循 WordPress 官方编码规范，所有数据输入均经过严格的 <code>sanitize_text_field</code>、<code>wp_kses_post</code> 与 <code>wp_verify_nonce</code> 过滤校验，仅具备文章创建权限的管理员才可操作，轻巧纯粹，零外网冗余请求。
+        </p>
+      </article>
+
+    </div>
+  </main>
+
+  <!-- 底部合规备案声明 (严格符合管局要求) -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-nav">
+        <a href="../../">首页</a>
+        <span>·</span>
+        <a href="../../#articles">菜鸟笔记</a>
+        <span>·</span>
+        <a href="../../#projects">项目实验室</a>
+        <span>·</span>
+        <a href="../../#about">关于本站</a>
+      </div>
+      <div>
+        &copy; 2024-2026 菜鸟笔记 (ucncn.cn) 版权所有
+      </div>
+      <div>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="beian-link">
+          苏ICP备2024150485号-5
+        </a>
+      </div>
+      <p class="footer-disclaimer">
+        声明：本站为个人非营利性技术学习笔记本，不提供用户注册及公众言论发布功能。
+      </p>
+    </div>
+  </footer>
+
+  <script src="../../assets/js/main.js"></script>
+</body>
+</html>

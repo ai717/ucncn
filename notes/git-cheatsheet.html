@@ -1,0 +1,182 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git 常用工作流与致命后悔药（Reset、Revert与Stash速查） - 菜鸟笔记</title>
+  <meta name="description" content="从提交错了分支到撤销未提交的改动，整理日常高频遇到的版本控制故障排查命令与无痛恢复方案。">
+  <meta name="keywords" content="Git工作流, Git回滚, Git reset, Git stash, 版本控制, 菜鸟笔记">
+  <meta name="author" content="菜鸟笔记 (ucncn.cn)">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <link rel="canonical" href="https://ucncn.cn/notes/git-cheatsheet.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Git 常用工作流与致命后悔药（Reset、Revert与Stash速查） - 菜鸟笔记">
+  <meta property="og:description" content="从提交错了分支到撤销未提交的改动，整理日常高频遇到的版本控制故障排查命令与无痛恢复方案。">
+  <meta property="og:url" content="https://ucncn.cn/notes/git-cheatsheet.html">
+  <meta property="og:site_name" content="菜鸟笔记">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Git 常用工作流与致命后悔药（Reset、Revert与Stash速查）",
+    "description": "从提交错了分支到撤销未提交的改动，整理日常高频遇到的版本控制故障排查命令与无痛恢复方案。",
+    "datePublished": "2026-10-12T10:00:00+08:00",
+    "dateModified": "2026-10-16T12:00:00+08:00",
+    "author": {
+      "@type": "Person",
+      "name": "菜鸟笔记"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "菜鸟笔记",
+      "url": "https://ucncn.cn"
+    },
+    "mainEntityOfPage": "https://ucncn.cn/notes/git-cheatsheet.html"
+  }
+  </script>
+</head>
+<body>
+
+  <!-- 头部导航 -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../" class="logo-area">
+        <img src="../assets/images/favicon.svg" alt="菜鸟笔记 Logo" width="28" height="28" style="vertical-align:middle; border-radius: 6px;">
+        <span class="logo-text">菜鸟笔记</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="../#articles" class="nav-link">菜鸟笔记</a>
+        <a href="../#projects" class="nav-link">项目实验室</a>
+        <a href="../#about" class="nav-link">关于</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="切换深浅模式" title="切换深浅模式"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      
+      <div class="breadcrumb">
+        <a href="../">首页</a>
+        <span>/</span>
+        <a href="../#articles">菜鸟笔记</a>
+        <span>/</span>
+        <span>Git 工作流</span>
+      </div>
+
+      <article class="prose">
+        <header class="article-header">
+          <h1 class="article-title">Git 常用工作流与致命后悔药（Reset、Revert 与 Stash 速查）</h1>
+          <div class="article-meta">
+            <span>📅 发布日期：2026-10-12</span>
+            <span>🏷️ 标签：Git / 版本控制 / 生产备忘</span>
+            <span>⏱️ 预计阅读：6 分钟</span>
+          </div>
+        </header>
+
+        <p>
+          在日常团队开发或者个人折腾项目时，Git 几乎是不可或缺的工具。然而，手滑提交了敏感配置、误操作合并了错误分支、或者正在改代码突然需要切分支修紧急 Bug，是每个开发者都会踩的坑。本文梳理了几条高频救命操作。
+        </p>
+
+        <h2>一、突发事件：代码写到一半需要切分支</h2>
+        <p>
+          当前工作区有大量未完成的代码，直接 <code>git checkout</code> 会报错或者把未提交修改带过去。此时首选暂存技术：
+        </p>
+        <pre><code class="language-bash"># 1. 给本次暂存加上描述，存入堆栈
+git stash save "正在重构路由组件，待继续"
+
+# 2. 此时工作区干干净净，可以放心切分支修 Bug
+git checkout main
+git checkout -b hotfix/login-bug
+
+# 3. 紧急修复完成并提交后，切回原分支
+git checkout feature/router-refactor
+
+# 4. 查看当前暂存列表
+git stash list
+
+# 5. 弹出并恢复最近一次的暂存内容
+git stash pop
+</code></pre>
+
+        <h2>二、手滑后悔药：撤销不同阶段的操作</h2>
+        <p>
+          撤销修改的核心在于搞清楚当前修改停留在哪个阶段（工作区、暂存区、本地提交、远程推送）。
+        </p>
+
+        <h3>1. 仅在工作区修改，尚未 <code>git add</code></h3>
+        <pre><code class="language-bash"># 放弃单个文件的修改
+git restore src/index.js
+
+# 放弃当前目录下所有未暂存的修改
+git restore .
+</code></pre>
+
+        <h3>2. 已经执行了 <code>git add</code>，尚未 <code>git commit</code></h3>
+        <pre><code class="language-bash"># 将文件移出暂存区，保留本地代码
+git restore --staged src/config.json
+</code></pre>
+
+        <h3>3. 已经 <code>git commit</code> 到本地，但想撤回</h3>
+        <pre><code class="language-bash"># 保留代码改动，仅撤销 commit 记录（推荐方案）
+git reset --soft HEAD~1
+
+# 彻底丢弃上次 commit 及所有代码（慎用）
+git reset --hard HEAD~1
+</code></pre>
+
+        <div class="callout">
+          <div class="callout-title">⚠️ 生产环境重要警示</div>
+          如果代码已经执行了 <code>git push</code> 推送到公共协作分支，<strong>严禁使用 reset --hard 并强推</strong>。此时必须使用 <code>git revert &lt;commit_id&gt;</code>，它会生成一条新的逆向提交，不破坏他人的提交历史。
+        </div>
+
+        <h2>三、分支清理与垃圾回收</h2>
+        <p>长期迭代后，本地往往残留大量已经合并并删除的远程废弃分支：</p>
+        <pre><code class="language-bash"># 同步远程分支状态，清理本地已失效的分支追踪记录
+git fetch --prune
+
+# 查看所有已合并到主分支的本地分支
+git branch --merged main
+</code></pre>
+
+        <h2>小结</h2>
+        <p>
+          Git 的本质是基于快照的有向无环图（DAG），只要没有手动执行彻底的 <code>git gc</code> 清理，绝大多数误操作都能通过 <code>git reflog</code> 找回对应的 commit SHA 并重置回来。保持冷静，善用日志。
+        </p>
+      </article>
+
+    </div>
+  </main>
+
+  <!-- 底部备案信息 -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-nav">
+        <a href="../">首页</a>
+        <span>·</span>
+        <a href="../#articles">菜鸟笔记</a>
+        <span>·</span>
+        <a href="../#projects">项目实验室</a>
+        <span>·</span>
+        <a href="../#about">关于本站</a>
+      </div>
+      <div>
+        &copy; 2024-2026 菜鸟笔记 (ucncn.cn) 版权所有
+      </div>
+      <div>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="beian-link">
+          苏ICP备2024150485号-5
+        </a>
+      </div>
+      <p class="footer-disclaimer">
+        声明：本站为个人非营利性技术学习笔记本，不提供用户注册及公众言论发布功能。
+      </p>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

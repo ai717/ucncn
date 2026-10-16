@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux Crontab 定时任务避坑备忘：环境变量与路径陷阱 - 菜鸟笔记</title>
+  <meta name="description" content="记录 Linux 运维中 Crontab 定时任务常见失效原因：默认执行环境缺 PATH 变量、未声明脚本绝对路径、输出重定向与日志审计方法。">
+  <meta name="keywords" content="Crontab定时任务, Linux定时器, Linux运维, Crontab环境变量, 菜鸟笔记">
+  <meta name="author" content="菜鸟笔记 (ucncn.cn)">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <link rel="canonical" href="https://ucncn.cn/notes/linux-crontab-tips.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Linux Crontab 定时任务避坑备忘：环境变量与路径陷阱 - 菜鸟笔记">
+  <meta property="og:description" content="记录 Linux 运维中 Crontab 定时任务失效排查：环境变量与日志重定向避坑。">
+  <meta property="og:url" content="https://ucncn.cn/notes/linux-crontab-tips.html">
+  <meta property="og:site_name" content="菜鸟笔记">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Linux Crontab 定时任务避坑备忘：环境变量与路径陷阱",
+    "description": "记录 Linux 运维中 Crontab 定时任务常见失效原因及排查方案。",
+    "datePublished": "2026-09-08T09:30:00+08:00",
+    "dateModified": "2026-10-16T12:00:00+08:00",
+    "author": {
+      "@type": "Person",
+      "name": "菜鸟笔记"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "菜鸟笔记",
+      "url": "https://ucncn.cn"
+    },
+    "mainEntityOfPage": "https://ucncn.cn/notes/linux-crontab-tips.html"
+  }
+  </script>
+
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../" class="logo-area">
+        <img src="../assets/images/favicon.svg" alt="菜鸟笔记 Logo" width="28" height="28" style="vertical-align:middle; border-radius: 6px;">
+        <span class="logo-text">菜鸟笔记</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="../#articles" class="nav-link">菜鸟笔记</a>
+        <a href="../#projects" class="nav-link">项目实验室</a>
+        <a href="../#about" class="nav-link">关于</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="切换深浅模式" title="切换深浅模式"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      
+      <div class="breadcrumb">
+        <a href="../">首页</a>
+        <span>/</span>
+        <a href="../#articles">菜鸟笔记</a>
+        <span>/</span>
+        <span>Linux 运维</span>
+      </div>
+
+      <article class="prose">
+        <header class="article-header">
+          <h1 class="article-title">Linux Crontab 定时任务避坑备忘：环境变量与路径陷阱</h1>
+          <div class="article-meta">
+            <span>📅 发布日期：2026-09-08</span>
+            <span>🏷️ 标签：Linux / Crontab / Shell / 自动化备份</span>
+            <span>⏱️ 预计阅读：6 分钟</span>
+          </div>
+        </header>
+
+        <p>
+          “在终端手动执行脚本完全正常，但一放进 Crontab 就不执行或者报各种找不到命令的错误。”这是绝大多数 Linux 运维与开发者都踩过的典型陷阱。本文系统剖析问题根源与防坑规范。
+        </p>
+
+        <h2>一、核心病根：极度精简的 Crond 运行环境</h2>
+        <p>
+          用户手动登录终端时，系统会自动加载 <code>/etc/profile</code>、<code>~/.bashrc</code> 等文件，注入了丰富的 <code>$PATH</code> 变量。
+          而 <strong>crond 守护进程派生的非交互 Shell，默认只有极少的基础 PATH（通常仅有 <code>/usr/bin:/bin</code>）</strong>。
+        </p>
+        <p>因此，如果你在 Python/Node 脚本里调用了位于 <code>/usr/local/bin</code> 或虚拟环境内的命令，就会提示 command not found。</p>
+
+        <h2>二、三大黄金军规</h2>
+
+        <h3>1. 绝对路径原则：可执行文件与脚本一律全路径</h3>
+        <pre><code class="language-bash"># ❌ 错误示范：依赖相对路径与系统环境变量
+* * * * * python backup.py
+
+# ✅ 正确规范：解释器与脚本均写死完整路径
+0 2 * * * /usr/bin/python3 /opt/scripts/backup.py
+</code></pre>
+
+        <h3>2. 显式在 Crontab 顶部声明 SHELL 与 PATH</h3>
+        <p>执行 <code>crontab -e</code> 时，建议在文件最上方统一定义环境变量：</p>
+        <pre><code class="language-bash">SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# 每天凌晨 3:00 执行清理任务
+0 3 * * * /opt/scripts/cleanup.sh
+</code></pre>
+
+        <h3>3. 绝不“静默执行”：做好标准输出与错误日志重定向</h3>
+        <pre><code class="language-bash"># 将标准输出 (1) 与错误输出 (2) 一同追加到日志文件，便于事后排查
+0 4 * * * /opt/scripts/db_dump.sh >> /var/log/cron_backup.log 2>&1
+</code></pre>
+
+        <h2>三、时间语法速查</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>字段</th>
+              <th>允许值</th>
+              <th>示例与说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>分 (Minute)</td>
+              <td>0 - 59</td>
+              <td><code>*/15</code> 每 15 分钟触发一次</td>
+            </tr>
+            <tr>
+              <td>时 (Hour)</td>
+              <td>0 - 23</td>
+              <td><code>0 2</code> 每天凌晨 2 点整</td>
+            </tr>
+            <tr>
+              <td>日 (Day)</td>
+              <td>1 - 31</td>
+              <td><code>1</code> 每月 1 号</td>
+            </tr>
+            <tr>
+              <td>月 (Month)</td>
+              <td>1 - 12</td>
+              <td><code>*</code> 每个月</td>
+            </tr>
+            <tr>
+              <td>周 (Week)</td>
+              <td>0 - 7 (0/7代表周日)</td>
+              <td><code>1-5</code> 周一至周五工作日</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-nav">
+        <a href="../">首页</a>
+        <span>·</span>
+        <a href="../#articles">菜鸟笔记</a>
+        <span>·</span>
+        <a href="../#projects">项目实验室</a>
+        <span>·</span>
+        <a href="../#about">关于本站</a>
+      </div>
+      <div>
+        &copy; 2024-2026 菜鸟笔记 (ucncn.cn) 版权所有
+      </div>
+      <div>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="beian-link">
+          苏ICP备2024150485号-5
+        </a>
+      </div>
+      <p class="footer-disclaimer">
+        声明：本站为个人非营利性技术学习笔记本，不提供用户注册及公众言论发布功能。
+      </p>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

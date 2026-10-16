@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <!-- Outer glass bubble gradient -->
+    <radialGradient id="glassGrad" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#E8FFF4" stop-opacity="0.9"/>
+      <stop offset="45%" stop-color="#A2F5D1" stop-opacity="0.35"/>
+      <stop offset="80%" stop-color="#00D287" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#00B06F" stop-opacity="0.4"/>
+    </radialGradient>
+
+    <!-- Little yellow ball gradient -->
+    <radialGradient id="yellowBody" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#FFF266"/>
+      <stop offset="60%" stop-color="#FFD214"/>
+      <stop offset="100%" stop-color="#FFA800"/>
+    </radialGradient>
+
+    <!-- Battery terminal cap gradient -->
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="30%" stop-color="#00E695"/>
+      <stop offset="100%" stop-color="#009A60"/>
+    </linearGradient>
+
+    <!-- Energy bolt gradient -->
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00FF9D"/>
+      <stop offset="100%" stop-color="#00B865"/>
+    </linearGradient>
+
+    <!-- Subtle drop shadow -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- 1. Outer Glass Bubble Dome -->
+  <circle cx="50" cy="53" r="41" fill="url(#glassGrad)" stroke="rgba(0, 210, 135, 0.45)" stroke-width="1.8"/>
+
+  <!-- Battery Terminal Cap at Top Right (Tilted ~35 deg) -->
+  <g transform="translate(68, 17) rotate(35)">
+    <!-- Base collar -->
+    <rect x="-11" y="-5" width="22" height="7" rx="3.5" fill="#FFFFFF" stroke="#00D287" stroke-width="1.2"/>
+    <rect x="-9" y="-4" width="18" height="5" rx="2.5" fill="#00D287"/>
+    <!-- Terminal nub -->
+    <rect x="-5" y="-9" width="10" height="5" rx="2" fill="#E6FFF4" stroke="#00D287" stroke-width="1"/>
+  </g>
+
+  <!-- 2. Yellow Ball Mascot Body -->
+  <circle cx="48" cy="56" r="30" fill="url(#yellowBody)" filter="url(#softGlow)"/>
+
+  <!-- Left Waving Hand / Arm -->
+  <ellipse cx="20" cy="48" rx="6.5" ry="5.5" transform="rotate(-25 20 48)" fill="#FFD014"/>
+
+  <!-- Right Hand holding Gun -->
+  <circle cx="72" cy="62" r="5" fill="#FFC800"/>
+
+  <!-- 3. Face Features -->
+  <!-- Cute Eyes -->
+  <g fill="#231916">
+    <!-- Left Eye -->
+    <ellipse cx="37" cy="50" rx="3.8" ry="5.2"/>
+    <!-- Right Eye -->
+    <ellipse cx="58" cy="50" rx="3.8" ry="5.2"/>
+  </g>
+  <!-- Eye Highlights (Starry Sparkle) -->
+  <circle cx="36" cy="47.5" r="1.6" fill="#FFFFFF"/>
+  <circle cx="38.5" cy="51" r="0.8" fill="#FFFFFF"/>
+  <circle cx="57" cy="47.5" r="1.6" fill="#FFFFFF"/>
+  <circle cx="59.5" cy="51" r="0.8" fill="#FFFFFF"/>
+
+  <!-- Blushing Cheeks -->
+  <ellipse cx="30" cy="56" rx="4.5" ry="2.8" fill="#FF7B88" opacity="0.85"/>
+  <ellipse cx="65" cy="56" rx="4.5" ry="2.8" fill="#FF7B88" opacity="0.85"/>
+
+  <!-- Happy Open Smiling Mouth -->
+  <path d="M43 57 Q47.5 66 52 57 Z" fill="#801818"/>
+  <path d="M44 61 Q47.5 66 51 61 Z" fill="#FF6B81"/>
+
+  <!-- Green Lightning Bolt on Belly -->
+  <polygon points="48,65 52,65 47,73 53,73 44,83 47,75 43,75" fill="url(#boltGrad)"/>
+
+  <!-- Mini Charging Gun in hand -->
+  <g transform="translate(68, 43)">
+    <!-- Cable -->
+    <path d="M4 22 C3 28 8 32 10 35" stroke="#2B333E" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <!-- Gun Body -->
+    <path d="M3 5 C6 2 12 3 13 8 L14 17 C14 20 10 22 7 21 L3 19 C1 18 0 15 1 12 Z" fill="#FFFFFF" stroke="#D0DDEB" stroke-width="1"/>
+    <!-- Gun Plug Face -->
+    <ellipse cx="9" cy="8" rx="4.5" ry="3.5" fill="#2E3844"/>
+    <!-- Pin holes -->
+    <circle cx="7.5" cy="7" r="0.7" fill="#FFFFFF"/>
+    <circle cx="9" cy="6.5" r="0.7" fill="#FFFFFF"/>
+    <circle cx="10.5" cy="7" r="0.7" fill="#FFFFFF"/>
+    <circle cx="8" cy="9" r="0.7" fill="#FFFFFF"/>
+    <circle cx="10" cy="9" r="0.7" fill="#FFFFFF"/>
+    <!-- Mini green bolt on gun -->
+    <polygon points="5,14 7,14 5,17 7,17 4,20 5,17 3.5,17" fill="#00D287"/>
+  </g>
+
+  <!-- Sparks around -->
+  <polygon points="15,22 18,22 16,27 20,27 13,34 16,28 13,28" fill="#FFD200"/>
+  <polygon points="85,38 88,38 86,42 90,42 84,48 87,43 84,43" fill="#FFD200"/>
+
+  <!-- Glass Highlight Reflections -->
+  <path d="M26 30 C34 21 48 18 58 19" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" opacity="0.75"/>
+  <circle cx="21" cy="35" r="1.5" fill="#FFFFFF" opacity="0.6"/>
+</svg>

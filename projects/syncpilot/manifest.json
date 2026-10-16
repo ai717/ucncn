@@ -1,0 +1,43 @@
+// filepath: manifest.json
+{
+  "manifest_version": 3,
+  "name": "SyncPilot",
+  "version": "2.3.0",
+  "description": "SyncPilot Native File System Direct Sync for AI Code Blocks",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "icons": {
+    "128": "icon.svg"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.svg"
+  },
+  "options_page": "setup.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://gemini.google.com/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://chat.deepseek.com/*",
+        "https://kimi.ai/*",
+        "https://www.kimi.ai/*",
+        "https://qwen.ai/*",
+        "https://chat.qwen.ai/*",
+        "https://doubao.com/*",
+        "https://www.doubao.com/*",
+        "https://grok.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

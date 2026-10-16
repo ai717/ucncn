@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux 云服务器初始化配置与基础安全基线加固备忘 - 菜鸟笔记</title>
+  <meta name="description" content="新购云服务器第一件事：配置非 root 用户、改 SSH 端口、关闭密码登录启用密钥认证、UFW 防火墙配置流程。">
+  <meta name="keywords" content="Linux安全加固, SSH密钥登录, UFW防火墙, 腾讯云服务器安全, 菜鸟笔记">
+  <meta name="author" content="菜鸟笔记 (ucncn.cn)">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <link rel="canonical" href="https://ucncn.cn/notes/linux-security.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Linux 云服务器初始化配置与基础安全基线加固备忘 - 菜鸟笔记">
+  <meta property="og:description" content="新购云服务器第一件事：配置非 root 用户、改 SSH 端口、关闭密码登录启用密钥认证、UFW 防火墙配置流程。">
+  <meta property="og:url" content="https://ucncn.cn/notes/linux-security.html">
+  <meta property="og:site_name" content="菜鸟笔记">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Linux 云服务器初始化配置与基础安全基线加固备忘",
+    "description": "新购云服务器第一件事：配置非 root 用户、改 SSH 端口、关闭密码登录启用密钥认证、UFW 防火墙配置流程。",
+    "datePublished": "2026-09-28T10:00:00+08:00",
+    "dateModified": "2026-10-16T12:00:00+08:00",
+    "author": {
+      "@type": "Person",
+      "name": "菜鸟笔记"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "菜鸟笔记",
+      "url": "https://ucncn.cn"
+    },
+    "mainEntityOfPage": "https://ucncn.cn/notes/linux-security.html"
+  }
+  </script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../" class="logo-area">
+        <img src="../assets/images/favicon.svg" alt="菜鸟笔记 Logo" width="28" height="28" style="vertical-align:middle; border-radius: 6px;">
+        <span class="logo-text">菜鸟笔记</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="../#articles" class="nav-link">菜鸟笔记</a>
+        <a href="../#projects" class="nav-link">项目实验室</a>
+        <a href="../#about" class="nav-link">关于</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="切换深浅模式" title="切换深浅模式"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      
+      <div class="breadcrumb">
+        <a href="../">首页</a>
+        <span>/</span>
+        <a href="../#articles">菜鸟笔记</a>
+        <span>/</span>
+        <span>Linux 运维</span>
+      </div>
+
+      <article class="prose">
+        <header class="article-header">
+          <h1 class="article-title">Linux 云服务器初始化配置与基础安全基线加固备忘</h1>
+          <div class="article-meta">
+            <span>📅 发布日期：2026-09-28</span>
+            <span>🏷️ 标签：Linux / Ubuntu / 服务器安全 / 运维基线</span>
+            <span>⏱️ 预计阅读：8 分钟</span>
+          </div>
+        </header>
+
+        <p>
+          在腾讯云、阿里云等平台新采购轻量应用服务器或 CVM 后，默认的系统环境往往使用 root 直连，且 SSH 暴露在默认的 22 端口。公网扫描器每天会有成千上万次暴力撞库尝试。本文记录一套标准化的一键加固检查单。
+        </p>
+
+        <h2>一、系统包更新与时区设置</h2>
+        <p>无论基于 Ubuntu 还是 Debian，装机第一步务必同步软件源并统一时区为东八区：</p>
+        <pre><code class="language-bash"># 更新软件源索引并升级基础依赖
+sudo apt update && sudo apt upgrade -y
+
+# 修正服务器时区为 Asia/Shanghai
+sudo timedatectl set-timezone Asia/Shanghai
+
+# 验证时间状态
+timedatectl
+</code></pre>
+
+        <h2>二、创建非 root 管理员账号并授权 Sudo</h2>
+        <p>日常运维应当严禁直接使用 root 登录，先创建一个专用运维账号：</p>
+        <pre><code class="language-bash"># 1. 创建普通用户 devops
+sudo adduser devops
+
+# 2. 将其添加到 sudo 提权管理组
+sudo usermod -aG sudo devops
+</code></pre>
+
+        <h2>三、SSH 密钥登录配置与加固</h2>
+        <p>
+          使用基于现代 ED25519 算法的非对称密钥对，彻底替代脆弱的弱密码登录：
+        </p>
+        <pre><code class="language-bash"># 本地生成高强度密钥对（在本地电脑终端执行）
+ssh-keygen -t ed25519 -C "admin@ucncn.cn"
+
+# 将公钥上传至云服务器对应用户的 .ssh/authorized_keys 中
+# 确保权限设置严格合规：
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+</code></pre>
+
+        <p>随后编辑 <code>/etc/ssh/sshd_config</code>，修改核心安全指令：</p>
+        <pre><code class="language-bash"># 禁止 root 远程登录
+PermitRootLogin no
+
+# 禁用明文密码认证，强制要求 Publickey
+PasswordAuthentication no
+
+# 修改默认 22 端口（例如改为 28822，避开自动化低级全网扫描）
+Port 28822
+</code></pre>
+        <blockquote>
+          <strong>小贴士：</strong>重启 sshd 服务前，切记不要关闭当前已连接的 SSH 会话窗口，务必新开一个终端测试新端口和密钥能否正常登录！
+        </blockquote>
+
+        <h2>四、启用轻量防火墙（UFW）</h2>
+        <p>Ubuntu 自带的 UFW 可以极简管理 iptables 进出站规则：</p>
+        <pre><code class="language-bash"># 默认拦截所有入站，允许所有出站
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# 放行刚才修改的 SSH 自定义端口
+sudo ufw allow 28822/tcp comment 'SSH Port'
+
+# 放行 Web 访问端口（HTTP 与 HTTPS）
+sudo ufw allow 80/tcp comment 'Web HTTP'
+sudo ufw allow 443/tcp comment 'Web HTTPS'
+
+# 启动防火墙并开机自启
+sudo ufw enable
+sudo ufw status verbose
+</code></pre>
+
+        <h2>总结</h2>
+        <p>
+          通过完成「非 root 用户 + ED25519 密钥认证 + 关闭 22 默认端口 + UFW 最小放行」四部曲，服务器能够抵御 99% 以上来自公网的常规撞库与扫描攻击，为长期稳定运行打好坚实的地基。
+        </p>
+      </article>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-nav">
+        <a href="../">首页</a>
+        <span>·</span>
+        <a href="../#articles">菜鸟笔记</a>
+        <span>·</span>
+        <a href="../#projects">项目实验室</a>
+        <span>·</span>
+        <a href="../#about">关于本站</a>
+      </div>
+      <div>
+        &copy; 2024-2026 菜鸟笔记 (ucncn.cn) 版权所有
+      </div>
+      <div>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="beian-link">
+          苏ICP备2024150485号-5
+        </a>
+      </div>
+      <p class="footer-disclaimer">
+        声明：本站为个人非营利性技术学习笔记本，不提供用户注册及公众言论发布功能。
+      </p>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

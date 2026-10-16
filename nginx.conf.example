@@ -1,0 +1,71 @@
+# 菜鸟笔记 (ucncn.cn) Nginx 生产环境推荐配置模板
+# 核心规范：默认地址使用裸域名 ucncn.cn (不带 www)，自动 301 重定向
+
+# 1. HTTP 全局重定向至 HTTPS (同时规范化为非 www 裸域名)
+server {
+    listen 80;
+    server_name ucncn.cn www.ucncn.cn;
+    return 301 https://ucncn.cn$request_uri;
+}
+
+# 2. HTTPS 下的 www 重定向至裸域名 (集中 SEO 权重)
+server {
+    listen 443 ssl http2;
+    server_name www.ucncn.cn;
+
+    ssl_certificate     /etc/nginx/ssl/ucncn.cn_bundle.crt;
+    ssl_certificate_key /etc/nginx/ssl/ucncn.cn.key;
+
+    return 301 https://ucncn.cn$request_uri;
+}
+
+# 3. 核心站点业务服务配置 (仅响应 ucncn.cn)
+server {
+    listen 443 ssl http2;
+    server_name ucncn.cn;
+
+    # SSL 证书配置
+    ssl_certificate     /etc/nginx/ssl/ucncn.cn_bundle.crt;
+    ssl_certificate_key /etc/nginx/ssl/ucncn.cn.key;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:50m;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # 网站物理根目录（根据服务器实际路径修改，如 /www/ucncn）
+    root /www/ucncn;
+    index index.html;
+
+    # Gzip 压缩支持
+    gzip on;
+    gzip_min_length 1k;
+    gzip_buffers 4 16k;
+    gzip_comp_level 5;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+
+    # 安全头部
+    add_header X-Content-Type-Options nosniff;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-XSS-Protection "1; mode=block";
+
+    # 主站常规路由
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 静态资源缓存控制
+    location ~* \.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2)$ {
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+    }
+
+    # 独立子项目实验室路由（如 /projects/movie-dna/）
+    location /projects/ {
+        try_files $uri $uri/ =404;
+    }
+
+    # 阻止访问隐藏文件
+    location ~ /\. {
+        deny all;
+    }
+}

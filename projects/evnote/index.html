@@ -1,0 +1,316 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>电啵啵 (EVNote) - 新能源电车充电记账与能耗分析微信小程序 - 菜鸟笔记实验室</title>
+  <meta name="description" content="电啵啵 (EVNote) 是一款专为新能源车主打造的轻量级充电记账与补能成本核算微信小程序。用最少字段精准记录每次充电，自动核算每公里真实电费成本、家充公桩对比与月度账单分析。">
+  <meta name="keywords" content="电啵啵, EVNote, 电车充电记账, 新能源汽车小程序, 每公里电费, 充电成本统计, 菜鸟笔记">
+  <meta name="author" content="菜鸟笔记 (ucncn.cn)">
+  <link rel="icon" type="image/svg+xml" href="../../assets/images/favicon.svg">
+  <link rel="canonical" href="https://ucncn.cn/projects/evnote/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="电啵啵 (EVNote) - 新能源电车充电记账微信小程序">
+  <meta property="og:description" content="用最少字段精准记录电车充电，秒级算清每公里补能成本。微信扫码即刻使用。">
+  <meta property="og:url" content="https://ucncn.cn/projects/evnote/">
+  <meta property="og:site_name" content="菜鸟笔记">
+
+  <!-- Schema.org 结构化数据 (SoftwareApplication) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "电啵啵 (EVNote)",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "WeChat Mini Program",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "CNY"
+    },
+    "description": "专为新能源车主打造的轻量级充电记账与补能成本核算微信小程序",
+    "author": {
+      "@type": "Person",
+      "name": "菜鸟笔记"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .ev-hero {
+      background: linear-gradient(135deg, rgba(0, 210, 135, 0.09) 0%, rgba(14, 165, 233, 0.08) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 40px 30px;
+      margin-bottom: 36px;
+      text-align: center;
+      position: relative;
+    }
+    .ev-badge-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .ev-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #059669;
+      background: rgba(16, 185, 129, 0.12);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .ev-badge.blue {
+      color: #0284c7;
+      background: rgba(14, 165, 233, 0.12);
+    }
+    .ev-avatar {
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 12px;
+      vertical-align: middle;
+    }
+    .ev-title {
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .ev-title span {
+      color: #00D287;
+    }
+    .ev-sub {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+    }
+
+    /* 小程序码扫码卡片 */
+    .qrcode-stage {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--card-shadow);
+      margin: 0 auto;
+    }
+    .qrcode-img {
+      width: 190px;
+      height: 190px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      padding: 6px;
+      margin-bottom: 12px;
+      transition: transform 0.2s ease;
+    }
+    .qrcode-img:hover {
+      transform: scale(1.03);
+    }
+    .qrcode-tip {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .qrcode-subtip {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
+    /* 特性网格 */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 22px;
+    }
+    .feature-icon {
+      font-size: 1.7rem;
+      margin-bottom: 10px;
+    }
+    .feature-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .cover-banner {
+      width: 100%;
+      max-width: 600px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+      margin: 20px auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 头部导航 -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../../" class="logo-area">
+        <img src="../../assets/images/favicon.svg" alt="菜鸟笔记 Logo" width="28" height="28" style="vertical-align:middle; border-radius: 6px;">
+        <span class="logo-text">菜鸟笔记 · 实验室</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="../../" class="nav-link">返回主站</a>
+        <a href="../../#articles" class="nav-link">菜鸟笔记</a>
+        <a href="../../#projects" class="nav-link">其他项目</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="切换深浅模式" title="切换深浅模式"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        <a href="../../">首页</a>
+        <span>/</span>
+        <a href="../../#projects">实验室</a>
+        <span>/</span>
+        <span>电啵啵 (EVNote) 微信小程序</span>
+      </div>
+
+      <!-- Hero 区域 -->
+      <section class="ev-hero">
+        <img src="assets/bobo-avatar.png" alt="电啵啵头像" class="ev-avatar">
+        <div class="ev-badge-wrap">
+          <span class="ev-badge">微信小程序</span>
+          <span class="ev-badge blue">纯净无广告</span>
+          <span class="ev-badge">毫秒级记账</span>
+        </div>
+        <h1 class="ev-title">电啵啵 <span>(EVNote)</span></h1>
+        <p class="ev-sub">
+          用最少字段精准记录每一次电车补能。月度花费、家充公桩对比、每公里电费，一目了然。
+        </p>
+
+        <!-- 微信小程序码扫码卡片 -->
+        <div class="qrcode-stage">
+          <img src="assets/minicode.png" alt="电啵啵微信小程序码" class="qrcode-img">
+          <div class="qrcode-tip">
+            <span>📱</span> 微信扫一扫，即刻打开小程序
+          </div>
+          <div class="qrcode-subtip">免安装 · 极速加载 · 数据安全</div>
+        </div>
+      </section>
+
+      <!-- 核心特性主体 -->
+      <article class="prose">
+        <h2>💡 为什么开发电啵啵？</h2>
+        <p>
+          相比燃油车只记录加了多少升油，新能源汽车（纯电 / 插混 / 增程）的充电场景要复杂得多：有波谷低电价的私桩家充、有按度数与服务费混合计费的公共快充，还有不同车企自带的免费充电权益额度。
+        </p>
+        <p>
+          许多车主想要算清楚<strong>“我开电车每个月到底花了多少电费？每公里真实成本到底是不是只要几分钱？”</strong>，但市面上的通用记账软件字段繁冗、充满贷款理财广告且无法关联电池容量与续航换算。
+        </p>
+        <p>
+          <strong>电啵啵 (EVNote) 正是为解决这一痛点而生的轻量级原生微信小程序：</strong>化繁为简，只保留充电最核心的 SOC 起止电量与金额，自动推算补能里程与综合能耗成本。
+        </p>
+
+        <h2>✨ 四大核心功能亮点</h2>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-name">极简秒级记账</div>
+            <div class="feature-desc">只需选择起止 SOC（如 20% &rarr; 90%）与实际花费金额，全自动计算补能度数与新增续航，3 秒搞定一笔记账。</div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <div class="feature-name">多维能耗与成本看板</div>
+            <div class="feature-desc">首页实时汇总本月充电频次、总花费金额、平均每公里成本走势，清晰对比家充与公共快充比例。</div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🚗</div>
+            <div class="feature-name">多车型与电池规格适配</div>
+            <div class="feature-desc">支持添加管理多台新能源车辆，自定义设定电池度数与官方标称续航，自动适配不同车型的能耗测算模型。</div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🧾</div>
+            <div class="feature-name">精美月度账单卡片</div>
+            <div class="feature-desc">一键生成专属的电车月度补能账单海报，方便在车友群、小红书与朋友圈分享真实的用车省钱战绩。</div>
+          </div>
+        </div>
+
+        <h2>📸 视觉界面展示</h2>
+        <div style="text-align: center; margin: 24px 0;">
+          <img src="assets/share-cover.png" alt="电啵啵月度账单海报" class="cover-banner">
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-top: 8px;">电啵啵月度充电与节能账单卡片生成效果</p>
+        </div>
+
+        <h2>🔒 数据安全与隐私</h2>
+        <p>
+          电啵啵采用<strong>“本地优先，云端安全隔离”</strong>的架构原则。你的所有充电明细与车辆配置信息均按微信生态的独立 OpenID 严格安全存储，绝不泄露车主个人隐私。
+        </p>
+
+        <div style="text-align: center; margin: 40px 0 20px;">
+          <p style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">准备好算清你的电车账单了吗？</p>
+          <img src="assets/minicode_card.png" alt="微信扫码打开电啵啵" style="width: 220px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--card-shadow);">
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 8px;">打开微信扫描上方小程序码，立即免费体验</p>
+        </div>
+      </article>
+
+    </div>
+  </main>
+
+  <!-- 底部合规备案声明 (严格符合管局要求) -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-nav">
+        <a href="../../">首页</a>
+        <span>·</span>
+        <a href="../../#articles">菜鸟笔记</a>
+        <span>·</span>
+        <a href="../../#projects">项目实验室</a>
+        <span>·</span>
+        <a href="../../#about">关于本站</a>
+      </div>
+      <div>
+        &copy; 2024-2026 菜鸟笔记 (ucncn.cn) 版权所有
+      </div>
+      <div>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="beian-link">
+          苏ICP备2024150485号-5
+        </a>
+      </div>
+      <p class="footer-disclaimer">
+        声明：本站为个人非营利性技术学习笔记本，不提供用户注册及公众言论发布功能。
+      </p>
+    </div>
+  </footer>
+
+  <script src="../../assets/js/main.js"></script>
+</body>
+</html>

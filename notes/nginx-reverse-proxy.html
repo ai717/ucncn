@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nginx 常用反向代理配置与 HTTPS 证书自动化部署备忘 - 菜鸟笔记</title>
+  <meta name="description" content="梳理日常 Web 开发中最高频的 Nginx 配置场景：单域名反向代理 Node/Python 后端、静态文件加速、WebSocket 长连接支持以及基于 Certbot 的免费 SSL 证书自动化续期方案。">
+  <meta name="keywords" content="Nginx反向代理, Nginx配置, HTTPS证书, Certbot, SSL证书, 菜鸟笔记">
+  <meta name="author" content="菜鸟笔记 (ucncn.cn)">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
+  <link rel="canonical" href="https://ucncn.cn/notes/nginx-reverse-proxy.html">
+  
+  <!-- Open Graph / 社交卡片 -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Nginx 常用反向代理配置与 HTTPS 证书自动化部署备忘 - 菜鸟笔记">
+  <meta property="og:description" content="单域名反向代理、静态文件缓存、WebSocket 支持与 Certbot 证书自动续期实战。">
+  <meta property="og:url" content="https://ucncn.cn/notes/nginx-reverse-proxy.html">
+  <meta property="og:site_name" content="菜鸟笔记">
+
+  <!-- Schema.org 结构化数据 (TechArticle) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Nginx 常用反向代理配置与 HTTPS 证书自动化部署备忘",
+    "description": "梳理日常 Web 开发中最高频的 Nginx 配置场景：反向代理、静态缓存与 SSL 自动化。",
+    "datePublished": "2026-10-05T10:00:00+08:00",
+    "dateModified": "2026-10-16T12:00:00+08:00",
+    "author": {
+      "@type": "Person",
+      "name": "菜鸟笔记"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "菜鸟笔记",
+      "url": "https://ucncn.cn"
+    },
+    "mainEntityOfPage": "https://ucncn.cn/notes/nginx-reverse-proxy.html"
+  }
+  </script>
+
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../" class="logo-area">
+        <img src="../assets/images/favicon.svg" alt="菜鸟笔记 Logo" width="28" height="28" style="vertical-align:middle; border-radius: 6px;">
+        <span class="logo-text">菜鸟笔记</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="../#articles" class="nav-link">菜鸟笔记</a>
+        <a href="../#projects" class="nav-link">项目实验室</a>
+        <a href="../#about" class="nav-link">关于</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="切换深浅模式" title="切换深浅模式"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      
+      <div class="breadcrumb">
+        <a href="../">首页</a>
+        <span>/</span>
+        <a href="../#articles">菜鸟笔记</a>
+        <span>/</span>
+        <span>Linux 运维</span>
+      </div>
+
+      <article class="prose">
+        <header class="article-header">
+          <h1 class="article-title">Nginx 常用反向代理配置与 HTTPS 证书自动化部署备忘</h1>
+          <div class="article-meta">
+            <span>📅 发布日期：2026-10-05</span>
+            <span>🏷️ 标签：Nginx / 反向代理 / SSL / 运维运维</span>
+            <span>⏱️ 预计阅读：8 分钟</span>
+          </div>
+        </header>
+
+        <p>
+          在自建个人网站、部署后端 API 接口或微服务时，Nginx 作为反向代理网关几乎是标准底座。它既能接管 80/443 端口集中管理 TLS/SSL 证书，又能将不同的子路径分发给不同的本地服务端口（如 Node.js、Python FastAPI、Go 等）。本文记录一份经过生产检验的标准模板。
+        </p>
+
+        <h2>一、反向代理标准基础块（保留真实客户端 IP）</h2>
+        <p>
+          直接将所有 HTTP 请求转发给运行在 <code>127.0.0.1:3000</code> 的后端程序。务必配置 <code>Host</code> 与 <code>X-Real-IP</code> 头，否则后端日志记录的将全都是 <code>127.0.0.1</code>：
+        </p>
+        <pre><code class="language-nginx">server {
+    listen 80;
+    server_name api.ucncn.cn;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        
+        # 传递原始客户端真实信息
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # 超时设置
+        proxy_connect_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+</code></pre>
+
+        <h2>二、支持 WebSocket 长连接透传</h2>
+        <p>
+          现代 Web 经常使用 Socket.IO 或原生 WebSocket。Nginx 默认会把 HTTP 升级请求当成普通短连接断开，需要显式声明升级协议头：
+        </p>
+        <pre><code class="language-nginx">location /ws/ {
+    proxy_pass http://127.0.0.1:8080;
+    
+    # WebSocket 必须的 HTTP 升级声明
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
+    proxy_set_header Host $host;
+    proxy_read_timeout 3600s; # 保持长连接一小时无数据不中断
+}
+</code></pre>
+
+        <h2>三、结合 Certbot 自动化申请与续期 Let's Encrypt 证书</h2>
+        <p>
+          不用再每三个月手动登录云控制台下载替换证书。在 Ubuntu/Debian 上通过 Certbot 可以实现一键部署与定时自动续签：
+        </p>
+        <pre><code class="language-bash"># 1. 安装 snapd 及 certbot
+sudo apt install snapd
+sudo snap install core; sudo snap refresh core
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+# 2. 自动检测 Nginx 配置并申请绑定域名证书
+sudo certbot --nginx -d ucncn.cn -d www.ucncn.cn
+
+# 3. 模拟测试自动续签任务（测试无报错即代表完全正常）
+sudo certbot renew --dry-run
+</code></pre>
+
+        <h2>四、配置修改后的热生效操作</h2>
+        <p>
+          切忌盲目 <code>nginx -s reload</code>！每次改完配置文件后，先进行语法检查：
+        </p>
+        <pre><code class="language-bash"># 1. 语法正确性检查
+sudo nginx -t
+
+# 2. 输出 syntax is ok 后，平滑无缝重载
+sudo nginx -s reload
+</code></pre>
+      </article>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-nav">
+        <a href="../">首页</a>
+        <span>·</span>
+        <a href="../#articles">菜鸟笔记</a>
+        <span>·</span>
+        <a href="../#projects">项目实验室</a>
+        <span>·</span>
+        <a href="../#about">关于本站</a>
+      </div>
+      <div>
+        &copy; 2024-2026 菜鸟笔记 (ucncn.cn) 版权所有
+      </div>
+      <div>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="beian-link">
+          苏ICP备2024150485号-5
+        </a>
+      </div>
+      <p class="footer-disclaimer">
+        声明：本站为个人非营利性技术学习笔记本，不提供用户注册及公众言论发布功能。
+      </p>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

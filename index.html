@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>菜鸟笔记 - 开发者个人技术与学习手记</title>
+  <meta name="description" content="菜鸟笔记 (ucncn.cn) 是一个专注记录计算机编程、Linux系统运维、实用效率脚本、现代Web前端踩坑经验与开源实验项目的个人纯静态技术学习笔记本。">
+  <meta name="keywords" content="菜鸟笔记, 技术笔记, Linux, Git, Python, 前端开发, Nginx, Docker, 个人开发者, 开源项目">
+  <meta name="author" content="菜鸟笔记 (ucncn.cn)">
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  
+  <!-- 规范裸域名 URL 引用 (严格不带 www) -->
+  <link rel="canonical" href="https://ucncn.cn/">
+
+  <!-- 开放图谱标签 (Open Graph) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="菜鸟笔记 - 开发者个人技术与学习手记">
+  <meta property="og:description" content="记录代码、工具与开发踩坑日常，持续学习，保持好奇。纯静态技术学习笔记与实验项目平台。">
+  <meta property="og:url" content="https://ucncn.cn/">
+  <meta property="og:site_name" content="菜鸟笔记">
+
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="菜鸟笔记 - 开发者个人技术与学习手记">
+  <meta name="twitter:description" content="记录代码、工具与开发踩坑日常，持续学习，保持好奇。">
+
+  <!-- Schema.org 结构化数据 (WebSite & Blog) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://ucncn.cn/#website",
+        "url": "https://ucncn.cn/",
+        "name": "菜鸟笔记",
+        "description": "开发者个人技术与学习手记",
+        "publisher": {
+          "@type": "Person",
+          "name": "菜鸟笔记"
+        },
+        "inLanguage": "zh-CN"
+      },
+      {
+        "@type": "Blog",
+        "@id": "https://ucncn.cn/#blog",
+        "name": "菜鸟笔记",
+        "url": "https://ucncn.cn/",
+        "isPartOf": {
+          "@id": "https://ucncn.cn/#website"
+        },
+        "description": "收录 Linux 运维、Git 协同、Python 自动化、现代前端等实战笔记。"
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- 头部导航 -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo-area">
+        <img src="assets/images/favicon.svg" alt="菜鸟笔记 Logo" width="28" height="28" style="vertical-align:middle; border-radius: 6px;">
+        <span class="logo-text">菜鸟笔记</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="#articles" class="nav-link active">菜鸟笔记</a>
+        <a href="#projects" class="nav-link">项目实验室</a>
+        <a href="#about" class="nav-link">关于</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="切换深浅模式" title="切换深浅模式"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 主体内容 -->
+  <main class="site-main">
+    <div class="container">
+
+      <!-- Hero 区域 -->
+      <section class="hero-section">
+        <h1 class="hero-title">保持记录，<span>勤于复盘</span>。</h1>
+        <p class="hero-desc">
+          欢迎来到「菜鸟笔记」(ucncn.cn)。这里是站长日常记录计算机编程、Linux系统运维、实用效率脚本与现代前端开发踩坑经验的个人纯静态技术备忘录。不积跬步，无以至千里。
+        </p>
+        <div class="hero-meta">
+          <span>📚 已归档笔记：30 篇</span>
+          <span>📁 分类体系：Linux / 前端 / Python / Git / 规范</span>
+          <span>⚡ 架构类型：纯静态高安全零数据库</span>
+          <span>📅 最近维护：2026-10</span>
+        </div>
+      </section>
+
+      <!-- 菜鸟笔记列表 -->
+      <section id="articles" class="articles-section">
+        <div class="section-header">
+          <h2 class="section-title">菜鸟笔记</h2>
+        </div>
+
+        <!-- 筛选标签 -->
+        <div class="filter-bar">
+          <button class="filter-btn active" data-cat="all">全部 (30)</button>
+          <button class="filter-btn" data-cat="linux">Linux 运维 (11)</button>
+          <button class="filter-btn" data-cat="frontend">前端开发 (8)</button>
+          <button class="filter-btn" data-cat="python">Python 脚本 (5)</button>
+          <button class="filter-btn" data-cat="git">Git 工作流 (2)</button>
+          <button class="filter-btn" data-cat="standards">开发规范 (4)</button>
+        </div>
+
+        <!-- 文章网格 (30 篇全量卡片，由 main.js 控制 5 条/页 分页切片展示) -->
+        <div class="articles-grid">
+
+          <!-- 1. Git -->
+          <a href="notes/git-cheatsheet.html" class="article-card" data-cat="git">
+            <div class="card-top">
+              <span class="card-tag">Git 工作流</span>
+              <span class="card-date">2026-10-12</span>
+            </div>
+            <h3 class="card-title">Git 常用工作流与致命后悔药（Reset、Revert 与 Stash 速查）</h3>
+            <p class="card-summary">
+              从提交错了分支到撤销未提交的改动，整理日常高频遇到的版本控制故障排查命令与无痛恢复方案。
+            </p>
+          </a>
+
+          <!-- 2. Nginx -->
+          <a href="notes/nginx-reverse-proxy.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-10-05</span>
+            </div>
+            <h3 class="card-title">Nginx 常用反向代理配置与 HTTPS 证书自动化部署备忘</h3>
+            <p class="card-summary">
+              梳理日常 Web 开发中最高频的 Nginx 配置场景：反向代理、静态文件缓存、WebSocket 支持与 Certbot 证书自动续签。
+            </p>
+          </a>
+
+          <!-- 3. Linux 安全 -->
+          <a href="notes/linux-security.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-09-28</span>
+            </div>
+            <h3 class="card-title">Linux 云服务器初始化配置与基础安全基线加固备忘</h3>
+            <p class="card-summary">
+              新购云服务器第一件事：配置非 root 用户、改 SSH 端口、关闭密码登录启用密钥认证、UFW 防火墙配置流程。
+            </p>
+          </a>
+
+          <!-- 4. Python 虚拟环境 -->
+          <a href="notes/python-venv-guide.html" class="article-card" data-cat="python">
+            <div class="card-top">
+              <span class="card-tag">Python 脚本</span>
+              <span class="card-date">2026-09-20</span>
+            </div>
+            <h3 class="card-title">Python 虚拟环境管理与 uv/pip 高效依赖隔离实践</h3>
+            <p class="card-summary">
+              深入对比 Python 内置 venv 与新一代极速包管理器 uv 的实战用法，彻底解决系统全局污染与依赖版本冲突。
+            </p>
+          </a>
+
+          <!-- 5. Docker -->
+          <a href="notes/docker-basic.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-09-15</span>
+            </div>
+            <h3 class="card-title">Docker 基础命令清单与轻量级环境部署实战</h3>
+            <p class="card-summary">
+              汇总日常使用频率最高的 Docker 镜像与容器管理指令，包含挂载卷管理、网络连接以及精简 Dockerfile 撰写规范。
+            </p>
+          </a>
+
+          <!-- 6. Crontab -->
+          <a href="notes/linux-crontab-tips.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-09-08</span>
+            </div>
+            <h3 class="card-title">Linux Crontab 定时任务避坑备忘：环境变量与路径陷阱</h3>
+            <p class="card-summary">
+              记录 Linux 运维中 Crontab 定时任务常见失效原因：默认执行环境缺 PATH 变量、未声明脚本绝对路径与日志排错。
+            </p>
+          </a>
+
+          <!-- 7. Python 自动化 -->
+          <a href="notes/python-automation.html" class="article-card" data-cat="python">
+            <div class="card-top">
+              <span class="card-tag">Python 脚本</span>
+              <span class="card-date">2026-08-30</span>
+            </div>
+            <h3 class="card-title">Python 实用自动化脚本精选：本地文件批量整理与文本处理</h3>
+            <p class="card-summary">
+              分享几个自用的零依赖轻量 Python 脚本：批量重命名规则文件、JSON 与 CSV 互相清洗转换、日志正则提取。
+            </p>
+          </a>
+
+          <!-- 8. Fetch API -->
+          <a href="notes/js-async-fetch.html" class="article-card" data-cat="frontend">
+            <div class="card-top">
+              <span class="card-tag">前端开发</span>
+              <span class="card-date">2026-08-22</span>
+            </div>
+            <h3 class="card-title">原生 JavaScript Fetch API 异步请求与错误捕获标准封装</h3>
+            <p class="card-summary">
+              基于原生 Fetch API 与 AbortController 实现带超时控制、JSON 自动解析与网络错误拦截的标准请求工具函数。
+            </p>
+          </a>
+
+          <!-- 9. Modern CSS -->
+          <a href="notes/modern-css.html" class="article-card" data-cat="frontend">
+            <div class="card-top">
+              <span class="card-tag">前端开发</span>
+              <span class="card-date">2026-08-14</span>
+            </div>
+            <h3 class="card-title">现代 CSS 布局技巧与实用弹性盒模型排版指南</h3>
+            <p class="card-summary">
+              摆脱陈旧浮动写法，全面梳理 Flexbox 与 CSS Grid 现代排版要点，实现自适应流式网格与移动端友好交互。
+            </p>
+          </a>
+
+          <!-- 10. Markdown 规范 -->
+          <a href="notes/markdown-standards.html" class="article-card" data-cat="standards">
+            <div class="card-top">
+              <span class="card-tag">开发规范</span>
+              <span class="card-date">2026-08-05</span>
+            </div>
+            <h3 class="card-title">技术文档撰写规范与 Markdown 排版美化速查表</h3>
+            <p class="card-summary">
+              总结个人技术博客、开源 README 与团队 Wiki 的通用排版规范：盘古之白中英文混排空格法则、层级标题逻辑。
+            </p>
+          </a>
+
+          <!-- 11. SQLite -->
+          <a href="notes/sqlite-lightweight-db.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-08-01</span>
+            </div>
+            <h3 class="card-title">SQLite 轻量数据库实战：从零构建单文件高并发只读缓存</h3>
+            <p class="card-summary">
+              解析轻量级 SQLite 的 WAL 模式配置、单文件数据库优势与百万级本地快速检索优化技巧。
+            </p>
+          </a>
+
+          <!-- 12. Shell 规范 -->
+          <a href="notes/shell-script-best-practices.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-07-28</span>
+            </div>
+            <h3 class="card-title">Shell 脚本健壮性避坑指南：set -euo pipefail 与错误捕获</h3>
+            <p class="card-summary">
+              为什么你的 Bash 脚本执行报错依然继续往下跑？掌握黄金四参数与严格错误陷阱处理规范。
+            </p>
+          </a>
+
+          <!-- 13. SSH Config -->
+          <a href="notes/ssh-config-tips.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-07-22</span>
+            </div>
+            <h3 class="card-title">SSH Config 多主机别名与免密连接高手进阶指南</h3>
+            <p class="card-summary">
+              不再手敲长串 IP 和端口，通过 ~/.ssh/config 配置文件打造极致顺滑的跳板机与多服务器直连。
+            </p>
+          </a>
+
+          <!-- 14. JS 数组方法 -->
+          <a href="notes/js-array-methods.html" class="article-card" data-cat="frontend">
+            <div class="card-top">
+              <span class="card-tag">前端开发</span>
+              <span class="card-date">2026-07-15</span>
+            </div>
+            <h3 class="card-title">现代 JavaScript 数组高阶函数实战（Map、Filter、Reduce与FlatMap）</h3>
+            <p class="card-summary">
+              全面梳理 ES6+ 常用不可变数据处理函数，掌握流式链式调用与复杂数据结构扁平化归纳。
+            </p>
+          </a>
+
+          <!-- 15. Systemd 服务 -->
+          <a href="notes/linux-systemd-service.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-07-08</span>
+            </div>
+            <h3 class="card-title">Linux Systemd 自建系统服务与进程守护崩溃自启指南</h3>
+            <p class="card-summary">
+              告别脆弱的 nohup 后台挂起，用标准 Systemd 托管 Node.js、Python 与 Go 服务实现开机自启与异常看门狗。
+            </p>
+          </a>
+
+          <!-- 16. Web 本地存储 -->
+          <a href="notes/web-storage-indexeddb.html" class="article-card" data-cat="frontend">
+            <div class="card-top">
+              <span class="card-tag">前端开发</span>
+              <span class="card-date">2026-06-30</span>
+            </div>
+            <h3 class="card-title">浏览器本地离线存储技术对比：LocalStorage 与 IndexedDB 选型</h3>
+            <p class="card-summary">
+              分析 LocalStorage 的 5MB 限制与同步阻塞问题，探讨异步超大容量 IndexedDB 的实战接入方案。
+            </p>
+          </a>
+
+          <!-- 17. Python 正则 -->
+          <a href="notes/python-regex-guide.html" class="article-card" data-cat="python">
+            <div class="card-top">
+              <span class="card-tag">Python 脚本</span>
+              <span class="card-date">2026-06-25</span>
+            </div>
+            <h3 class="card-title">Python 正则表达式常用匹配模式与编译优化速查表</h3>
+            <p class="card-summary">
+              总结 re.compile 预编译机制、非贪婪匹配、零宽断言与高频爬虫文本提取表达式规范。
+            </p>
+          </a>
+
+          <!-- 18. 日志轮转 -->
+          <a href="notes/linux-logrotate-guide.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-06-18</span>
+            </div>
+            <h3 class="card-title">Linux 日志轮转工具 Logrotate 配置实战：防止磁盘被日志撑爆</h3>
+            <p class="card-summary">
+              系统服务日积月累产生几十 G 巨型日志？手把手教你配置自动化按天轮转、Gzip 压缩与历史清理。
+            </p>
+          </a>
+
+          <!-- 19. Git Commit 规范 -->
+          <a href="notes/git-commit-convention.html" class="article-card" data-cat="git">
+            <div class="card-top">
+              <span class="card-tag">Git 工作流</span>
+              <span class="card-date">2026-06-10</span>
+            </div>
+            <h3 class="card-title">Git Commit 提交信息规范（Conventional Commits）与语义化版本演进</h3>
+            <p class="card-summary">
+              feat、fix、docs、chore 到底怎么分？通过清晰明确的提交前缀打造自动生成 CHANGELOG 的工程闭环。
+            </p>
+          </a>
+
+          <!-- 20. CSS 主题变量 -->
+          <a href="notes/css-variables-theming.html" class="article-card" data-cat="frontend">
+            <div class="card-top">
+              <span class="card-tag">前端开发</span>
+              <span class="card-date">2026-06-02</span>
+            </div>
+            <h3 class="card-title">原生 CSS 变量与多主题深浅配色无缝切换架构</h3>
+            <p class="card-summary">
+              不用引入任何预处理器或大型 UI 库，纯原生实现 prefers-color-scheme 系统级自动跟随与手动持久化主题。
+            </p>
+          </a>
+
+          <!-- 21. Linux 性能排查 -->
+          <a href="notes/linux-top-htop-metrics.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-05-26</span>
+            </div>
+            <h3 class="card-title">Linux 性能排查三板斧：CPU 负载 Load Average、内存与 Swap 深度解析</h3>
+            <p class="card-summary">
+              CPU 使用率 100% 和负载 100 是一回事吗？揭开 Linux 系统运行状态监控的核心指标真相。
+            </p>
+          </a>
+
+          <!-- 22. Python 类型注解 -->
+          <a href="notes/python-type-hints.html" class="article-card" data-cat="python">
+            <div class="card-top">
+              <span class="card-tag">Python 脚本</span>
+              <span class="card-date">2026-05-18</span>
+            </div>
+            <h3 class="card-title">Python 3 类型注解（Type Hints）与静态检查利器应用</h3>
+            <p class="card-summary">
+              从 Optional、Union 到泛型 Generics，利用类型注解消除动态语言隐式 Bug，提升 IDE 自动补全体验。
+            </p>
+          </a>
+
+          <!-- 23. HTTP 状态码 -->
+          <a href="notes/http-status-codes.html" class="article-card" data-cat="standards">
+            <div class="card-top">
+              <span class="card-tag">开发规范</span>
+              <span class="card-date">2026-05-10</span>
+            </div>
+            <h3 class="card-title">HTTP 状态码全景指南：常见 2xx、3xx、4xx、5xx 核心排错语义</h3>
+            <p class="card-summary">
+              系统整理 301 与 302 区别、401 与 403 权限边界、以及 502 Bad Gateway 常见 Nginx 后端故障成因。
+            </p>
+          </a>
+
+          <!-- 24. 浏览器缓存机制 -->
+          <a href="notes/browser-cache-strategy.html" class="article-card" data-cat="frontend">
+            <div class="card-top">
+              <span class="card-tag">前端开发</span>
+              <span class="card-date">2026-05-02</span>
+            </div>
+            <h3 class="card-title">Web 浏览器缓存策略机制详解：强缓存 Cache-Control 与协商缓存 ETag</h3>
+            <p class="card-summary">
+              如何做到新版本静态资源秒级更新而旧资源长期免流量缓存？揭秘现代前端工程哈希打包与 HTTP 头配合策略。
+            </p>
+          </a>
+
+          <!-- 25. Linux 压缩命令 -->
+          <a href="notes/linux-tar-gzip-compression.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-04-24</span>
+            </div>
+            <h3 class="card-title">Linux 常用打包与压缩命令速查（tar, gzip, zip 与 7z）</h3>
+            <p class="card-summary">
+              参数总是记混？一文讲清 tar -czvf 与 -xzvf 的记忆法则，以及多核极限压缩工具 pigz 的极速使用技巧。
+            </p>
+          </a>
+
+          <!-- 26. JS 事件循环 -->
+          <a href="notes/js-event-loop-microtasks.html" class="article-card" data-cat="frontend">
+            <div class="card-top">
+              <span class="card-tag">前端开发</span>
+              <span class="card-date">2026-04-16</span>
+            </div>
+            <h3 class="card-title">深入浅出 JavaScript 事件循环机制：宏任务与微任务执行时序</h3>
+            <p class="card-summary">
+              彻底搞清 Promise.then、setTimeout 与 async/await 在浏览器调用栈中的精确执行先后顺序。
+            </p>
+          </a>
+
+          <!-- 27. Python 文件读写 -->
+          <a href="notes/python-file-io-handling.html" class="article-card" data-cat="python">
+            <div class="card-top">
+              <span class="card-tag">Python 脚本</span>
+              <span class="card-date">2026-04-08</span>
+            </div>
+            <h3 class="card-title">Python 高效文件读写与上下文管理器 with 语句实战</h3>
+            <p class="card-summary">
+              告别手动 f.close() 的资源泄漏隐患，掌握分块读取超大文本、内存映射 mmap 与 UTF-8 编码安全读写规范。
+            </p>
+          </a>
+
+          <!-- 28. Linux 端口占用 -->
+          <a href="notes/linux-netstat-ss-ports.html" class="article-card" data-cat="linux">
+            <div class="card-top">
+              <span class="card-tag">Linux 运维</span>
+              <span class="card-date">2026-03-30</span>
+            </div>
+            <h3 class="card-title">Linux 网络端口监听排查：从 netstat、ss 到 lsof 端口占用解决</h3>
+            <p class="card-summary">
+              遭遇 Address already in use 报错？一键定位是哪个进程占用了 80、443 或 3000 端口并快速处理。
+            </p>
+          </a>
+
+          <!-- 29. 前端性能指标 -->
+          <a href="notes/frontend-performance-basics.html" class="article-card" data-cat="frontend">
+            <div class="card-top">
+              <span class="card-tag">前端开发</span>
+              <span class="card-date">2026-03-22</span>
+            </div>
+            <h3 class="card-title">前端首屏加载性能优化核心指标与资源压缩实录</h3>
+            <p class="card-summary">
+              梳理 Core Web Vitals 核心指标（LCP、INP、CLS），通过 Brotli/Gzip 压缩、现代 WebP 图片与字体裁剪提速。
+            </p>
+          </a>
+
+          <!-- 30. Vim 快捷键 -->
+          <a href="notes/vim-cheatsheet-essentials.html" class="article-card" data-cat="standards">
+            <div class="card-top">
+              <span class="card-tag">开发规范</span>
+              <span class="card-date">2026-03-14</span>
+            </div>
+            <h3 class="card-title">Linux 终端 Vim 编辑器极简高频快捷键生存备忘</h3>
+            <p class="card-summary">
+              服务器上改配置文件必备：光标跳行、搜索替换、复制粘贴撤销与保存退出的肌肉记忆清单。
+            </p>
+          </a>
+
+        </div>
+
+        <!-- 纯前端 5条一页 动态分页组件容器 -->
+        <div id="paginationContainer" class="pagination-container"></div>
+      </section>
+
+      <!-- 独立子项目/实验室专区 (SyncPilot、WP插件、微信小程序等) -->
+      <section id="projects" class="projects-section">
+        <div class="section-header">
+          <h2 class="section-title">项目实验室 (Labs)</h2>
+        </div>
+        <p style="font-size:0.95rem; color:var(--text-muted); margin-bottom: 20px;">
+          除了写个人学习备忘，站长平时也喜欢在子目录开发一些实用工具扩展与数据探索小玩具。
+        </p>
+
+        <div class="projects-grid">
+          <!-- 1. SyncPilot 扩展项目卡片 -->
+          <div class="project-card">
+            <div>
+              <span class="project-badge" style="color:#059669; background:rgba(16, 185, 129, 0.12);">已发布 · v2.3.0</span>
+              <h3 class="project-title">SyncPilot ⚡ (Chrome 扩展)</h3>
+              <p class="project-desc">
+                基于原生 File System Access API 的 AI 代码直写落盘工具。零后台常驻，一键将 Gemini、ChatGPT、Claude 等生成的代码写入本地工程。
+              </p>
+            </div>
+            <a href="projects/syncpilot/index.html" class="project-link-btn">
+              查看项目介绍与离线包下载 &rarr;
+            </a>
+          </div>
+
+          <!-- 2. DOIN 网页小游戏门户卡片 (直接链接至 doin.win) -->
+          <div class="project-card">
+            <div>
+              <span class="project-badge" style="color:#0ea5e9; background:rgba(14, 165, 233, 0.12);">Web 小游戏平台 · 独立开发</span>
+              <h3 class="project-title">DOIN (doin.win) 🎮</h3>
+              <p class="project-desc">
+                纯浏览器端即开即玩的现代静态小游戏门户。汇聚街机射击、数织推理、经典复刻与益智消除等数十款原创 Web 小游戏，零等待畅玩。
+              </p>
+            </div>
+            <a href="https://doin.win" target="_blank" rel="noopener noreferrer" class="project-link-btn">
+              访问 DOIN 平台 (doin.win) &#8599;
+            </a>
+          </div>
+
+          <!-- 3. WP Structured Draft Importer 插件项目卡片 -->
+          <div class="project-card">
+            <div>
+              <span class="project-badge" style="color:#7c3aed; background:rgba(124, 58, 237, 0.12);">已发布 · v1.0.3</span>
+              <h3 class="project-title">WP Draft Importer (WP 插件)</h3>
+              <p class="project-desc">
+                结构化 JSON 一键导入 WordPress 草稿与 Yoast SEO 核心字段。智能修复未转义字符，保护既有分类体系，内容发布极速提效。
+              </p>
+            </div>
+            <a href="projects/wp-input2/index.html" class="project-link-btn">
+              查看项目介绍与插件包下载 &rarr;
+            </a>
+          </div>
+
+          <!-- 4. 电啵啵 (EVNote) 微信小程序卡片 -->
+          <div class="project-card">
+            <div>
+              <span class="project-badge" style="color:#059669; background:rgba(16, 185, 129, 0.12);">微信小程序 · 已上线</span>
+              <h3 class="project-title">电啵啵 (EVNote) ⚡</h3>
+              <p class="project-desc">
+                专为新能源车主打造的轻量级充电记账与补能成本核算微信小程序。极简输入 SOC 与花费，秒级算清每公里电费与能耗看板。
+              </p>
+            </div>
+            <a href="projects/evnote/index.html" class="project-link-btn">
+              查看项目介绍与扫码体验 &rarr;
+            </a>
+          </div>
+
+          <!-- 5. 送你一张小卡片 (CardCraft) 微信小程序卡片 -->
+          <div class="project-card">
+            <div>
+              <span class="project-badge" style="color:#d97706; background:rgba(245, 158, 11, 0.12);">微信小程序 · 已上线</span>
+              <h3 class="project-title">送你一张小卡片 🎨</h3>
+              <p class="project-desc">
+                高审美的灵感金句与知识卡片生成小程序。内置 8 大 Apple 级质感预设，全画幅社媒比例无缝切换，Canvas 2D 离屏超清导出。
+              </p>
+            </div>
+            <a href="projects/cardcraft/index.html" class="project-link-btn">
+              查看项目介绍与扫码体验 &rarr;
+            </a>
+          </div>
+
+          <!-- 6. 豆瓣电影基因项目卡片 -->
+          <div class="project-card">
+            <div>
+              <span class="project-badge wip">研发中 · Alpha</span>
+              <h3 class="project-title">豆瓣电影基因 (Movie DNA)</h3>
+              <p class="project-desc">
+                基于个人观影大数据构建的多维审美雷达、喜好标签拓扑与个人专属选片预测小工具。业余时间持续打磨中。
+              </p>
+            </div>
+            <a href="projects/movie-dna/index.html" class="project-link-btn">
+              查看项目进展 &rarr;
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 关于本站 -->
+      <section id="about" class="projects-section" style="border-top: 1px dashed var(--border-color); margin-top: 40px; padding-top: 30px;">
+        <div class="section-header">
+          <h2 class="section-title">关于菜鸟笔记</h2>
+        </div>
+        <div class="prose">
+          <p>
+            「菜鸟笔记」(ucncn.cn) 是由个人独立搭建并维护的编程学习与技术随笔站点。
+          </p>
+          <p>
+            本站坚持<strong>纯静态化交付</strong>，不依赖任何动态后台数据库，不收集任何用户隐私数据，无商业广告与付费变现业务。旨在打造一个纯粹、安静、经得起时间检验的个人数字技术小花园。
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 底部合规声明与备案链接 (严格符合管局与腾讯云要求) -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-nav">
+        <a href="/">首页</a>
+        <span>·</span>
+        <a href="#articles">菜鸟笔记</a>
+        <span>·</span>
+        <a href="#projects">项目实验室</a>
+        <span>·</span>
+        <a href="#about">关于本站</a>
+      </div>
+      <div>
+        &copy; 2024-2026 菜鸟笔记 (ucncn.cn) 版权所有
+      </div>
+      <div>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="beian-link">
+          苏ICP备2024150485号-5
+        </a>
+      </div>
+      <p class="footer-disclaimer">
+        声明：本站为个人非营利性技术学习笔记本，不提供用户注册及公众言论发布功能。
+      </p>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
