@@ -49,15 +49,17 @@
     .badge-glow {
       box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
     }
+    kbd {
+      display: inline-block;
+      white-space: nowrap;
+      vertical-align: baseline;
+    }
   </style>
 </head>
 <body class="min-h-screen py-10 px-4 flex flex-col items-center justify-between">
 
-  <!-- 顶部主站回航导航 -->
-  <header class="w-full max-w-4xl flex items-center justify-between py-2 mb-6 text-xs text-gray-400">
-    <a href="../" class="inline-flex items-center gap-1.5 hover:text-emerald-400 transition font-medium">
-      <span>&larr;</span> 返回 菜鸟笔记 (ucncn.cn)
-    </a>
+  <!-- 顶部导航 -->
+  <header class="w-full max-w-4xl flex items-center justify-end py-2 mb-6 text-xs text-gray-400">
     <div class="flex items-center gap-3">
       <a href="demo.html" class="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 transition font-medium">
         <span>👀 2,826部典藏样例报告</span>
@@ -65,7 +67,7 @@
       </a>
       <span class="text-gray-600">|</span>
       <a href="skills/movie-dna/AGENT_PROMPT.md" target="_blank" class="hover:text-gray-200 transition">
-        🧠 选片智能体 Prompt
+        🧠 选片智能体 Prompt (示例)
       </a>
     </div>
   </header>
@@ -100,7 +102,7 @@
           还没有导出自己的数据？先看看最终报告长什么样
         </div>
         <div class="text-xs text-gray-400">
-          内置 @junzi 历经 18 载、2,826 部电影真实记录，含 8×8 殿堂海报墙与完整五维雷达
+          内置匿名资深影迷历经 18 载、2,826 部电影真实记录，含 8×8 殿堂海报墙与完整五维雷达
         </div>
       </div>
       <a href="demo.html" class="whitespace-nowrap px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-extrabold text-xs shadow-lg shadow-amber-500/20 transition transform hover:-translate-y-0.5 flex items-center gap-1.5">
@@ -112,15 +114,15 @@
     <!-- 步骤一：拖拽书签按钮 (核心一键添加) -->
     <div class="glass-card rounded-2xl p-6 text-left border border-amber-500/20 bg-amber-950/10 space-y-4">
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="w-6 h-6 rounded-full bg-amber-500 text-black text-xs font-black flex items-center justify-center">1</span>
-          <h2 class="text-base font-bold text-amber-300">第一步：将按钮拖到书签栏</h2>
+        <div class="flex items-center gap-3">
+          <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500 text-black text-base sm:text-lg font-black flex items-center justify-center shadow-lg shadow-amber-500/30 flex-shrink-0">1</span>
+          <h2 class="text-lg sm:text-xl font-black text-amber-300 tracking-tight">第一步：将按钮拖到书签栏</h2>
         </div>
-        <span class="text-[11px] text-amber-400/80 font-mono">一次安装 · 永久可用</span>
+        <span class="text-xs text-amber-400/90 font-mono hidden sm:inline-block">一次安装 · 永久可用</span>
       </div>
       
       <p class="text-xs text-gray-400 leading-relaxed">
-        鼠标按住下方黄色按钮，<strong class="text-gray-200">直接拖拽到浏览器书签栏</strong>（若未显示书签栏，按快捷键 <kbd class="px-1.5 py-0.5 bg-gray-800 rounded border border-gray-700 text-amber-400 font-mono">Ctrl + Shift + B</kbd> 打开；Mac 用户按 <kbd class="px-1.5 py-0.5 bg-gray-800 rounded border border-gray-700 text-amber-400 font-mono">⌘ + Shift + B</kbd>）：
+        鼠标按住下方黄色按钮，<strong class="text-gray-200">直接拖拽到浏览器书签栏</strong><span class="text-gray-400">（若未显示书签栏，按快捷键 <kbd class="inline-block whitespace-nowrap px-1.5 py-0.5 bg-gray-800 rounded border border-gray-700 text-amber-400 font-mono text-[11px]">Ctrl&nbsp;+&nbsp;Shift&nbsp;+&nbsp;B</kbd> 打开；<span class="inline-block whitespace-nowrap">Mac 用户按 <kbd class="inline-block whitespace-nowrap px-1.5 py-0.5 bg-gray-800 rounded border border-gray-700 text-amber-400 font-mono text-[11px]">⌘&nbsp;+&nbsp;Shift&nbsp;+&nbsp;B</kbd></span>）：</span>
       </p>
 
       <div class="flex flex-wrap items-center gap-3 pt-1">
@@ -140,11 +142,11 @@
     <!-- 步骤二：打开任意豆瓣页面并点击书签提取 -->
     <div class="glass-card rounded-2xl p-6 text-left border border-emerald-500/20 bg-emerald-950/10 space-y-4">
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="w-6 h-6 rounded-full bg-emerald-500 text-black text-xs font-black flex items-center justify-center">2</span>
-          <h2 class="text-base font-bold text-emerald-300">第二步：打开豆瓣并点击书签提取</h2>
+        <div class="flex items-center gap-3">
+          <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500 text-black text-base sm:text-lg font-black flex items-center justify-center shadow-lg shadow-emerald-500/30 flex-shrink-0">2</span>
+          <h2 class="text-lg sm:text-xl font-black text-emerald-300 tracking-tight">第二步：打开豆瓣并点击书签提取</h2>
         </div>
-        <span class="text-[11px] text-emerald-400/80 font-mono">智能嗅探 · 平滑防封</span>
+        <span class="text-xs text-emerald-400/90 font-mono hidden sm:inline-block">智能嗅探 · 平滑防封</span>
       </div>
 
       <p class="text-xs text-gray-400 leading-relaxed">
@@ -162,11 +164,11 @@
     <!-- 步骤三：上传 JSON 区域 -->
     <div class="glass-card rounded-2xl p-6 text-left space-y-4 border border-blue-500/20 bg-blue-950/10">
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-black flex items-center justify-center">3</span>
-          <h2 class="text-base font-bold text-blue-400">第三步：上传导出的 JSON 并生成报告</h2>
+        <div class="flex items-center gap-3">
+          <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-500 text-white text-base sm:text-lg font-black flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0">3</span>
+          <h2 class="text-lg sm:text-xl font-black text-blue-400 tracking-tight">第三步：上传导出的 JSON 并生成报告</h2>
         </div>
-        <span class="text-[11px] text-blue-400/80 font-mono">本地秒级解析 · 隐私不出浏览器</span>
+        <span class="text-xs text-blue-400/90 font-mono hidden sm:inline-block">本地秒级解析 · 隐私不出浏览器</span>
       </div>
 
       <div id="drop-area" class="drop-zone glass-card rounded-xl p-8 cursor-pointer text-center space-y-3">
@@ -222,8 +224,7 @@
     <div>MovieDNA · 记录每一个不愿被遗忘的光影之夜</div>
     <div class="flex items-center gap-4">
       <a href="demo.html" class="hover:text-gray-300 transition">样例报告</a>
-      <a href="skills/movie-dna/AGENT_PROMPT.md" target="_blank" class="hover:text-gray-300 transition">选片Prompt</a>
-      <a href="../" class="hover:text-gray-300 transition">菜鸟笔记 (ucncn.cn)</a>
+      <a href="skills/movie-dna/AGENT_PROMPT.md" target="_blank" class="hover:text-gray-300 transition">选片Prompt (示例)</a>
     </div>
   </footer>
 
