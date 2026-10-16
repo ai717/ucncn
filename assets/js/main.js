@@ -44,8 +44,8 @@ function updateThemeIcon(isDark) {
   }
 }
 
-// 2. 菜鸟笔记 5条一页 分页与分类联动
-const PAGE_SIZE = 5;
+// 2. 菜鸟笔记 6条一页 分页与分类联动
+const PAGE_SIZE = 6;
 let currentPage = 1;
 let currentCategory = 'all';
 
