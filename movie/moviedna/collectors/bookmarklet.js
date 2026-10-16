@@ -2,11 +2,11 @@
  * MovieDNA - 豆瓣观影数据免插件一键提取书签脚本 (Bookmarklet)
  *
  * 使用方式：
- * 1. 登录豆瓣，进入任意“我看过的电影”页面 (movie.douban.com/people/{id}/collect)
+ * 1. 登录豆瓣，进入个人电影主页 (movie.douban.com/mine 或 movie.douban.com/people/{id}/collect)
  * 2. 点击浏览器书签栏中的本脚本，或直接在控制台粘贴执行
- * 3. 脚本在页面右上方展示实时进度，爬取完毕后自动触发下载 moviedna_records.json
+ * 3. 脚本在页面右上方展示实时进度，爬取完毕后自动触发下载 douban_movie_{id}_{date}.json
  */
-(function () {
+(async function () {
   if (window.__MOVIEDNA_RUNNING__) {
     alert("MovieDNA 提取任务已在运行中，请勿重复点击！");
     return;
@@ -15,45 +15,52 @@
 
   // 1. 校验当前页面域名
   if (!location.hostname.includes("douban.com")) {
-    alert("请先登录豆瓣，并在豆瓣页面运行此脚本！");
+    alert("请先登录豆瓣，并在豆瓣页面（推荐个人电影页 movie.douban.com/mine）运行此脚本！");
     window.__MOVIEDNA_RUNNING__ = false;
     return;
   }
 
-  // 2. 智能全域识别当前用户 ID (4层兜底探测，在任何豆瓣页面如首页/电影首页均可直接识别)
+  // 2. 智能精准识别当前登录用户 ID (禁止在正文区盲目抓取其他豆友链接)
   let userId = null;
 
-  // 策略 A: 从当前 URL 识别 (/people/{id})
+  // 策略 A: 从当前 URL 识别 (/people/{id}/...)
   const userMatch = location.pathname.match(/\/people\/([^/]+)/);
-  if (userMatch) userId = userMatch[1];
-
-  // 策略 B: 从豆瓣核心登录 Cookie (dbcl2) 中直接提取数字 ID (只要登录了任何豆瓣页面必定存在)
-  if (!userId) {
-    const cookieMatch = document.cookie.match(/dbcl2="?(\d+)/);
-    if (cookieMatch) {
-      userId = cookieMatch[1];
-    }
+  if (userMatch && !['login', 'register', 'help'].includes(userMatch[1])) {
+    userId = userMatch[1];
   }
 
-  // 策略 C: 从页面所有个人链接扫描 (如顶部头像、导航菜单等)
+  // 策略 B: 从豆瓣全站统一顶栏自身账号区提取 (#db-global-nav .top-nav-info)
   if (!userId) {
-    const allUserLinks = document.querySelectorAll('a[href*="/people/"]');
-    for (const a of allUserLinks) {
-      const match = a.href.match(/\/people\/([^/]+)/);
+    const navUser = document.querySelector('#db-global-nav .top-nav-info a[href*="/people/"], #db-global-nav .nav-user-account a[href*="/people/"], a.bn-more[href*="/people/"]');
+    if (navUser) {
+      const match = navUser.href.match(/\/people\/([^/]+)/);
       if (match && !['login', 'register', 'help'].includes(match[1])) {
         userId = match[1];
-        break;
       }
     }
   }
 
-  // 策略 D: 极端情况弹窗手动输入
+  // 策略 C: 异步发起 /mine 重定向探测（已登录时会直接跟随重定向到个人主页 URL）
   if (!userId) {
-    userId = prompt("未能自动识别豆瓣账号ID，请输入您的豆瓣个性域名或数字ID：");
+    try {
+      const resp = await fetch('https://movie.douban.com/mine', { credentials: 'include', redirect: 'follow' });
+      if (resp && resp.url) {
+        const m = resp.url.match(/\/people\/([^/]+)/);
+        if (m && !['login', 'register', 'help'].includes(m[1])) {
+          userId = m[1];
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 策略 D: 弹窗确认或手动输入（绝不随意将页面其他网友作为目标用户！）
+  if (!userId) {
+    userId = prompt("【MovieDNA】未能自动检测到您的豆瓣登录账号。\n请输入您的豆瓣个性域名或数字 ID（即个人主页 URL /people/你的ID/ 中的字符）：");
     if (!userId) {
       window.__MOVIEDNA_RUNNING__ = false;
       return;
     }
+    userId = userId.trim().replace(/^@/, '');
   }
 
   // 3. 构建悬浮面板 UI
@@ -64,22 +71,25 @@
     top: 20px;
     right: 20px;
     z-index: 999999;
-    background: #1e1e24;
+    background: #111827;
     color: #f3f4f6;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    padding: 18px 22px;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    min-width: 300px;
+    min-width: 320px;
     border: 1px solid #374151;
   `;
 
   panel.innerHTML = `
-    <div style="font-weight: 600; font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="font-weight: 700; font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
       <span>🎬 MovieDNA 数据提取器</span>
-      <span id="mdna-status" style="font-size: 12px; color: #10b981;">准备就绪</span>
+      <span id="mdna-status" style="font-size: 12px; color: #10b981; font-weight: 600;">准备就绪</span>
     </div>
-    <div style="font-size: 12px; color: #9ca3af; margin-bottom: 12px;" id="mdna-user">目标用户: ${userId}</div>
+    <div style="font-size: 12px; color: #9ca3af; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 8px;">
+      <span>目标账号: <strong id="mdna-user-val" style="color: #fbbf24; font-size: 13px;">@${userId}</strong></span>
+      <a href="javascript:void(0)" id="mdna-btn-change" style="color: #60a5fa; text-decoration: underline; cursor: pointer; font-size: 11px;">不是我？修改</a>
+    </div>
     <div style="background: #374151; border-radius: 6px; height: 8px; overflow: hidden; margin-bottom: 10px;">
       <div id="mdna-bar" style="width: 0%; height: 100%; background: #3b82f6; transition: width 0.3s;"></div>
     </div>
@@ -88,8 +98,8 @@
       <span id="mdna-page">第 0 页</span>
     </div>
     <div style="display: flex; gap: 8px;">
-      <button id="mdna-btn-stop" style="flex: 1; padding: 6px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">中止并导出</button>
-      <button id="mdna-btn-close" style="display: none; flex: 1; padding: 6px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">关闭</button>
+      <button id="mdna-btn-stop" style="flex: 1; padding: 7px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">中止并导出</button>
+      <button id="mdna-btn-close" style="display: none; flex: 1; padding: 7px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">关闭</button>
     </div>
   `;
   document.body.appendChild(panel);
@@ -100,6 +110,8 @@
   const pageEl = document.getElementById("mdna-page");
   const stopBtn = document.getElementById("mdna-btn-stop");
   const closeBtn = document.getElementById("mdna-btn-close");
+  const changeBtn = document.getElementById("mdna-btn-change");
+  const userValEl = document.getElementById("mdna-user-val");
 
   let isAborted = false;
   stopBtn.onclick = () => {
@@ -111,6 +123,20 @@
   closeBtn.onclick = () => {
     panel.remove();
     window.__MOVIEDNA_RUNNING__ = false;
+  };
+
+  changeBtn.onclick = () => {
+    const newId = prompt("请输入您自己的豆瓣个性域名或数字 ID：", userId);
+    if (newId && newId.trim()) {
+      userId = newId.trim().replace(/^@/, '');
+      userValEl.innerText = "@" + userId;
+      isAborted = true;
+      setTimeout(() => {
+        panel.remove();
+        window.__MOVIEDNA_RUNNING__ = false;
+        alert("已切换目标账号为 @" + userId + "，请再次点击书签立即开始抓取！");
+      }, 300);
+    }
   };
 
   // 4. 解析单页数据
@@ -131,7 +157,6 @@
         const introEl = item.querySelector(".info .intro");
         const intro = introEl ? introEl.innerText.trim() : "";
 
-        // 评分与标记日期
         const dateEl = item.querySelector(".info .date");
         const markDate = dateEl ? dateEl.innerText.trim() : "";
 
@@ -144,7 +169,6 @@
           }
         }
 
-        // 标签与短评
         const tagsEl = item.querySelector(".info .tags");
         const tags = tagsEl ? tagsEl.innerText.replace("标签:", "").trim().split(/\s+/) : [];
 
@@ -166,11 +190,9 @@
       }
     });
 
-    // 检查是否有下一页
     const nextLink = doc.querySelector(".paginator .next a");
     const hasNext = !!nextLink;
 
-    // 获取总记录数（通常在 h1 或筛选栏）
     let totalCount = null;
     const h1 = doc.querySelector("#content h1");
     if (h1) {
@@ -194,7 +216,7 @@
     URL.revokeObjectURL(url);
   }
 
-  // 6. 随机休眠函数 (防封控节流)
+  // 6. 随机休眠函数
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   // 7. 主采集流水线
@@ -237,7 +259,6 @@
         start += 15;
         page += 1;
 
-        // 随机延迟 800ms ~ 1500ms
         const delay = 800 + Math.floor(Math.random() * 700);
         await sleep(delay);
       } catch (e) {
@@ -260,13 +281,13 @@
           douban_id: userId,
           export_time: new Date().toISOString(),
           total_count: allRecords.length,
-          client: "MovieDNA Bookmarklet v1.0",
+          client: "MovieDNA Bookmarklet v2.0",
         },
         records: allRecords,
       };
       downloadJson(exportPayload);
     } else {
-      alert("未获取到任何观影记录，请检查账号是否公开或是否登录！");
+      alert("未获取到任何观影记录！\n请检查：\n1. 账号 @" + userId + " 的看过的电影是否设置为仅自己可见；\n2. 请确认当前是否已登录豆瓣。");
     }
   }
 
