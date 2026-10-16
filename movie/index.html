@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <title>MovieDNA - 豆瓣个人观影基因一键生成</title>
+  <link rel="icon" type="image/svg+xml" href="moviedna/web/static/favicon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="generator.js"></script>
+  <style>
+    body {
+      background: #090e17;
+      color: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    .glass-card {
+      background: rgba(22, 33, 50, 0.72);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .gold-gradient {
+      background: linear-gradient(135deg, #f59e0b, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .emerald-gradient {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .drop-zone {
+      border: 2px dashed rgba(59, 130, 246, 0.35);
+      transition: all 0.3s ease;
+    }
+    .drop-zone.dragover {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.12);
+      transform: scale(1.01);
+    }
+    .bookmarklet-btn {
+      cursor: move;
+      cursor: grab;
+      user-select: none;
+    }
+    .bookmarklet-btn:active {
+      cursor: grabbing;
+    }
+    .badge-glow {
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen py-10 px-4 flex flex-col items-center justify-between">
+
+  <!-- 顶部主站回航导航 -->
+  <header class="w-full max-w-4xl flex items-center justify-between py-2 mb-6 text-xs text-gray-400">
+    <a href="../" class="inline-flex items-center gap-1.5 hover:text-emerald-400 transition font-medium">
+      <span>&larr;</span> 返回 菜鸟笔记 (ucncn.cn)
+    </a>
+    <div class="flex items-center gap-3">
+      <a href="demo.html" class="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 transition font-medium">
+        <span>👀 2,826部典藏样例报告</span>
+        <span class="text-[10px] opacity-70">↗</span>
+      </a>
+      <span class="text-gray-600">|</span>
+      <a href="skills/movie-dna/AGENT_PROMPT.md" target="_blank" class="hover:text-gray-200 transition">
+        🧠 选片智能体 Prompt
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-3xl w-full space-y-8 text-center my-auto">
+    
+    <!-- 头部标语 -->
+    <div class="space-y-3">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 badge-glow">
+        <span>🛡️ 零插件</span>
+        <span>·</span>
+        <span>🔒 零封号风险</span>
+        <span>·</span>
+        <span>⚡ 纯前端离线安全计算</span>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-black tracking-tight leading-tight">
+        豆瓣个人 <span class="gold-gradient">观影基因</span> 一键生成
+      </h1>
+      <p class="text-gray-400 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+        全量观影记录清洗 · 五维审美雷达构建 · 极端评价毒辣画像 · 专属选片模型
+      </p>
+    </div>
+
+    <!-- 快捷体验通道：典藏样例卡片 -->
+    <div class="glass-card rounded-2xl p-4 md:p-5 text-left border border-amber-500/30 bg-gradient-to-r from-amber-950/20 via-slate-900/60 to-emerald-950/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="space-y-1 text-center sm:text-left">
+        <div class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300">
+          <span>✨ 样例即刻体验</span>
+          <span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-[10px] text-amber-300 border border-amber-500/30">无需等待</span>
+        </div>
+        <div class="text-sm font-semibold text-gray-200">
+          还没有导出自己的数据？先看看最终报告长什么样
+        </div>
+        <div class="text-xs text-gray-400">
+          内置 @junzi 历经 18 载、2,826 部电影真实记录，含 8×8 殿堂海报墙与完整五维雷达
+        </div>
+      </div>
+      <a href="demo.html" class="whitespace-nowrap px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-extrabold text-xs shadow-lg shadow-amber-500/20 transition transform hover:-translate-y-0.5 flex items-center gap-1.5">
+        <span>👀 查看典藏样例报告</span>
+        <span class="text-xs">&rarr;</span>
+      </a>
+    </div>
+
+    <!-- 步骤一：拖拽书签按钮 (核心一键添加) -->
+    <div class="glass-card rounded-2xl p-6 text-left border border-amber-500/20 bg-amber-950/10 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-amber-500 text-black text-xs font-black flex items-center justify-center">1</span>
+          <h2 class="text-base font-bold text-amber-300">第一步：将按钮拖到书签栏</h2>
+        </div>
+        <span class="text-[11px] text-amber-400/80 font-mono">一次安装 · 永久可用</span>
+      </div>
+      
+      <p class="text-xs text-gray-400 leading-relaxed">
+        鼠标按住下方黄色按钮，<strong class="text-gray-200">直接拖拽到浏览器书签栏</strong>（若未显示书签栏，按快捷键 <kbd class="px-1.5 py-0.5 bg-gray-800 rounded border border-gray-700 text-amber-400 font-mono">Ctrl + Shift + B</kbd> 打开；Mac 用户按 <kbd class="px-1.5 py-0.5 bg-gray-800 rounded border border-gray-700 text-amber-400 font-mono">⌘ + Shift + B</kbd>）：
+      </p>
+
+      <div class="flex flex-wrap items-center gap-3 pt-1">
+        <!-- 核心可拖拽 a 标签 -->
+        <a id="bookmarklet-link" href="#" class="bookmarklet-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-sm shadow-lg shadow-amber-500/20 transition transform hover:-translate-y-0.5" title="按住拖拽至浏览器书签栏">
+          <span>🎬 豆瓣数据提取</span>
+        </a>
+
+        <button onclick="copyBookmarkletCode()" class="text-xs text-gray-300 hover:text-white px-3.5 py-2 rounded-xl bg-gray-800/90 border border-gray-700 hover:border-gray-600 transition flex items-center gap-1.5">
+          <span>📋 复制脚本代码</span>
+        </button>
+
+        <span class="text-[11px] text-gray-500">无法拖拽？点击“复制脚本代码”，新建书签并粘贴为网址即可</span>
+      </div>
+    </div>
+
+    <!-- 步骤二：打开任意豆瓣页面并点击书签提取 -->
+    <div class="glass-card rounded-2xl p-6 text-left border border-emerald-500/20 bg-emerald-950/10 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-emerald-500 text-black text-xs font-black flex items-center justify-center">2</span>
+          <h2 class="text-base font-bold text-emerald-300">第二步：打开豆瓣并点击书签提取</h2>
+        </div>
+        <span class="text-[11px] text-emerald-400/80 font-mono">智能嗅探 · 平滑防封</span>
+      </div>
+
+      <p class="text-xs text-gray-400 leading-relaxed">
+        点击下方按钮打开豆瓣电影（或已登录的任意豆瓣页面）。打开后，在页面上直接点击书签栏上的 <strong class="text-emerald-300">「🎬 豆瓣数据提取」</strong>，提取器将<strong class="text-gray-200">自动嗅探识别你的账号 ID</strong> 并静默抓取全量观影记录，抓取完毕后会自动下载 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-emerald-400 font-mono">douban_movie_xxx.json</code>：
+      </p>
+
+      <div class="pt-1">
+        <a href="https://movie.douban.com/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition transform hover:-translate-y-0.5">
+          <span>🔗 打开豆瓣电影首页 (movie.douban.com)</span>
+          <span class="text-xs opacity-80">&rarr;</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 步骤三：上传 JSON 区域 -->
+    <div class="glass-card rounded-2xl p-6 text-left space-y-4 border border-blue-500/20 bg-blue-950/10">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-black flex items-center justify-center">3</span>
+          <h2 class="text-base font-bold text-blue-400">第三步：上传导出的 JSON 并生成报告</h2>
+        </div>
+        <span class="text-[11px] text-blue-400/80 font-mono">本地秒级解析 · 隐私不出浏览器</span>
+      </div>
+
+      <div id="drop-area" class="drop-zone glass-card rounded-xl p-8 cursor-pointer text-center space-y-3">
+        <input type="file" id="file-input" accept=".json" class="hidden" />
+        <div class="w-12 h-12 mx-auto rounded-full bg-blue-600/10 flex items-center justify-center text-blue-400 text-2xl border border-blue-500/20">
+          📁
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-gray-200">点击选择或将 JSON 文件拖入此处</div>
+          <div class="text-xs text-gray-500 mt-1">支持由 MovieDNA 提取器导出的 douban_movie_*.json 文件</div>
+        </div>
+        <button id="upload-btn" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition shadow-lg shadow-blue-500/20">
+          选择文件并生成
+        </button>
+      </div>
+
+      <!-- 解析中/结果模态提示区 -->
+      <div id="status-container" class="hidden p-4 rounded-xl bg-slate-900/90 border border-slate-700 text-center space-y-3">
+        <div id="status-text" class="text-sm font-medium text-emerald-400 animate-pulse">
+          🚀 正在解析观影数据并构建五维审美雷达...
+        </div>
+      </div>
+    </div>
+
+    <!-- 四大核心功能展示卡片 -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-left pt-2">
+      <div class="glass-card rounded-xl p-3.5 space-y-1">
+        <div class="text-lg">🎬</div>
+        <div class="text-xs font-bold text-gray-200">8×8 殿堂海报墙</div>
+        <div class="text-[11px] text-gray-400 leading-normal">64部影史丰碑高密度铺陈，成就感拉满</div>
+      </div>
+      <div class="glass-card rounded-xl p-3.5 space-y-1">
+        <div class="text-lg">🕸️</div>
+        <div class="text-xs font-bold text-gray-200">五维动态雷达</div>
+        <div class="text-[11px] text-gray-400 leading-normal">视觉、智性、深情、隐喻与反装逼加权</div>
+      </div>
+      <div class="glass-card rounded-xl p-3.5 space-y-1">
+        <div class="text-lg">🏛️</div>
+        <div class="text-xs font-bold text-gray-200">评分严苛金字塔</div>
+        <div class="text-[11px] text-gray-400 leading-normal">结构化穿透千部分布，自适应推导人格</div>
+      </div>
+      <div class="glass-card rounded-xl p-3.5 space-y-1">
+        <div class="text-lg">🧠</div>
+        <div class="text-xs font-bold text-gray-200">AI 选片智能体</div>
+        <div class="text-[11px] text-gray-400 leading-normal">一键导出 Prompt，注入 LLM 成为私人选片大脑</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 页脚说明 -->
+  <footer class="w-full max-w-4xl text-center py-6 mt-8 text-xs text-gray-500 border-t border-gray-800/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div>MovieDNA · 记录每一个不愿被遗忘的光影之夜</div>
+    <div class="flex items-center gap-4">
+      <a href="demo.html" class="hover:text-gray-300 transition">样例报告</a>
+      <a href="skills/movie-dna/AGENT_PROMPT.md" target="_blank" class="hover:text-gray-300 transition">选片Prompt</a>
+      <a href="../" class="hover:text-gray-300 transition">菜鸟笔记 (ucncn.cn)</a>
+    </div>
+  </footer>
+
+  <script>
+    // 注入 Bookmarklet 代码到拖拽链接
+    const BOOKMARKLET_RAW = "javascript:(function%20()%20%7B%20if%20(window.__MOVIEDNA_RUNNING__)%20%7B%20alert(%22MovieDNA%20%E6%8F%90%E5%8F%96%E4%BB%BB%E5%8A%A1%E5%B7%B2%E5%9C%A8%E8%BF%90%E8%A1%8C%E4%B8%AD%EF%BC%8C%E8%AF%B7%E5%8B%BF%E9%87%8D%E5%A4%8D%E7%82%B9%E5%87%BB%EF%BC%81%22);%20return;%20%7D%20window.__MOVIEDNA_RUNNING__%20=%20true;%20if%20(!location.hostname.includes(%22douban.com%22))%20%7B%20alert(%22%E8%AF%B7%E5%85%88%E7%99%BB%E5%BD%95%E8%B1%86%E7%93%A3%EF%BC%8C%E5%B9%B6%E5%9C%A8%E8%B1%86%E7%93%A3%E9%A1%B5%E9%9D%A2%E8%BF%90%E8%A1%8C%E6%AD%A4%E8%84%9A%E6%9C%AC%EF%BC%81%22);%20window.__MOVIEDNA_RUNNING__%20=%20false;%20return;%20%7D%20let%20userId%20=%20null;%20const%20userMatch%20=%20location.pathname.match(/%5C/people%5C/(%5B%5E/%5D+)/);%20if%20(userMatch)%20userId%20=%20userMatch%5B1%5D;%20if%20(!userId)%20%7B%20const%20cookieMatch%20=%20document.cookie.match(/dbcl2=%22?(%5Cd+)/);%20if%20(cookieMatch)%20%7B%20userId%20=%20cookieMatch%5B1%5D;%20%7D%20%7D%20if%20(!userId)%20%7B%20const%20allUserLinks%20=%20document.querySelectorAll('a%5Bhref*=%22/people/%22%5D');%20for%20(const%20a%20of%20allUserLinks)%20%7B%20const%20match%20=%20a.href.match(/%5C/people%5C/(%5B%5E/%5D+)/);%20if%20(match%20&&%20!%5B'login',%20'register',%20'help'%5D.includes(match%5B1%5D))%20%7B%20userId%20=%20match%5B1%5D;%20break;%20%7D%20%7D%20%7D%20if%20(!userId)%20%7B%20userId%20=%20prompt(%22%E6%9C%AA%E8%83%BD%E8%87%AA%E5%8A%A8%E8%AF%86%E5%88%AB%E8%B1%86%E7%93%A3%E8%B4%A6%E5%8F%B7ID%EF%BC%8C%E8%AF%B7%E8%BE%93%E5%85%A5%E6%82%A8%E7%9A%84%E8%B1%86%E7%93%A3%E4%B8%AA%E6%80%A7%E5%9F%9F%E5%90%8D%E6%88%96%E6%95%B0%E5%AD%97ID%EF%BC%9A%22);%20if%20(!userId)%20%7B%20window.__MOVIEDNA_RUNNING__%20=%20false;%20return;%20%7D%20%7D%20const%20panel%20=%20document.createElement(%22div%22);%20panel.id%20=%20%22moviedna-panel%22;%20panel.style.cssText%20=%20%60%20position:%20fixed;%20top:%2020px;%20right:%2020px;%20z-index:%20999999;%20background:%20#1e1e24;%20color:%20#f3f4f6;%20padding:%2016px%2020px;%20border-radius:%2012px;%20box-shadow:%200%2010px%2025px%20rgba(0,0,0,0.4);%20font-family:%20-apple-system,%20BlinkMacSystemFont,%20'Segoe%20UI',%20Roboto,%20sans-serif;%20min-width:%20300px;%20border:%201px%20solid%20#374151;%20%60;%20panel.innerHTML%20=%20%60%20%3Cdiv%20style=%22font-weight:%20600;%20font-size:%2015px;%20margin-bottom:%208px;%20display:%20flex;%20align-items:%20center;%20justify-content:%20space-between;%22%3E%20%3Cspan%3E%F0%9F%8E%AC%20MovieDNA%20%E6%95%B0%E6%8D%AE%E6%8F%90%E5%8F%96%E5%99%A8%3C/span%3E%20%3Cspan%20id=%22mdna-status%22%20style=%22font-size:%2012px;%20color:%20#10b981;%22%3E%E5%87%86%E5%A4%87%E5%B0%B1%E7%BB%AA%3C/span%3E%20%3C/div%3E%20%3Cdiv%20style=%22font-size:%2012px;%20color:%20#9ca3af;%20margin-bottom:%2012px;%22%20id=%22mdna-user%22%3E%E7%9B%AE%E6%A0%87%E7%94%A8%E6%88%B7:%20$%7BuserId%7D%3C/div%3E%20%3Cdiv%20style=%22background:%20#374151;%20border-radius:%206px;%20height:%208px;%20overflow:%20hidden;%20margin-bottom:%2010px;%22%3E%20%3Cdiv%20id=%22mdna-bar%22%20style=%22width:%200%25;%20height:%20100%25;%20background:%20#3b82f6;%20transition:%20width%200.3s;%22%3E%3C/div%3E%20%3C/div%3E%20%3Cdiv%20style=%22display:%20flex;%20justify-content:%20space-between;%20font-size:%2012px;%20color:%20#d1d5db;%20margin-bottom:%2012px;%22%3E%20%3Cspan%20id=%22mdna-count%22%3E%E5%B7%B2%E6%8A%93%E5%8F%96:%200%20%E9%83%A8%3C/span%3E%20%3Cspan%20id=%22mdna-page%22%3E%E7%AC%AC%200%20%E9%A1%B5%3C/span%3E%20%3C/div%3E%20%3Cdiv%20style=%22display:%20flex;%20gap:%208px;%22%3E%20%3Cbutton%20id=%22mdna-btn-stop%22%20style=%22flex:%201;%20padding:%206px;%20background:%20#ef4444;%20color:%20white;%20border:%20none;%20border-radius:%206px;%20cursor:%20pointer;%20font-size:%2012px;%22%3E%E4%B8%AD%E6%AD%A2%E5%B9%B6%E5%AF%BC%E5%87%BA%3C/button%3E%20%3Cbutton%20id=%22mdna-btn-close%22%20style=%22display:%20none;%20flex:%201;%20padding:%206px;%20background:%20#10b981;%20color:%20white;%20border:%20none;%20border-radius:%206px;%20cursor:%20pointer;%20font-size:%2012px;%22%3E%E5%85%B3%E9%97%AD%3C/button%3E%20%3C/div%3E%20%60;%20document.body.appendChild(panel);%20const%20statusEl%20=%20document.getElementById(%22mdna-status%22);%20const%20barEl%20=%20document.getElementById(%22mdna-bar%22);%20const%20countEl%20=%20document.getElementById(%22mdna-count%22);%20const%20pageEl%20=%20document.getElementById(%22mdna-page%22);%20const%20stopBtn%20=%20document.getElementById(%22mdna-btn-stop%22);%20const%20closeBtn%20=%20document.getElementById(%22mdna-btn-close%22);%20let%20isAborted%20=%20false;%20stopBtn.onclick%20=%20()%20=%3E%20%7B%20isAborted%20=%20true;%20statusEl.innerText%20=%20%22%E5%B7%B2%E6%89%8B%E5%8A%A8%E4%B8%AD%E6%AD%A2%22;%20statusEl.style.color%20=%20%22#f59e0b%22;%20%7D;%20closeBtn.onclick%20=%20()%20=%3E%20%7B%20panel.remove();%20window.__MOVIEDNA_RUNNING__%20=%20false;%20%7D;%20function%20parseCollectPage(htmlText)%20%7B%20const%20doc%20=%20new%20DOMParser().parseFromString(htmlText,%20%22text/html%22);%20const%20items%20=%20doc.querySelectorAll(%22.grid-view%20.item%22);%20const%20records%20=%20%5B%5D;%20items.forEach((item)%20=%3E%20%7B%20try%20%7B%20const%20titleEl%20=%20item.querySelector(%22.info%20.title%20a%22);%20if%20(!titleEl)%20return;%20const%20titleFull%20=%20titleEl.innerText.trim().replace(/%5Cs+/g,%20%22%20%22);%20const%20link%20=%20titleEl.href;%20const%20idMatch%20=%20link.match(/%5C/subject%5C/(%5Cd+)/);%20const%20subjectId%20=%20idMatch%20?%20idMatch%5B1%5D%20:%20%22%22;%20const%20introEl%20=%20item.querySelector(%22.info%20.intro%22);%20const%20intro%20=%20introEl%20?%20introEl.innerText.trim()%20:%20%22%22;%20const%20dateEl%20=%20item.querySelector(%22.info%20.date%22);%20const%20markDate%20=%20dateEl%20?%20dateEl.innerText.trim()%20:%20%22%22;%20let%20rating%20=%20null;%20const%20ratingEl%20=%20item.querySelector(%22.info%20span%5Bclass*='rating'%5D%22);%20if%20(ratingEl)%20%7B%20const%20match%20=%20ratingEl.className.match(/rating(%5Cd)-t/);%20if%20(match)%20%7B%20rating%20=%20parseInt(match%5B1%5D,%2010)%20*%202;%20%7D%20%7D%20const%20tagsEl%20=%20item.querySelector(%22.info%20.tags%22);%20const%20tags%20=%20tagsEl%20?%20tagsEl.innerText.replace(%22%E6%A0%87%E7%AD%BE:%22,%20%22%22).trim().split(/%5Cs+/)%20:%20%5B%5D;%20const%20commentEl%20=%20item.querySelector(%22.info%20.comment%22);%20const%20comment%20=%20commentEl%20?%20commentEl.innerText.trim()%20:%20%22%22;%20records.push(%7B%20subject_id:%20subjectId,%20title:%20titleFull,%20url:%20link,%20intro:%20intro,%20rating:%20rating,%20mark_date:%20markDate,%20tags:%20tags.filter(Boolean),%20comment:%20comment,%20%7D);%20%7D%20catch%20(err)%20%7B%20console.error(%22%E8%A7%A3%E6%9E%90%E6%9D%A1%E7%9B%AE%E5%BC%82%E5%B8%B8:%22,%20err);%20%7D%20%7D);%20const%20nextLink%20=%20doc.querySelector(%22.paginator%20.next%20a%22);%20const%20hasNext%20=%20!!nextLink;%20let%20totalCount%20=%20null;%20const%20h1%20=%20doc.querySelector(%22#content%20h1%22);%20if%20(h1)%20%7B%20const%20match%20=%20h1.innerText.match(/%5C((%5Cd+)%5C)/);%20if%20(match)%20totalCount%20=%20parseInt(match%5B1%5D,%2010);%20%7D%20return%20%7B%20records,%20hasNext,%20totalCount%20%7D;%20%7D%20function%20downloadJson(data)%20%7B%20const%20blob%20=%20new%20Blob(%5BJSON.stringify(data,%20null,%202)%5D,%20%7B%20type:%20%22application/json;charset=utf-8%22%20%7D);%20const%20url%20=%20URL.createObjectURL(blob);%20const%20a%20=%20document.createElement(%22a%22);%20a.href%20=%20url;%20a.download%20=%20%60douban_movie_$%7BuserId%7D_$%7Bnew%20Date().toISOString().slice(0,%2010)%7D.json%60;%20document.body.appendChild(a);%20a.click();%20document.body.removeChild(a);%20URL.revokeObjectURL(url);%20%7D%20const%20sleep%20=%20(ms)%20=%3E%20new%20Promise((resolve)%20=%3E%20setTimeout(resolve,%20ms));%20async%20function%20runScraper()%20%7B%20let%20start%20=%200;%20let%20page%20=%201;%20let%20allRecords%20=%20%5B%5D;%20let%20totalExpected%20=%20null;%20statusEl.innerText%20=%20%22%E9%87%87%E9%9B%86%E4%B8%AD...%22;%20while%20(!isAborted)%20%7B%20pageEl.innerText%20=%20%60%E7%AC%AC%20$%7Bpage%7D%20%E9%A1%B5%60;%20const%20url%20=%20%60https://movie.douban.com/people/$%7BuserId%7D/collect?start=$%7Bstart%7D&sort=time&rating=all&filter=all&mode=grid%60;%20try%20%7B%20const%20resp%20=%20await%20fetch(url,%20%7B%20credentials:%20%22include%22%20%7D);%20if%20(!resp.ok)%20%7B%20throw%20new%20Error(%60HTTP%20$%7Bresp.status%7D%60);%20%7D%20const%20text%20=%20await%20resp.text();%20const%20%7B%20records,%20hasNext,%20totalCount%20%7D%20=%20parseCollectPage(text);%20if%20(totalCount%20&&%20!totalExpected)%20%7B%20totalExpected%20=%20totalCount;%20%7D%20allRecords.push(...records);%20countEl.innerText%20=%20%60%E5%B7%B2%E6%8A%93%E5%8F%96:%20$%7BallRecords.length%7D%20%E9%83%A8%60;%20if%20(totalExpected)%20%7B%20const%20pct%20=%20Math.min(100,%20Math.round((allRecords.length%20/%20totalExpected)%20*%20100));%20barEl.style.width%20=%20%60$%7Bpct%7D%25%60;%20%7D%20if%20(!hasNext%20%7C%7C%20records.length%20===%200)%20%7B%20break;%20%7D%20start%20+=%2015;%20page%20+=%201;%20const%20delay%20=%20800%20+%20Math.floor(Math.random()%20*%20700);%20await%20sleep(delay);%20%7D%20catch%20(e)%20%7B%20console.error(%22%E6%8A%93%E5%8F%96%E5%A4%B1%E8%B4%A5:%22,%20e);%20statusEl.innerText%20=%20%22%E7%BD%91%E7%BB%9C%E5%BC%82%E5%B8%B8%22;%20statusEl.style.color%20=%20%22#ef4444%22;%20break;%20%7D%20%7D%20statusEl.innerText%20=%20isAborted%20?%20%22%E5%B7%B2%E4%B8%AD%E6%AD%A2%E5%B9%B6%E5%AF%BC%E5%87%BA%22%20:%20%22%E5%B7%B2%E5%AE%8C%E6%88%90%EF%BC%81%22;%20statusEl.style.color%20=%20%22#10b981%22;%20barEl.style.width%20=%20%22100%25%22;%20stopBtn.style.display%20=%20%22none%22;%20closeBtn.style.display%20=%20%22block%22;%20if%20(allRecords.length%20%3E%200)%20%7B%20const%20exportPayload%20=%20%7B%20meta:%20%7B%20douban_id:%20userId,%20export_time:%20new%20Date().toISOString(),%20total_count:%20allRecords.length,%20client:%20%22MovieDNA%20Bookmarklet%20v1.0%22,%20%7D,%20records:%20allRecords,%20%7D;%20downloadJson(exportPayload);%20%7D%20else%20%7B%20alert(%22%E6%9C%AA%E8%8E%B7%E5%8F%96%E5%88%B0%E4%BB%BB%E4%BD%95%E8%A7%82%E5%BD%B1%E8%AE%B0%E5%BD%95%EF%BC%8C%E8%AF%B7%E6%A3%80%E6%9F%A5%E8%B4%A6%E5%8F%B7%E6%98%AF%E5%90%A6%E5%85%AC%E5%BC%80%E6%88%96%E6%98%AF%E5%90%A6%E7%99%BB%E5%BD%95%EF%BC%81%22);%20%7D%20%7D%20runScraper();%20%7D)();";
+    window.__BOOKMARKLET_CODE__ = BOOKMARKLET_RAW;
+
+    const bLink = document.getElementById('bookmarklet-link');
+    if (bLink) {
+      bLink.href = BOOKMARKLET_RAW;
+    }
+
+    function copyBookmarkletCode() {
+      if (window.__BOOKMARKLET_CODE__) {
+        navigator.clipboard.writeText(window.__BOOKMARKLET_CODE__)
+          .then(() => {
+            alert('✅ 书签脚本代码已复制到剪贴板！\n\n使用方法：\n1. 在浏览器书签栏右键选择【添加网页/添加书签】；\n2. 名称填写【🎬 豆瓣数据提取】；\n3. 网址(URL)处粘贴刚才复制的代码并保存即可。');
+          })
+          .catch(() => {
+            prompt('请按 Ctrl+C 手动复制代码：', window.__BOOKMARKLET_CODE__);
+          });
+      }
+    }
+
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const statusContainer = document.getElementById('status-container');
+    const statusText = document.getElementById('status-text');
+
+    uploadBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+    dropArea.addEventListener('click', () => fileInput.click());
+
+    dropArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropArea.classList.add('dragover');
+    });
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        handleFile(fileInput.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.name.endsWith('.json')) {
+        alert('请上传由 MovieDNA 提取器导出的 .json 文件！');
+        return;
+      }
+
+      // 显示处理状态
+      statusContainer.classList.remove('hidden');
+      statusText.innerText = '🚀 正在读取文件并在本地解析观影记录...';
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const textContent = e.target.result;
+        try {
+          statusText.innerText = '✨ 正在计算评分分布、年份历程与五维审美雷达...';
+          
+          // 纯前端本地解析生成
+          if (window.MovieDNAEngine) {
+            const result = window.MovieDNAEngine.buildReportFromRawJson(textContent);
+            const html = result.html;
+            const doubanId = result.meta.douban_id || 'cinephile';
+            const count = (result.stats.overview && result.stats.overview.total_movies) || result.meta.total_count || 0;
+
+            statusText.innerText = `🎉 解析完成！共分析 ${count} 部作品，正在呈现报告...`;
+
+            setTimeout(() => {
+              // 直接在当前窗口呈现完整生成的报告
+              document.open();
+              document.write(html);
+              document.close();
+            }, 400);
+
+            return;
+          }
+
+          // 降级：如果未加载 generator.js，尝试调用后端 /api/analyze
+          sendToServer(file);
+
+        } catch (err) {
+          console.error(err);
+          // 尝试调用后端 /api/analyze
+          sendToServer(file);
+        }
+      };
+
+      reader.onerror = function() {
+        sendToServer(file);
+      };
+
+      reader.readAsText(file);
+    }
+
+    function sendToServer(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      statusText.innerText = '📡 正在请求服务引擎生成报告...';
+
+      fetch('/api/analyze', {
+        method: 'POST',
+        body: formData
+      })
+      .then(resp => {
+        if (!resp.ok) throw new Error('解析失败，请检查文件格式是否为 MovieDNA 导出的 JSON');
+        return resp.json();
+      })
+      .then(data => {
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+        } else {
+          location.reload();
+        }
+      })
+      .catch(err => {
+        alert('解析出错：' + err.message);
+        statusContainer.classList.add('hidden');
+      });
+    }
+  </script>
+</body>
+</html>
