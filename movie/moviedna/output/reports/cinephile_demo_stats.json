@@ -1,0 +1,135 @@
+{
+  "meta": {
+    "douban_id": "cinephile_demo",
+    "export_time": "2026-10-11T12:00:00Z",
+    "total_count": 6,
+    "client": "MovieDNA Bookmarklet v1.0"
+  },
+  "stats": {
+    "overview": {
+      "total_movies": 6,
+      "rated_movies": 5,
+      "unrated_movies": 1,
+      "average_rating": 7.6,
+      "five_star_rate": 60.0,
+      "four_star_rate": 0.0,
+      "three_star_rate": 20.0,
+      "low_star_rate": 20.0,
+      "total_comments": 5
+    },
+    "rating_distribution": {
+      "score_10": {
+        "count": 3,
+        "pct": 60.0
+      },
+      "score_8": {
+        "count": 0,
+        "pct": 0.0
+      },
+      "score_6": {
+        "count": 1,
+        "pct": 20.0
+      },
+      "score_4": {
+        "count": 0,
+        "pct": 0.0
+      },
+      "score_2": {
+        "count": 1,
+        "pct": 20.0
+      }
+    },
+    "year_timeline": {
+      "2021": 1,
+      "2022": 1,
+      "2023": 1,
+      "2024": 1,
+      "2025": 1,
+      "2026": 1
+    },
+    "top_tags": [
+      {
+        "tag": "经典",
+        "count": 1
+      },
+      {
+        "tag": "希望",
+        "count": 1
+      },
+      {
+        "tag": "剧情",
+        "count": 1
+      },
+      {
+        "tag": "华语经典",
+        "count": 1
+      },
+      {
+        "tag": "张国荣",
+        "count": 1
+      },
+      {
+        "tag": "历史",
+        "count": 1
+      },
+      {
+        "tag": "硬科幻",
+        "count": 1
+      },
+      {
+        "tag": "诺兰",
+        "count": 1
+      },
+      {
+        "tag": "高概念",
+        "count": 1
+      },
+      {
+        "tag": "动作",
+        "count": 1
+      },
+      {
+        "tag": "爆米花",
+        "count": 1
+      },
+      {
+        "tag": "烂片",
+        "count": 1
+      },
+      {
+        "tag": "恶俗",
+        "count": 1
+      },
+      {
+        "tag": "纪录片",
+        "count": 1
+      }
+    ],
+    "representative_samples": {
+      "praise_samples": [
+        {
+          "title": "肖申克的救赎 The Shawshank Redemption",
+          "rating": 10,
+          "comment": "无论什么时候看都直击灵魂，关于坚守与尊严的极致呈现。"
+        },
+        {
+          "title": "霸王别姬",
+          "rating": 10,
+          "comment": "不疯魔不成活。大时代碾压下的小人物命运，视听语言登峰造极。"
+        },
+        {
+          "title": "星际穿越 Interstellar",
+          "rating": 10,
+          "comment": "爱不是人类发明的，它是高维空间的感知！兔子洞时空架构封神。"
+        }
+      ],
+      "criticism_samples": [
+        {
+          "title": "恶俗悬浮喜剧",
+          "rating": 2,
+          "comment": "通篇PPT运镜加低俗小品段子，把观众按在地上摩擦，侮辱智商！"
+        }
+      ]
+    }
+  }
+}

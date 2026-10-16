@@ -1,0 +1,10 @@
+services:
+  moviedna:
+    build: .
+    container_name: moviedna-web
+    restart: always
+    ports:
+      - "8765:8765"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PORT=8765

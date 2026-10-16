@@ -11,35 +11,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to VPS via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT }}
-          script: |
-            TARGET_DIR="/www/wwwroot/ucncn.cn"
-            echo "🚀 开始自动部署到目录: $TARGET_DIR"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            # 确保目标目录存在
-            if [ ! -d "$TARGET_DIR" ]; then
-              mkdir -p "$TARGET_DIR"
-            fi
+      - name: Deploy files directly to VPS
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-            cd "$TARGET_DIR"
+          echo "🚀 打包最新静态资源并直传 VPS (/www/wwwroot/ucncn.cn)..."
+          tar --exclude='.git' --exclude='.github' -czf site_deploy.tar.gz .
 
-            # 如果目录内还不是 git 仓库，自动初始化并拉取
-            if [ ! -d ".git" ]; then
-              echo "📦 正在初次克隆仓库..."
-              git init
-              git remote add origin https://github.com/ai717/ucncn.git || git remote set-url origin https://github.com/ai717/ucncn.git
-              git fetch origin main
-              git checkout -f -B main origin/main
-            else
-              echo "🔄 正在同步 GitHub 最新版本..."
-              git fetch origin main
-              git reset --hard origin/main
-            fi
+          scp -o StrictHostKeyChecking=no -P ${{ secrets.SERVER_PORT }} -i ~/.ssh/id_rsa site_deploy.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/site_deploy.tar.gz
 
-            echo "✅ 菜鸟笔记 (ucncn.cn) 线上已同步至最新代码！"
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /www/wwwroot/ucncn.cn && tar -xzf /tmp/site_deploy.tar.gz -C /www/wwwroot/ucncn.cn && rm -f /tmp/site_deploy.tar.gz"
+
+          echo "✅ 菜鸟笔记 (ucncn.cn) 线上已同步至最新代码！"

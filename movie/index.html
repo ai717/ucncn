@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>豆瓣电影基因 (Movie DNA) - 菜鸟笔记实验室 (ucncn.cn)</title>
+  <meta name="description" content="基于用户近20年、2826部豆瓣全量观影大数据的个人观影基因、五维决策雷达与专属选片智能体。菜鸟笔记实验室独立子项目。">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 0%, #0f2318 0%, #06110a 60%, #030704 100%);
+      color: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+    }
+    .gold-gradient {
+      background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fef08a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .emerald-gradient {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 50%, #6ee7b7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .glass-card {
+      background: rgba(13, 30, 20, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(52, 211, 153, 0.45);
+      box-shadow: 0 16px 36px -10px rgba(0, 181, 29, 0.25);
+    }
+  </style>
+</head>
+<body class="min-h-screen py-10 px-4 flex flex-col justify-between">
+
+  <!-- 顶部面包屑与导航 -->
+  <header class="max-w-4xl w-full mx-auto mb-10 flex items-center justify-between">
+    <a href="../" class="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition bg-emerald-950/60 px-3.5 py-1.5 rounded-full border border-emerald-500/30">
+      <span>&larr;</span> 返回菜鸟笔记主站 (ucncn.cn)
+    </a>
+    <span class="text-xs font-mono text-gray-500">ucncn.cn / movie</span>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="max-w-4xl w-full mx-auto space-y-10">
+    
+    <!-- Hero 标语 -->
+    <div class="text-center space-y-3">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-900/40 text-emerald-300 border border-emerald-500/30">
+        <span>🎬</span> 菜鸟笔记实验室 · 独立子项目
+      </div>
+      <h1 class="text-4xl md:text-5xl font-black tracking-tight">
+        豆瓣个人 <span class="emerald-gradient">观影基因</span> 系统
+      </h1>
+      <p class="text-gray-400 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+        基于近 20 年个人全量观影打标沉淀，提炼五维决策雷达、题材红黑榜与专属选片数字孪生模型。
+      </p>
+    </div>
+
+    <!-- 核心报告体验网格 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- 报告 1：君子专属全景报告 -->
+      <a href="moviedna/output/reports/junzi.html" class="glass-card rounded-2xl p-7 block group">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-1 rounded-md text-xs font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            ★ 精选典藏
+          </span>
+          <span class="text-xs text-gray-400 font-mono">2,826 部数据沉淀</span>
+        </div>
+        <h2 class="text-xl font-black text-white group-hover:text-amber-300 transition flex items-center gap-2">
+          君子 · 豆瓣光影纪元报告 <span class="text-amber-400 text-sm">&rarr;</span>
+        </h2>
+        <p class="text-xs text-gray-400 mt-2 leading-relaxed">
+          包含 8×8 殿堂海报成就墙、动态加权五维决策雷达、高饱和发光严苛金字塔、近20年足迹走势与高赞短评灵魂切片。
+        </p>
+        <div class="mt-5 pt-4 border-t border-white/10 flex items-center gap-2 text-xs text-amber-400 font-bold">
+          <span>立即查阅全景动态报告</span>
+        </div>
+      </a>
+
+      <!-- 报告 2：演示标准模板 -->
+      <a href="moviedna/output/reports/cinephile_demo.html" class="glass-card rounded-2xl p-7 block group">
+        <div class="flex items-center justify-between mb-4">
+          <span class="px-2.5 py-1 rounded-md text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            STANDARD DEMO
+          </span>
+          <span class="text-xs text-gray-400 font-mono">通用标杆样例</span>
+        </div>
+        <h2 class="text-xl font-black text-white group-hover:text-emerald-300 transition flex items-center gap-2">
+          Cinephile 演示报告 <span class="text-emerald-400 text-sm">&rarr;</span>
+        </h2>
+        <p class="text-xs text-gray-400 mt-2 leading-relaxed">
+          标准测试数据集生成的轻量演示样张，展示视口滑入动效、数据清洗算法与图表自适应排版规范。
+        </p>
+        <div class="mt-5 pt-4 border-t border-white/10 flex items-center gap-2 text-xs text-emerald-400 font-bold">
+          <span>查看演示样例效果</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- MovieDNA 选片智能体资产专区 -->
+    <div class="glass-card rounded-2xl p-7 space-y-4 border-emerald-500/30 bg-emerald-950/20">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🧠</span>
+          <div>
+            <h3 class="text-base font-bold text-white">MovieDNA 专属选片智能体 (Agent Skill)</h3>
+            <p class="text-xs text-gray-400">已沉淀为可给任意 AI（Cursor、Claude、ChatGPT、Dify）使用的标准 Skill 资产</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="skills/movie-dna/SKILL.md" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-900/60 hover:bg-emerald-800 text-emerald-300 border border-emerald-500/40 transition">
+            查看 SKILL.md
+          </a>
+          <a href="skills/movie-dna/AGENT_PROMPT.md" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-900/60 hover:bg-amber-800 text-amber-300 border border-amber-500/40 transition">
+            查看通用 Prompt
+          </a>
+        </div>
+      </div>
+      <div class="text-xs text-gray-300 bg-black/40 rounded-xl p-3.5 border border-white/5 font-mono leading-relaxed">
+        <strong>核心人设与算法：</strong>1983年生成熟80后 · 艺术设计专业视听底色 · 五维雷达（隔代深情 9.8 / 镜头美学 9.5 / 叙事智性 9.2 / 反装逼 10.0 一票否决）· 影人黑白名单（诺兰/张艺谋 vs 郭敬明/包贝尔）。
+      </div>
+    </div>
+
+    <!-- 本地离线解析服务使用说明 -->
+    <div class="glass-card rounded-2xl p-7 space-y-3">
+      <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+        <span>⚡</span> 本地运行与实时解析服务
+      </div>
+      <p class="text-xs text-gray-400 leading-relaxed">
+        本项目基于 FastAPI 提供纯本地私密解析，零数据上传。在项目目录下运行下方命令即可启动本地提取与解析后台：
+      </p>
+      <div class="bg-black/60 rounded-xl p-3.5 border border-white/10 font-mono text-xs text-emerald-300 flex items-center justify-between">
+        <code>python moviedna/server.py</code>
+        <span class="text-gray-500 text-[11px]">端口 8765</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 底部备案与版权 -->
+  <footer class="max-w-4xl w-full mx-auto mt-16 pt-6 border-t border-white/10 text-center text-xs text-gray-500 space-y-1">
+    <div>&copy; 2024-2026 菜鸟笔记 (ucncn.cn) · 电影基因实验室子项目</div>
+    <div>
+      <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-400 transition">
+        苏ICP备2024150485号-5
+      </a>
+    </div>
+  </footer>
+</body>
+</html>

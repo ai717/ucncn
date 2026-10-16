@@ -3,3 +3,7 @@ Thumbs.db
 *.log
 .vscode/
 .idea/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+normalize_paths.js

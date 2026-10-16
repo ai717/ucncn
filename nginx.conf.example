@@ -64,6 +64,11 @@ server {
         try_files $uri $uri/ =404;
     }
 
+    # 电影基因子项目独立路由（如 /movie/）
+    location /movie/ {
+        try_files $uri $uri/ /movie/index.html;
+    }
+
     # 阻止访问隐藏文件
     location ~ /\. {
         deny all;

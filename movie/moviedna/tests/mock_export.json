@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "douban_id": "cinephile_demo",
+    "export_time": "2026-10-11T12:00:00Z",
+    "total_count": 6,
+    "client": "MovieDNA Bookmarklet v1.0"
+  },
+  "records": [
+    {
+      "subject_id": "1292052",
+      "title": "肖申克的救赎 The Shawshank Redemption",
+      "url": "https://movie.douban.com/subject/1292052/",
+      "intro": "弗兰克·德拉邦特 / 蒂姆·罗宾斯 / 剧情 犯罪",
+      "rating": 10,
+      "mark_date": "2021-05-01",
+      "tags": ["经典", "希望", "剧情"],
+      "comment": "无论什么时候看都直击灵魂，关于坚守与尊严的极致呈现。"
+    },
+    {
+      "subject_id": "1291546",
+      "title": "霸王别姬",
+      "url": "https://movie.douban.com/subject/1291546/",
+      "intro": "陈凯歌 / 张国荣 / 剧情 爱情",
+      "rating": 10,
+      "mark_date": "2022-03-12",
+      "tags": ["华语经典", "张国荣", "历史"],
+      "comment": "不疯魔不成活。大时代碾压下的小人物命运，视听语言登峰造极。"
+    },
+    {
+      "subject_id": "1888888",
+      "title": "星际穿越 Interstellar",
+      "url": "https://movie.douban.com/subject/1888888/",
+      "intro": "克里斯托弗·诺兰 / 马修·麦康纳 / 科幻 冒险",
+      "rating": 10,
+      "mark_date": "2023-08-20",
+      "tags": ["硬科幻", "诺兰", "高概念"],
+      "comment": "爱不是人类发明的，它是高维空间的感知！兔子洞时空架构封神。"
+    },
+    {
+      "subject_id": "2888888",
+      "title": "某流水线商业动作片",
+      "url": "https://movie.douban.com/subject/2888888/",
+      "intro": "好莱坞动作爆米花",
+      "rating": 6,
+      "mark_date": "2024-04-05",
+      "tags": ["动作", "爆米花"],
+      "comment": "特效合格，但人物扁平，看完即忘。"
+    },
+    {
+      "subject_id": "3888888",
+      "title": "恶俗悬浮喜剧",
+      "url": "https://movie.douban.com/subject/3888888/",
+      "intro": "某导演 / 喜剧",
+      "rating": 2,
+      "mark_date": "2025-01-18",
+      "tags": ["烂片", "恶俗"],
+      "comment": "通篇PPT运镜加低俗小品段子，把观众按在地上摩擦，侮辱智商！"
+    },
+    {
+      "subject_id": "4888888",
+      "title": "某未打分独立纪录片",
+      "url": "https://movie.douban.com/subject/4888888/",
+      "intro": "纪录片",
+      "rating": null,
+      "mark_date": "2026-02-10",
+      "tags": ["纪录片"],
+      "comment": ""
+    }
+  ]
+}

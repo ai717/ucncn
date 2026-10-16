@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MovieDNA 个人观影基因报告 - @cinephile_demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body { background: #0b0f19; color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .gold-gradient { background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  </style>
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body class="min-h-screen py-10 px-4 md:px-12">
+  <div class="max-w-5xl mx-auto space-y-8">
+    
+    <!-- 头部 Header -->
+    <header class="text-center space-y-3">
+      <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-900/40 text-blue-400 border border-blue-500/20">
+        MovieDNA 数字孪生观影模型
+      </div>
+      <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">
+        <span class="gold-gradient">@cinephile_demo</span> 的观影基因画像
+      </h1>
+      <p class="text-gray-400 text-sm">数据覆盖 6 个标记年份 · 沉淀于 2026-10-11</p>
+    </header>
+
+    <!-- 概览指标卡片 -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="glass-card p-5 rounded-2xl text-center">
+        <div class="text-gray-400 text-xs">累计观影总量</div>
+        <div class="text-3xl font-bold text-white mt-1">6<span class="text-xs text-gray-500 ml-1">部</span></div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl text-center">
+        <div class="text-gray-400 text-xs">综合均分</div>
+        <div class="text-3xl font-bold text-amber-400 mt-1">7.6<span class="text-xs text-gray-500 ml-1">/10</span></div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl text-center">
+        <div class="text-gray-400 text-xs">五星殿堂率</div>
+        <div class="text-3xl font-bold text-emerald-400 mt-1">60.0%</div>
+      </div>
+      <div class="glass-card p-5 rounded-2xl text-center">
+        <div class="text-gray-400 text-xs">留存短评真迹</div>
+        <div class="text-3xl font-bold text-indigo-400 mt-1">5<span class="text-xs text-gray-500 ml-1">篇</span></div>
+      </div>
+    </div>
+
+    <!-- 图表分析区 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- 评分分布饼图 -->
+      <div class="glass-card p-6 rounded-2xl">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span> 评分严苛度与分值金字塔
+        </h2>
+        <div id="chart-rating" class="h-64 w-full"></div>
+      </div>
+
+      <!-- 时间线柱状图 -->
+      <div class="glass-card p-6 rounded-2xl">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-400"></span> 观影活跃年鉴走势
+        </h2>
+        <div id="chart-timeline" class="h-64 w-full"></div>
+      </div>
+    </div>
+
+    <!-- 高频题材标签 -->
+    <div class="glass-card p-6 rounded-2xl">
+      <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-purple-400"></span> 核心常驻题材与印记
+      </h2>
+      <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">经典 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">希望 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">剧情 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">华语经典 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">张国荣 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">历史 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">硬科幻 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">诺兰 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">高概念 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">动作 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">爆米花 <span class="text-xs text-gray-500">(1)</span></span><span class="px-3 py-1.5 rounded-lg bg-gray-800/80 text-sm border border-gray-700 text-gray-300">烂片 <span class="text-xs text-gray-500">(1)</span></span>
+      </div>
+    </div>
+
+    <!-- AI 观影基因解读容器 -->
+    <div class="glass-card p-8 rounded-2xl space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-2 border-b border-gray-800 pb-3">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> 深度审美基因与选片决策模型
+      </h2>
+      <div id="dna-content" class="prose prose-invert max-w-none text-gray-300 leading-relaxed text-sm">
+        <!-- Markdown 渲染目标 -->
+      </div>
+    </div>
+
+    <!-- 页脚 Footer -->
+    <footer class="text-center text-xs text-gray-600 pt-6">
+      MovieDNA 观影基因系统 · 纯本地私密渲染 · 零隐私泄漏
+    </footer>
+  </div>
+
+  <script>
+    // 渲染评分图表
+    const ratingChart = echarts.init(document.getElementById('chart-rating'), 'dark');
+    ratingChart.setOption({
+      backgroundColor: 'transparent',
+      tooltip: { trigger: 'item' },
+      series: [{
+        type: 'pie',
+        radius: ['45%', '75%'],
+        avoidLabelOverlap: false,
+        itemStyle: { borderRadius: 8, borderColor: '#1e293b', borderWidth: 2 },
+        label: { show: false },
+        data: [{"value": 3, "name": "5星神作 (10分)"}, {"value": 0, "name": "4星佳作 (8分)"}, {"value": 1, "name": "3星平庸 (6分)"}, {"value": 0, "name": "2星缺陷 (4分)"}, {"value": 1, "name": "1星雷区 (2分)"}]
+      }]
+    });
+
+    // 渲染时间线图表
+    const timelineChart = echarts.init(document.getElementById('chart-timeline'), 'dark');
+    timelineChart.setOption({
+      backgroundColor: 'transparent',
+      tooltip: { trigger: 'axis' },
+      xAxis: { type: 'category', data: ["2021", "2022", "2023", "2024", "2025", "2026"], axisLabel: { fontSize: 10, color: '#9ca3af' } },
+      yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+      series: [{
+        data: [1, 1, 1, 1, 1, 1],
+        type: 'bar',
+        itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] }
+      }]
+    });
+
+    // 渲染 DNA 内容
+    const rawDnaMd = "";
+    if (rawDnaMd) {
+      document.getElementById('dna-content').innerHTML = marked.parse(rawDnaMd);
+    } else {
+      document.getElementById('dna-content').innerHTML = '<p class="text-gray-500 italic">尚无 AI 基因报告内容，请运行 DNA 提炼引擎。</p>';
+    }
+
+    window.addEventListener('resize', () => {
+      ratingChart.resize();
+      timelineChart.resize();
+    });
+  </script>
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

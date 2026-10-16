@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的光影二十年 · 豆瓣全量观影基因与年度总结</title>
+  <style>
+    :root {
+      --bg-dark: #0a0d0e;
+      --bg-card: rgba(18, 24, 23, 0.75);
+      --border-card: rgba(46, 204, 113, 0.2);
+      --douban-green: #00b51d;
+      --douban-glow: rgba(0, 181, 29, 0.35);
+      --gold: #f59e0b;
+      --gold-glow: rgba(245, 158, 11, 0.3);
+      --danger-red: #ef4444;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Ambient Canvas Background */
+    #bg-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Film Grain Overlay */
+    .film-grain {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0.04;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Presentation Deck */
+    .deck-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(30px) scale(0.96);
+      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                  visibility 0.65s;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+
+    .slide.prev {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-30px) scale(0.96);
+    }
+
+    /* Card Box */
+    .glass-card {
+      width: 100%;
+      max-width: 860px;
+      max-height: 88vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 36px 40px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 181, 29, 0.08);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      animation: cardGlow 4s ease-in-out infinite alternate;
+    }
+
+    .glass-card::-webkit-scrollbar {
+      width: 4px;
+    }
+    .glass-card::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    @keyframes cardGlow {
+      0% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 181, 29, 0.05); }
+      100% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 35px rgba(0, 181, 29, 0.15); }
+    }
+
+    /* Typography & Accents */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      background: rgba(0, 181, 29, 0.15);
+      border: 1px solid rgba(0, 181, 29, 0.3);
+      color: #34d399;
+      margin-bottom: 12px;
+      align-self: flex-start;
+    }
+
+    .badge-gold {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+    }
+
+    .badge-red {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #f87171;
+    }
+
+    h1.slide-title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      line-height: 1.25;
+      background: linear-gradient(135deg, #ffffff 30%, #9ae6b4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.slide-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    /* Highlight Numbers */
+    .stat-hero {
+      font-size: 64px;
+      font-weight: 900;
+      font-feature-settings: "tnum";
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .stat-hero-gold {
+      background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Controls Bar */
+    .top-controls {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-circle:hover {
+      background: rgba(0, 181, 29, 0.25);
+      border-color: var(--douban-green);
+      transform: scale(1.05);
+    }
+
+    /* Navigation Arrows & Progress */
+    .nav-indicator {
+      position: absolute;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nav-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-dot.active {
+      height: 28px;
+      background: var(--douban-green);
+      box-shadow: 0 0 12px var(--douban-glow);
+    }
+
+    .bottom-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .nav-btn {
+      padding: 10px 22px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 30px;
+      color: #e5e7eb;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-btn:hover {
+      background: rgba(0, 181, 29, 0.2);
+      border-color: var(--douban-green);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.primary {
+      background: linear-gradient(135deg, #059669, #00b51d);
+      border: none;
+      box-shadow: 0 4px 15px rgba(0, 181, 29, 0.35);
+      color: #ffffff;
+    }
+
+    .nav-btn.primary:hover {
+      box-shadow: 0 6px 20px rgba(0, 181, 29, 0.5);
+      transform: translateY(-2px);
+    }
+
+    /* Grid layout blocks */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 16px 20px;
+      transition: all 0.25s ease;
+    }
+
+    .stat-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(0, 181, 29, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Rating Bars */
+    .bar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .bar-name {
+      width: 90px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #10b981, #00b51d);
+      transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 0%;
+    }
+
+    .bar-fill.gold {
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+
+    .bar-fill.red {
+      background: linear-gradient(90deg, #ef4444, #f87171);
+    }
+
+    .bar-num {
+      width: 80px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      font-feature-settings: "tnum";
+    }
+
+    /* Quotes Carousel */
+    .quote-box {
+      background: rgba(0, 181, 29, 0.05);
+      border-left: 4px solid var(--douban-green);
+      border-radius: 0 16px 16px 0;
+      padding: 18px 24px;
+      margin-bottom: 16px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .quote-box.dislike {
+      background: rgba(239, 68, 68, 0.06);
+      border-left-color: var(--danger-red);
+    }
+
+    .quote-box:hover {
+      transform: translateX(4px);
+    }
+
+    .quote-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #e5e7eb;
+      font-style: normal;
+      margin-bottom: 8px;
+    }
+
+    .quote-meta {
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Radar Canvas */
+    #radarCanvas {
+      width: 280px;
+      height: 280px;
+      max-width: 100%;
+    }
+
+    /* Poster Badge Box */
+    .badge-card {
+      background: radial-gradient(circle at 50% 0%, rgba(0, 181, 29, 0.15) 0%, rgba(18, 24, 23, 0.8) 75%);
+      border: 1px solid rgba(0, 181, 29, 0.35);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .glass-card {
+        padding: 24px 20px;
+        max-height: 84vh;
+      }
+      h1.slide-title {
+        font-size: 24px;
+      }
+      .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .stat-hero {
+        font-size: 46px;
+      }
+      .nav-indicator {
+        display: none;
+      }
+      .bar-name {
+        width: 70px;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+
+  <!-- Ambient Cinematic Background -->
+  <canvas id="bg-canvas"></canvas>
+  <div class="film-grain"></div>
+
+  <!-- Top Action Controls -->
+  <div class="top-controls">
+    <button class="btn-circle" id="soundBtn" title="播放/静音光影氛围音效">
+      <svg id="soundIcon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      </svg>
+    </button>
+    <button class="btn-circle" id="fullscreenBtn" title="全屏沉浸浏览">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Vertical Nav Dots -->
+  <div class="nav-indicator" id="dotsContainer"></div>
+
+  <!-- Slides Container -->
+  <div class="deck-container" id="deck">
+
+    <!-- Slide 1: 序幕 · 光影长河 -->
+    <div class="slide active" data-index="0">
+      <div class="glass-card" style="text-align: center; align-items: center;">
+        <span class="badge">DOUBAN CINEMA ARCHIVE · 2007 - 2026</span>
+        <h1 class="slide-title" style="font-size: 40px; margin-top: 10px; margin-bottom: 12px;">我的光影二十年</h1>
+        <p class="slide-sub" style="max-width: 580px; font-size: 16px;">
+          银幕暗下，微光亮起。近二十载寒来暑往，你在光影的平行世界里度过了数千个不可替代的夜晚。
+        </p>
+
+        <div style="margin: 28px 0;">
+          <div class="stat-hero counter" data-target="2826">0</div>
+          <div style="font-size: 15px; color: var(--text-muted); margin-top: 8px;">部标记作品 · 累积超过 5,100 小时的生命体验</div>
+        </div>
+
+        <div class="grid-3" style="width: 100%; max-width: 680px; margin-top: 10px;">
+          <div class="stat-card">
+            <div class="stat-label">首部标记起点</div>
+            <div class="stat-value" style="font-size: 20px; color: #34d399;">2007 年</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">严苛打分沉淀</div>
+            <div class="stat-value" style="font-size: 20px; color: #60a5fa;"><span class="counter" data-target="2176">0</span> 部</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">真实深刻短评</div>
+            <div class="stat-value" style="font-size: 20px; color: #fbbf24;"><span class="counter" data-target="351">0</span> 篇</div>
+          </div>
+        </div>
+
+        <button class="nav-btn primary" onclick="nextSlide()" style="margin-top: 24px; padding: 12px 32px; font-size: 15px;">
+          开启我的光影基因报告 ↓
+        </button>
+      </div>
+    </div>
+
+    <!-- Slide 2: 刻度 · 星级天平 -->
+    <div class="slide" data-index="1">
+      <div class="glass-card">
+        <span class="badge">RATING SCALE & METRICS</span>
+        <h1 class="slide-title">严苛而温柔的打分天平</h1>
+        <p class="slide-sub">
+          你的总体平均分为 <strong>7.19 / 10 分</strong>（折合 3.6 星）。你不滥发廉价的赞美，也绝不容忍平庸的敷衍；五星与一星之间，是一道不可逾越的审美鸿沟。
+        </p>
+
+        <div class="grid-2" style="margin-bottom: 24px;">
+          <div class="stat-card" style="display: flex; align-items: center; gap: 20px;">
+            <div class="stat-hero stat-hero-gold" style="font-size: 54px;">7.19</div>
+            <div>
+              <div style="font-size: 15px; font-weight: 700; color: #fff;">理性现实主义均分</div>
+              <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">高于豆瓣路人均线，具备极高筛选门槛</div>
+            </div>
+          </div>
+          <div class="stat-card" style="display: flex; align-items: center; gap: 20px;">
+            <div class="stat-hero" style="font-size: 54px;">19.0%</div>
+            <div>
+              <div style="font-size: 15px; font-weight: 700; color: #fff;">五星神作率</div>
+              <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">414 部作品直击灵魂，成为生命印记</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating distribution bars -->
+        <div style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 16px;">
+          <div class="bar-item">
+            <div class="bar-name">★★★★★ 10分</div>
+            <div class="bar-track"><div class="bar-fill gold" data-width="19.0%"></div></div>
+            <div class="bar-num">414 部 (19%)</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-name">★★★★☆ 8分</div>
+            <div class="bar-track"><div class="bar-fill" data-width="41.7%"></div></div>
+            <div class="bar-num">908 部 (42%)</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-name">★★★☆☆ 6分</div>
+            <div class="bar-track"><div class="bar-fill" data-width="24.6%" style="background: #3b82f6;"></div></div>
+            <div class="bar-num">536 部 (25%)</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-name">★★☆☆☆ 4分</div>
+            <div class="bar-track"><div class="bar-fill red" data-width="9.1%"></div></div>
+            <div class="bar-num">197 部 (9%)</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-name">★☆☆☆☆ 2分</div>
+            <div class="bar-track"><div class="bar-fill red" data-width="5.6%" style="background: #dc2626;"></div></div>
+            <div class="bar-num">121 部 (6%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: 时光 · 二十年流光曲线 -->
+    <div class="slide" data-index="2">
+      <div class="glass-card">
+        <span class="badge">TIMELINE & PRODUCTION ERAS</span>
+        <h1 class="slide-title">岁月流转与银幕代际</h1>
+        <p class="slide-sub">
+          你的观影足迹横跨新旧世纪。2010 年代是你的狂热主力，而你对影史经典与 2026 当下最新院线始终保持着敏锐的触觉。
+        </p>
+
+        <div class="grid-4" style="margin-bottom: 24px;">
+          <div class="stat-card">
+            <div class="stat-label">2010 年代作品</div>
+            <div class="stat-value" style="color: #34d399;">1,028 部</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">现代高工业视听巅峰</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">2000 年代作品</div>
+            <div class="stat-value" style="color: #60a5fa;">529 部</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">新世纪黄金十年</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">2020 年代新片</div>
+            <div class="stat-value" style="color: #fbbf24;">360 部</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">实时追踪流媒体与院线</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">90年代及经典</div>
+            <div class="stat-value" style="color: #c084fc;">352 部</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">港片黄金期与影史神作</div>
+          </div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.3); border-radius: 16px; padding: 20px;">
+          <div style="font-size: 13px; font-weight: 600; color: #e5e7eb; margin-bottom: 14px;">标记年份活跃峰值 (TOP 5)</div>
+          <div class="bar-item">
+            <div class="bar-name">2009 年</div>
+            <div class="bar-track"><div class="bar-fill" data-width="100%"></div></div>
+            <div class="bar-num">296 部</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-name">2018 年</div>
+            <div class="bar-track"><div class="bar-fill" data-width="70%"></div></div>
+            <div class="bar-num">207 部</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-name">2019 年</div>
+            <div class="bar-track"><div class="bar-fill" data-width="65%"></div></div>
+            <div class="bar-num">192 部</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-name">2010 年</div>
+            <div class="bar-track"><div class="bar-fill" data-width="64%"></div></div>
+            <div class="bar-num">191 部</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-name">2017 年</div>
+            <div class="bar-track"><div class="bar-fill" data-width="62%"></div></div>
+            <div class="bar-num">184 部</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: 题材 · 偏好密码 -->
+    <div class="slide" data-index="3">
+      <div class="glass-card">
+        <span class="badge">GENRE PREFERENCE MATRIX</span>
+        <h1 class="slide-title">题材象限：真爱与雷区</h1>
+        <p class="slide-sub">
+          数据揭示了最真实的喜好分水岭：动画、战争与历史是你的“封神圣殿”；剧情片是你的审美基石；而国产恶俗小品喜剧是最大的重灾区。
+        </p>
+
+        <div class="grid-3" style="margin-bottom: 24px;">
+          <div class="stat-card" style="border-left: 3px solid #f59e0b;">
+            <div class="stat-label">👑 动画片 (132部)</div>
+            <div class="stat-value" style="color: #fbbf24; font-size: 24px;">均分 8.59</div>
+            <div style="font-size: 12px; color: #34d399; margin-top: 4px;">五星率高达 48.0%！零差评</div>
+          </div>
+          <div class="stat-card" style="border-left: 3px solid #10b981;">
+            <div class="stat-label">⚔️ 战争片 (119部)</div>
+            <div class="stat-value" style="color: #34d399; font-size: 24px;">均分 8.36</div>
+            <div style="font-size: 12px; color: #34d399; margin-top: 4px;">五星率 45.5% · 史诗厚重</div>
+          </div>
+          <div class="stat-card" style="border-left: 3px solid #3b82f6;">
+            <div class="stat-label">📜 历史/传记 (102部)</div>
+            <div class="stat-value" style="color: #60a5fa; font-size: 24px;">均分 8.33</div>
+            <div style="font-size: 12px; color: #34d399; margin-top: 4px;">五星率 41.7% · 命运洪流</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="background: rgba(0, 181, 29, 0.06); border: 1px solid rgba(0, 181, 29, 0.2); border-radius: 16px; padding: 18px;">
+            <div style="font-size: 14px; font-weight: 700; color: #34d399; margin-bottom: 8px;">🏛️ 审美基石（体量最大）</div>
+            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+              • <strong>剧情 (1,240部)</strong>：均分 7.51，注重现实生活弧光<br>
+              • <strong>奇幻 (268部)</strong>：均分 7.21，偏爱宏大世界观<br>
+              • <strong>犯罪/悬疑 (610部)</strong>：均分 7.11，苛求智力对决<br>
+              • <strong>科幻 (346部)</strong>：均分 7.05，包容并鼓励国产硬科幻
+            </div>
+          </div>
+
+          <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 16px; padding: 18px;">
+            <div style="font-size: 14px; font-weight: 700; color: #f87171; margin-bottom: 8px;">⚠️ 审慎与雷区警戒</div>
+            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+              • <strong>恐怖片 (116部)</strong>：均分 6.68，反感廉价跳脸恶心<br>
+              • <strong>动作片 (705部)</strong>：均分 6.79，无扎实人物绝不给高分<br>
+              • <strong>喜剧片 (546部)</strong>：均分 6.89，恶俗小品是1星重灾区<br>
+              • <strong>一票否决</strong>：降智、装逼、吵闹、资本硬推流量
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5: 版图 · 环球银幕地图 -->
+    <div class="slide" data-index="4">
+      <div class="glass-card">
+        <span class="badge">GLOBAL CINEMA LANDSCAPE</span>
+        <h1 class="slide-title">世界电影版图与偏好温差</h1>
+        <p class="slide-sub">
+          你的足迹遍布全球。中国大陆是你的情感主场，欧洲电影深得你心，而韩国电影成了全域唯一的显著低洼地。
+        </p>
+
+        <div class="grid-3" style="margin-bottom: 20px;">
+          <div class="stat-card">
+            <div class="stat-label">🇨🇳 中国大陆 (1,457部)</div>
+            <div class="stat-value" style="font-size: 22px;">均分 7.14</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">第一主场 · 深度共情底层与硬科幻</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">🇺🇸 美国 (801部)</div>
+            <div class="stat-value" style="font-size: 22px; color: #60a5fa;">均分 7.59</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">好莱坞高工业标杆与 HBO 神剧</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">🇭🇰 中国香港 (530部)</div>
+            <div class="stat-value" style="font-size: 22px;">均分 7.17</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">黄金警匪、枪战与时代情怀</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div style="background: rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 18px;">
+            <div style="font-size: 14px; font-weight: 700; color: #fbbf24; margin-bottom: 8px;">🇪🇺 欧洲文艺与反转（高分殿堂）</div>
+            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+              • <strong>意大利 (58部 / 均分 8.48)</strong>：天堂电影院、美丽人生<br>
+              • <strong>西班牙 (103部 / 均分 7.79)</strong>：纸钞屋、黑暗面、高能悬疑<br>
+              • <strong>法国 (93部 / 均分 7.81)</strong> & <strong>英国 (183部 / 均分 7.67)</strong>
+            </div>
+          </div>
+
+          <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: 16px; padding: 18px;">
+            <div style="font-size: 14px; font-weight: 700; color: #f87171; margin-bottom: 8px;">🇰🇷 韩国影视低洼（均分仅 5.46）</div>
+            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+              142 部韩国影视，均分跌至全域最低的 <strong>5.46 分</strong>，五星率仅 5.7%。对韩式狗血煽情、刻意反转与流水线复仇套路具有极强的抗体与免疫力。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6: 影人 · 白名单神殿 vs 避坑黑名单 -->
+    <div class="slide" data-index="5">
+      <div class="glass-card">
+        <span class="badge">CREATOR PANTHEON & BLACKLIST</span>
+        <h1 class="slide-title">影人神殿与避坑雷达</h1>
+        <p class="slide-sub">
+          谁参与必属精品？谁出现必定暴雷？你的打分给出了毫不留情却又精准无比的答案。
+        </p>
+
+        <div class="grid-2" style="margin-bottom: 20px;">
+          <!-- Left: Loved creators -->
+          <div style="background: rgba(0, 181, 29, 0.05); border: 1px solid rgba(0, 181, 29, 0.25); border-radius: 16px; padding: 20px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #34d399; margin-bottom: 12px;">
+              <span>🏆 殿堂级创作者（品质保障）</span>
+            </div>
+            <div style="font-size: 13px; color: #e5e7eb; line-height: 1.9;">
+              • <strong>克里斯托弗·诺兰兄弟</strong>：10部 · 均分 <strong>9.33 ~ 10.0</strong><br>
+              • <strong>彼得·杰克逊</strong>：17部 · 均分 <strong>9.18</strong> (指环王中土史诗)<br>
+              • <strong>宫崎骏</strong>：18部 · 均分 <strong>9.14</strong> (生命力与无瑕童心)<br>
+              • <strong>理查德·柯蒂斯</strong>：5部 · 均分 <strong>10.00 满分</strong> (时空恋旅人)<br>
+              • <strong>张艺谋</strong>：33部 · 均分 <strong>8.60</strong> (光影美学深度契合)<br>
+              • <strong>戏骨保障</strong>：李雪健 (9.0)、陈建斌 (9.11)、唐国强
+            </div>
+          </div>
+
+          <!-- Right: Blacklist -->
+          <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 16px; padding: 20px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #f87171; margin-bottom: 12px;">
+              <span>🚫 一票否决黑名单（绝不原谅）</span>
+            </div>
+            <div style="font-size: 13px; color: #e5e7eb; line-height: 1.9;">
+              • <strong>郭敬明</strong>：9部 · 均分 <strong>3.11</strong> (88%打1-2星，虚浮拜金PPT)<br>
+              • <strong>包贝尔</strong>：13部 · 均分 <strong>4.00</strong> (77%打1-2星，恶俗油腻)<br>
+              • <strong>陈学冬 / 谢依霖</strong>：均分 <strong>2.40 ~ 2.80</strong> (100%全雷)<br>
+              • <strong>大鹏 / 俞白眉 / 柳岩</strong>：均分 <strong>4.40 ~ 4.50</strong> (小品段子拼凑)<br>
+              • <strong>做作流量明星</strong>：如小巷人家怒改1星：“资方自食恶果”
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 7: 金句 · 灵魂影评长廊 -->
+    <div class="slide" data-index="6">
+      <div class="glass-card">
+        <span class="badge">ICONIC REVIEWS & SOUL VOICES</span>
+        <h1 class="slide-title">笔下春秋：351 篇短评里的人间清醒</h1>
+        <p class="slide-sub">
+          你的影评不装腔作势，不抄通稿。这里有让你潸然泪下的至纯深情，也有让你拍案叫绝的手术刀式讽刺。
+        </p>
+
+        <!-- Carousel / Stack of Reviews -->
+        <div style="max-height: 480px; overflow-y: auto; padding-right: 6px;">
+          <div class="quote-box">
+            <div class="quote-text">“故事结束，每个人都需要离开孤岛回到尚未毁灭的人类世界。你可能认为历尽劫难必当彻底悔悟，重新为人。而在我眼里，他们只是又一次重新做回了自己。道家谓天地一成一毁为一劫，周而复始。”</div>
+            <div class="quote-meta">
+              <span style="color:#34d399; font-weight:600;">★★★★★ 10分</span>
+              <span>《一出好戏》</span>
+              <span style="background:rgba(0,181,29,0.2); color:#34d399; padding:2px 8px; border-radius:10px;">170 人觉得有用</span>
+            </div>
+          </div>
+
+          <div class="quote-box">
+            <div class="quote-text">“终于抽空去看了，虽然包场，但忍住不哭出声来也很痛苦。突然想到这两天有大人物相见。但比起两个阿嬷的相见，比起一代又一代的阿嬷，p都不算。”</div>
+            <div class="quote-meta">
+              <span style="color:#34d399; font-weight:600;">★★★★★ 10分</span>
+              <span>《给阿嬷的情书》</span>
+              <span>泪点开关：祖辈隔代深情</span>
+            </div>
+          </div>
+
+          <div class="quote-box">
+            <div class="quote-text">“他是一只好狗狗，值得过上幸福的生活，可惜我给不了，好心人，不管它以前叫什么名字，请重新给它起一个，并一直叫他这个名字。”</div>
+            <div class="quote-meta">
+              <span style="color:#34d399; font-weight:600;">★★★★★ 10分</span>
+              <span>《心犬相随》</span>
+              <span>情感软肋：人与动物的纯粹羁绊</span>
+            </div>
+          </div>
+
+          <div class="quote-box">
+            <div class="quote-text">“世界笑着坠落，只有讽刺在上升。”</div>
+            <div class="quote-meta">
+              <span style="color:#34d399; font-weight:600;">★★★★★ 10分</span>
+              <span>《凶降喜讯》</span>
+              <span>智性锋芒：荒诞政治讽刺</span>
+            </div>
+          </div>
+
+          <div class="quote-box dislike">
+            <div class="quote-text">“仙人跳部分，我以为剧作方试试把观众踩地上摩擦，忍一下就好了，没想到他们玩得挺嗨，又擦了几下，以为差不多行了，他倒是擦上瘾了，最后还侮辱下观众智商。”</div>
+            <div class="quote-meta">
+              <span style="color:#f87171; font-weight:600;">★☆☆☆☆ 2分</span>
+              <span>《老舅》</span>
+              <span style="background:rgba(239,68,68,0.2); color:#f87171; padding:2px 8px; border-radius:10px;">49 人觉得有用 · 毒舌避坑</span>
+            </div>
+          </div>
+
+          <div class="quote-box dislike">
+            <div class="quote-text">“除了摄影，一无是处。那些满嘴夸最好的丧尸片，丧尸文艺片，宏大主题，哲学意味的，只能说给你装到了。”</div>
+            <div class="quote-meta">
+              <span style="color:#f87171; font-weight:600;">★☆☆☆☆ 2分</span>
+              <span>《惊变28年》</span>
+              <span>避坑红线：反伪深沉装逼</span>
+            </div>
+          </div>
+
+          <div class="quote-box dislike">
+            <div class="quote-text">“看了十分钟 音乐轰鸣 吵吵闹闹 我是真的83年的老人了，能不能安静点”</div>
+            <div class="quote-meta">
+              <span style="color:#f87171; font-weight:600;">★☆☆☆☆ 2分</span>
+              <span>《你好1983》</span>
+              <span>真实代际印记：拒绝喧嚣闹剧</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 8: 终章 · 专属观影人格勋章卡 -->
+    <div class="slide" data-index="7">
+      <div class="glass-card" style="text-align: center; align-items: center;">
+        <span class="badge badge-gold">ANNUAL MOVIE DNA CEREMONY</span>
+        <h1 class="slide-title" style="font-size: 32px; margin-bottom: 6px;">你的专属观影人格结算</h1>
+        <p class="slide-sub" style="margin-bottom: 20px;">
+          基于 2,826 部光影数据多维解构生成的终身数字审美勋章
+        </p>
+
+        <div class="badge-card" style="width: 100%; max-width: 680px; margin-bottom: 24px;">
+          <div style="font-size: 14px; color: #fbbf24; letter-spacing: 2px; font-weight: 700; margin-bottom: 8px;">👑 观影基因终身称号</div>
+          <div style="font-size: 30px; font-weight: 900; color: #ffffff; margin-bottom: 12px; text-shadow: 0 0 20px rgba(0,181,29,0.5);">
+            艺术底色的理性现实主义者
+          </div>
+          <div style="font-size: 14px; color: #d1d5db; line-height: 1.8; max-width: 580px; margin: 0 auto 20px;">
+            拥有设计与艺术的挑剔之眼，秒破 PPT 运镜与假模假式；内心深处却为祖辈亲情与纯真忠诚永存柔软热泪。在虚浮的时代，你用 2,826 次凝视，守住了属于电影的体面与尊严。
+          </div>
+
+          <!-- Radar Chart Area -->
+          <div style="display: flex; justify-content: center; align-items: center; margin: 10px 0;">
+            <canvas id="radarCanvas" width="300" height="300"></canvas>
+          </div>
+
+          <div class="grid-3" style="margin-top: 16px; margin-bottom: 0;">
+            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px;">
+              <div style="font-size: 12px; color: var(--text-dim);">第一核心软肋</div>
+              <div style="font-size: 14px; font-weight: 700; color: #34d399; margin-top: 4px;">隔代深情与忠犬</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px;">
+              <div style="font-size: 12px; color: var(--text-dim);">智性偏好</div>
+              <div style="font-size: 14px; font-weight: 700; color: #60a5fa; margin-top: 4px;">高概念兔子洞时空</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px;">
+              <div style="font-size: 12px; color: var(--text-dim);">一票否决</div>
+              <div style="font-size: 14px; font-weight: 700; color: #f87171; margin-top: 4px;">装腔作势与做作流量</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 14px;">
+          <button class="nav-btn primary" onclick="goToSlide(0)">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            重新漫游光影长河
+          </button>
+          <button class="nav-btn" onclick="alert('观影基因已成功沉淀于 C:\\Users\\everg\\.agents\\skills\\movie-dna，已在智能体技能库中随时就绪！')">
+            查看 Skill 状态
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation Buttons -->
+  <div class="bottom-bar">
+    <button class="nav-btn" id="prevBtn" onclick="prevSlide()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+      上一页
+    </button>
+    <div style="font-size: 13px; color: var(--text-muted); font-feature-settings: 'tnum';" id="pageCounter">1 / 8</div>
+    <button class="nav-btn primary" id="nextBtn" onclick="nextSlide()">
+      下一页
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <script>
+    // Total slides
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    let currentSlide = 0;
+    let isAnimating = false;
+
+    // Navigation Dots
+    const dotsContainer = document.getElementById('dotsContainer');
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    }
+    const dots = document.querySelectorAll('.nav-dot');
+
+    function updateSlideDisplay() {
+      slides.forEach((s, idx) => {
+        s.classList.remove('active', 'prev');
+        if (idx === currentSlide) {
+          s.classList.add('active');
+          triggerSlideAnimations(s);
+        } else if (idx < currentSlide) {
+          s.classList.add('prev');
+        }
+      });
+
+      dots.forEach((d, idx) => {
+        d.classList.toggle('active', idx === currentSlide);
+      });
+
+      document.getElementById('pageCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+      document.getElementById('prevBtn').style.opacity = currentSlide === 0 ? '0.4' : '1';
+      document.getElementById('prevBtn').style.pointerEvents = currentSlide === 0 ? 'none' : 'auto';
+
+      if (currentSlide === totalSlides - 1) {
+        document.getElementById('nextBtn').textContent = '重新开始 ↺';
+      } else {
+        document.getElementById('nextBtn').innerHTML = '下一页 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
+      }
+    }
+
+    function goToSlide(idx) {
+      if (idx < 0) idx = 0;
+      if (idx >= totalSlides) idx = 0;
+      currentSlide = idx;
+      updateSlideDisplay();
+      playTone(300 + currentSlide * 40, 0.1);
+    }
+
+    function nextSlide() {
+      goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentSlide - 1);
+    }
+
+    // Keyboard support
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      }
+    });
+
+    // Mouse wheel support (debounced)
+    let wheelTimeout = null;
+    window.addEventListener('wheel', (e) => {
+      if (wheelTimeout) return;
+      wheelTimeout = setTimeout(() => { wheelTimeout = null; }, 600);
+      if (e.deltaY > 20) {
+        nextSlide();
+      } else if (e.deltaY < -20) {
+        prevSlide();
+      }
+    }, { passive: true });
+
+    // Touch swipe support
+    let touchStartY = 0;
+    window.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    window.addEventListener('touchend', (e) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      const diff = touchStartY - touchEndY;
+      if (diff > 50) nextSlide();
+      else if (diff < -50) prevSlide();
+    }, { passive: true });
+
+    // Trigger animations when slide is shown
+    function triggerSlideAnimations(slideEl) {
+      // Counter animations
+      const counters = slideEl.querySelectorAll('.counter');
+      counters.forEach(c => {
+        const target = parseInt(c.getAttribute('data-target'), 10);
+        let count = 0;
+        const duration = 1200;
+        const step = Math.ceil(target / (duration / 25));
+        const timer = setInterval(() => {
+          count += step;
+          if (count >= target) {
+            c.textContent = target.toLocaleString();
+            clearInterval(timer);
+          } else {
+            c.textContent = count.toLocaleString();
+          }
+        }, 25);
+      });
+
+      // Bar animations
+      const bars = slideEl.querySelectorAll('.bar-fill');
+      bars.forEach(b => {
+        const w = b.getAttribute('data-width') || '0%';
+        b.style.width = '0%';
+        setTimeout(() => {
+          b.style.width = w;
+        }, 150);
+      });
+
+      // If slide 8 (Radar chart)
+      if (slideEl.getAttribute('data-index') === '7') {
+        setTimeout(drawRadarChart, 200);
+      }
+    }
+
+    // Canvas Background Particles
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      createParticles();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function createParticles() {
+      particles = [];
+      const count = Math.floor(width * height / 18000);
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 1.8 + 0.6,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: (Math.random() - 0.5) * 0.35 - 0.15,
+          alpha: Math.random() * 0.6 + 0.15,
+          color: Math.random() > 0.35 ? '#00b51d' : '#f59e0b'
+        });
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Radial dark vignette
+      const grad = ctx.createRadialGradient(width/2, height/2, width*0.1, width/2, height/2, width*0.8);
+      grad.addColorStop(0, 'rgba(10, 24, 18, 0.35)');
+      grad.addColorStop(1, 'rgba(5, 8, 9, 0.95)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      // Render floating light particles
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.shadowBlur = p.radius * 4;
+        ctx.shadowColor = p.color;
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+
+      requestAnimationFrame(animateParticles);
+    }
+    resizeCanvas();
+    animateParticles();
+
+    // Radar Chart on Slide 8
+    function drawRadarChart() {
+      const rCanvas = document.getElementById('radarCanvas');
+      if (!rCanvas) return;
+      const rCtx = rCanvas.getContext('2d');
+      const w = rCanvas.width;
+      const h = rCanvas.height;
+      const center = { x: w / 2, y: h / 2 };
+      const radius = w * 0.38;
+
+      rCtx.clearRect(0, 0, w, h);
+
+      const labels = [
+        "视觉影调与构图",
+        "叙事智性与闭环",
+        "隔代质朴深情",
+        "社会隐喻反思",
+        "反装逼去悬浮"
+      ];
+      const values = [0.95, 0.92, 0.98, 0.90, 1.00]; // 0 ~ 1
+      const count = labels.length;
+
+      // Draw background polygons
+      for (let level = 1; level <= 4; level++) {
+        const r = (radius / 4) * level;
+        rCtx.beginPath();
+        for (let i = 0; i < count; i++) {
+          const angle = (Math.PI * 2 / count) * i - Math.PI / 2;
+          const x = center.x + r * Math.cos(angle);
+          const y = center.y + r * Math.sin(angle);
+          if (i === 0) rCtx.moveTo(x, y);
+          else rCtx.lineTo(x, y);
+        }
+        rCtx.closePath();
+        rCtx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        rCtx.lineWidth = 1;
+        rCtx.stroke();
+      }
+
+      // Draw axes
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 / count) * i - Math.PI / 2;
+        const x = center.x + radius * Math.cos(angle);
+        const y = center.y + radius * Math.sin(angle);
+        rCtx.beginPath();
+        rCtx.moveTo(center.x, center.y);
+        rCtx.lineTo(x, y);
+        rCtx.strokeStyle = 'rgba(0, 181, 29, 0.25)';
+        rCtx.stroke();
+
+        // Label text
+        const textDist = radius + 22;
+        const lx = center.x + textDist * Math.cos(angle);
+        const ly = center.y + textDist * Math.sin(angle);
+        rCtx.fillStyle = '#9ca3af';
+        rCtx.font = '11px -apple-system, sans-serif';
+        rCtx.textAlign = 'center';
+        rCtx.textBaseline = 'middle';
+        rCtx.fillText(labels[i], lx, ly);
+      }
+
+      // Draw user radar polygon
+      rCtx.beginPath();
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 / count) * i - Math.PI / 2;
+        const r = radius * values[i];
+        const x = center.x + r * Math.cos(angle);
+        const y = center.y + r * Math.sin(angle);
+        if (i === 0) rCtx.moveTo(x, y);
+        else rCtx.lineTo(x, y);
+      }
+      rCtx.closePath();
+      rCtx.fillStyle = 'rgba(0, 181, 29, 0.35)';
+      rCtx.fill();
+      rCtx.strokeStyle = '#00b51d';
+      rCtx.lineWidth = 2.5;
+      rCtx.stroke();
+
+      // Points
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 / count) * i - Math.PI / 2;
+        const r = radius * values[i];
+        const x = center.x + r * Math.cos(angle);
+        const y = center.y + r * Math.sin(angle);
+        rCtx.beginPath();
+        rCtx.arc(x, y, 4, 0, Math.PI * 2);
+        rCtx.fillStyle = '#fbbf24';
+        rCtx.fill();
+      }
+    }
+
+    // Synthesizer Audio using Web Audio API
+    let audioCtx = null;
+    let isSoundOn = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playTone(freq = 440, duration = 0.2) {
+      if (!isSoundOn) return;
+      initAudio();
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    const soundBtn = document.getElementById('soundBtn');
+    soundBtn.addEventListener('click', () => {
+      isSoundOn = !isSoundOn;
+      soundBtn.style.color = isSoundOn ? '#34d399' : '#f3f4f6';
+      soundBtn.style.borderColor = isSoundOn ? '#00b51d' : 'rgba(255,255,255,0.15)';
+      if (isSoundOn) {
+        initAudio();
+        playTone(523.25, 0.3); // C5 chime
+      }
+    });
+
+    // Fullscreen toggle
+    document.getElementById('fullscreenBtn').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    // Initial trigger
+    triggerSlideAnimations(slides[0]);
+  </script>
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
