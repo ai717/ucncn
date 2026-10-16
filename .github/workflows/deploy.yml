@@ -21,9 +21,9 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
           echo "🚀 打包最新静态资源并直传 VPS (/www/wwwroot/ucncn.cn)..."
-          tar --exclude='.git' --exclude='.github' -czf site_deploy.tar.gz .
+          tar --exclude='.git' --exclude='.github' -czf /tmp/site_deploy.tar.gz .
 
-          scp -o StrictHostKeyChecking=no -P ${{ secrets.SERVER_PORT }} -i ~/.ssh/id_rsa site_deploy.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/site_deploy.tar.gz
+          scp -o StrictHostKeyChecking=no -P ${{ secrets.SERVER_PORT }} -i ~/.ssh/id_rsa /tmp/site_deploy.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/site_deploy.tar.gz
 
           ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /www/wwwroot/ucncn.cn && tar -xzf /tmp/site_deploy.tar.gz -C /www/wwwroot/ucncn.cn && rm -f /tmp/site_deploy.tar.gz"
 
