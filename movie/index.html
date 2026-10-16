@@ -3,156 +3,2059 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>豆瓣电影基因 (Movie DNA) - 菜鸟笔记实验室 (ucncn.cn)</title>
-  <meta name="description" content="基于用户近20年、2826部豆瓣全量观影大数据的个人观影基因、五维决策雷达与专属选片智能体。菜鸟笔记实验室独立子项目。">
-  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 核心设置：no-referrer 彻底穿透豆瓣防盗链，确保海报 100% 显示 -->
+  <meta name="referrer" content="no-referrer">
+  <title>我的光影纪 · @junzi 豆瓣观影报告</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="/static/echarts.min.js"></script>
+  <script src="https://registry.npmmirror.com/echarts/5.4.3/files/dist/echarts.min.js"></script>
+  <script src="/static/marked.min.js"></script>
+  <script src="https://registry.npmmirror.com/marked/9.1.6/files/marked.min.js"></script>
   <style>
+    :root {
+      --bg-forest: #0b1510;
+      --douban-green: #00b51d;
+      --douban-soft-green: #a7f3d0;
+      --paper-cream: #eef9f1;
+      --paper-blue: #0284c7;
+      --gold: #f59e0b;
+      --danger: #ef4444;
+      --text-dark: #1f2937;
+      --text-light: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background: radial-gradient(circle at 50% 0%, #0f2318 0%, #06110a 60%, #030704 100%);
-      color: #f3f4f6;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+      background-color: var(--bg-forest);
+      background-image: 
+        radial-gradient(circle at 50% 10%, rgba(0, 181, 29, 0.22) 0%, transparent 55%),
+        repeating-linear-gradient(45deg, rgba(0,0,0,0.18) 0, rgba(0,0,0,0.18) 2px, transparent 0, transparent 5px);
+      color: var(--text-light);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
     }
-    .gold-gradient {
-      background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fef08a 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+
+    .film-grain {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none; z-index: 99; opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
-    .emerald-gradient {
-      background: linear-gradient(135deg, #10b981 0%, #34d399 50%, #6ee7b7 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+
+    /* 宽屏版心：桌面端宽阔优雅 880px，支持大体一屏一模块的自然呼吸感 */
+    .viewport-flow {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 40px 20px 80px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
     }
-    .glass-card {
-      background: rgba(13, 30, 20, 0.7);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(52, 211, 153, 0.2);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* 模块入场视口滚动渐现动效 */
+    .reveal-card {
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
     }
-    .glass-card:hover {
+    .reveal-card.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* 首屏信笺保证立即呈现 */
+    .paper-section {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+
+    /* 金属长尾夹拟物隐喻 */
+    .binder-clip {
+      width: 56px;
+      height: 48px;
+      margin: 0 auto -20px auto;
+      position: relative;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .clip-wire {
+      width: 32px;
+      height: 28px;
+      border: 3px solid #71717a;
+      border-bottom: none;
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+    }
+    .clip-body {
+      width: 52px;
+      height: 18px;
+      background: linear-gradient(180deg, #27272a 0%, #18181b 100%);
+      border-radius: 4px;
+      border: 1px solid #3f3f46;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    /* 模块 1：复古牛油果淡青信纸 (吸收图 1、图 4、图 5) */
+    .paper-section {
+      background: var(--paper-cream);
+      color: var(--text-dark);
+      border-radius: 32px;
+      padding: 48px 44px 40px 44px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 181, 29, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 复古邮戳印章 */
+    .stamp-seal {
+      position: absolute;
+      top: 36px;
+      right: 36px;
+      width: 84px;
+      height: 84px;
+      border: 2px dashed rgba(20, 53, 32, 0.4);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+      color: #143520;
+      transform: rotate(-12deg);
+      user-select: none;
+      line-height: 1.15;
+      text-align: center;
+    }
+    .stamp-seal .year { font-size: 15px; font-weight: 900; color: #00b51d; }
+
+    /* 顶部身份栏 */
+    .profile-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+    .avatar-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3px solid #a7f3d0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .user-main { font-size: 28px; font-weight: 900; color: #064e3b; letter-spacing: -0.5px; }
+    .user-tagline {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 700; color: #047857;
+      background: rgba(0, 181, 29, 0.12); padding: 3px 12px; border-radius: 20px;
+      margin-top: 4px;
+    }
+
+    /* 4 格核心指标卡片 (层次分明、杂志感、高信息识别度) */
+    .capsule-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+    .capsule-card {
+      background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 24px;
+      padding: 24px 22px 20px 22px;
+      box-shadow: 0 8px 24px -6px rgba(6, 78, 59, 0.08), 0 2px 6px rgba(0, 0, 0, 0.02);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .capsule-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+      opacity: 0.8;
+    }
+    .capsule-card:hover {
       transform: translateY(-3px);
-      border-color: rgba(52, 211, 153, 0.45);
-      box-shadow: 0 16px 36px -10px rgba(0, 181, 29, 0.25);
+      box-shadow: 0 14px 28px -6px rgba(6, 78, 59, 0.14);
+    }
+    .capsule-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .capsule-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .capsule-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: rgba(16, 185, 129, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .capsule-label {
+      font-size: 14px;
+      font-weight: 800;
+      color: #064e3b;
+      letter-spacing: 0.2px;
+    }
+    .capsule-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(4, 120, 87, 0.08);
+      color: #047857;
+    }
+    .capsule-val-row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .capsule-val {
+      font-size: 46px;
+      font-weight: 950;
+      color: #064e3b;
+      line-height: 1;
+      letter-spacing: -1.5px;
+      font-feature-settings: "tnum";
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .capsule-unit {
+      font-size: 15px;
+      font-weight: 700;
+      color: #059669;
+    }
+    .capsule-subtext {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+
+    /* 电影信笺区域：时光打字机、分段便签式排版与层次重构 */
+    .letter-parchment {
+      font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+      background: linear-gradient(180deg, #ffffff 0%, #f7faf7 100%);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 20px;
+      padding: 32px 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(6, 78, 59, 0.04);
+      position: relative;
+    }
+    .letter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px dashed rgba(4, 120, 87, 0.2);
+    }
+    .letter-salutation {
+      font-size: 17px;
+      font-weight: 700;
+      color: #064e3b;
+      letter-spacing: 0.5px;
+    }
+    .letter-machine-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #047857;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-family: -apple-system, sans-serif;
+    }
+    .letter-body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .letter-paragraph {
+      font-size: 15px;
+      line-height: 2.1;
+      color: #374151;
+      text-align: justify;
+      position: relative;
+      padding-left: 18px;
+      border-left: 2px solid rgba(16, 185, 129, 0.35);
+    }
+    .letter-paragraph strong {
+      color: #064e3b;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.12);
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+    .letter-footer-quote {
+      margin-top: 10px;
+      padding: 14px 18px;
+      background: rgba(220, 252, 231, 0.5);
+      border-radius: 12px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      font-size: 14px;
+      line-height: 1.9;
+      color: #064e3b;
+      font-style: italic;
+    }
+    .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.1em;
+      background: #00b51d;
+      vertical-align: sub;
+      animation: blink 0.8s infinite;
+      margin-left: 2px;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* 模块 2：经典宝蓝光影海报阵列 (吸收图 2) */
+    .blue-section {
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+      border-radius: 32px;
+      padding: 40px 36px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(2, 132, 199, 0.25);
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 20px;
+    }
+    .section-title { font-size: 26px; font-weight: 900; color: #fff; }
+    .section-badge { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #bae6fd; text-transform: uppercase; }
+
+    /* 8x8 殿堂级高密度光影海报阵列 (64 宫格电影成就墙) */
+    .poster-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      margin-top: 18px;
+    }
+    @media (max-width: 768px) {
+      .poster-grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 6px;
+      }
+    }
+    @media (max-width: 480px) {
+      .poster-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+    }
+    .poster-card {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      aspect-ratio: 2 / 3;
+      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(18px) scale(0.92);
+      transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s),
+                  transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s),
+                  box-shadow 0.2s ease;
+    }
+    .blue-section.revealed .poster-card {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .poster-fallback-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px;
+      text-align: center;
+      user-select: none;
+      z-index: 1;
+    }
+    .poster-badge-icon {
+      font-size: 16px;
+    }
+    .poster-fallback-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: #94a3b8;
+      line-height: 1.2;
+      word-break: break-all;
+    }
+    .poster-card:hover {
+      transform: translateY(-5px) scale(1.15) !important;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.65);
+      z-index: 20;
+    }
+    .poster-card img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      z-index: 2;
+      transition: opacity 0.3s ease;
+    }
+    .poster-overlay {
+      position: absolute; bottom: 0; left: 0; width: 100%;
+      background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.35) 70%, transparent 100%);
+      font-size: 9px; font-weight: 700; color: #f3f4f6;
+      padding: 8px 3px 3px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-align: center;
+      z-index: 3;
+    }
+
+    /* 模块 3：深林墨绿 · 观影特征可视化独立大卡片 */
+    .dark-section {
+      background: rgba(18, 38, 26, 0.9);
+      border: 1px solid rgba(154, 230, 180, 0.22);
+      backdrop-filter: blur(20px);
+      border-radius: 32px;
+      padding: 40px 36px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+    }
+    /* 模块四：星级严苛度分值金字塔 (超感大尺寸、加粗发光发亮进度条) */
+    .pyramid-overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 600px) {
+      .pyramid-overview-grid { grid-template-columns: 1fr; }
+    }
+    .pyramid-stat-card {
+      background: rgba(10, 25, 18, 0.7);
+      border: 1.5px solid rgba(245, 158, 11, 0.3);
+      border-radius: 20px;
+      padding: 18px 22px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      transition: all 0.3s ease;
+    }
+    .pyramid-stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(245, 158, 11, 0.15);
+    }
+    .pyramid-stat-card.green-card {
+      border-color: rgba(52, 211, 153, 0.3);
+    }
+    .pyramid-stat-card.green-card:hover {
+      box-shadow: 0 8px 25px rgba(52, 211, 153, 0.15);
+    }
+    .pyramid-stat-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pyramid-stat-val {
+      font-size: 32px;
+      font-weight: 900;
+      font-feature-settings: "tnum";
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .pyramid-stat-sub {
+      font-size: 13px;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+    .metric-subcard {
+      background: rgba(8, 20, 14, 0.85);
+      border: 1.5px solid rgba(154, 230, 180, 0.25);
+      border-radius: 28px;
+      padding: 32px 30px;
+      box-shadow: inset 0 2px 20px rgba(0, 0, 0, 0.6), 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+    .star-bar-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .star-bar-row:last-child {
+      margin-bottom: 0;
+    }
+    .star-bar-meta {
+      width: 175px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .star-bar-label {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .star-count-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      font-feature-settings: "tnum";
+    }
+    .star-bar-track {
+      flex: 1;
+      height: 26px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 0 20px;
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+    .star-bar-fill {
+      height: 100%;
+      border-radius: 14px;
+      width: 0;
+      transition: width 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .star-bar-fill::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 50%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 100%);
+      border-radius: 14px 14px 0 0;
+    }
+    .dark-section.revealed .star-bar-fill {
+      width: var(--target-width);
+    }
+    .dark-section.revealed .star-bar-row:nth-child(1) .star-bar-fill { transition-delay: 0.1s; }
+    .dark-section.revealed .star-bar-row:nth-child(2) .star-bar-fill { transition-delay: 0.25s; }
+    .dark-section.revealed .star-bar-row:nth-child(3) .star-bar-fill { transition-delay: 0.4s; }
+    .dark-section.revealed .star-bar-row:nth-child(4) .star-bar-fill { transition-delay: 0.55s; }
+    .star-bar-num {
+      width: 82px;
+      flex-shrink: 0;
+      text-align: right;
+      font-weight: 900;
+      font-size: 22px;
+      font-feature-settings: "tnum";
+      letter-spacing: -0.5px;
+    }
+    .pyramid-footer-philosophy {
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+    .pyramid-footer-tag {
+      padding: 5px 12px;
+      border-radius: 8px;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      font-weight: 800;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .split-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+
+    /* 核心常驻题材矩阵 (大字号、醒目发光渐变胶囊条、高清晰对比度) */
+    .genre-matrix-card {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .genre-matrix-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .genre-matrix-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .genre-matrix-tip {
+      font-size: 11px;
+      font-weight: 600;
+      color: #bae6fd;
+    }
+    .genre-bars-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px 32px;
+    }
+    @media (min-width: 680px) {
+      .genre-bars-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
+    .bar-label {
+      width: 72px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bar-track {
+      flex: 1;
+      height: 12px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 0 12px;
+      position: relative;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #38bdf8 0%, #ffffff 100%);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+      width: 0;
+      transition: width 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+    }
+    .blue-section.revealed .bar-fill {
+      width: var(--target-width);
+    }
+    .bar-num {
+      width: 52px;
+      text-align: right;
+      font-size: 14px;
+      font-weight: 900;
+      color: #38bdf8;
+      font-feature-settings: "tnum";
+    }
+
+    /* 五维决策天梯胶囊栏 (值越大的胶囊越突出) */
+    .radar-rank-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .radar-rank-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #a7f3d0;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+    .radar-rank-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0, 181, 29, 0.2);
+    }
+    .radar-rank-badge .radar-rank-val {
+      font-weight: 900;
+      font-feature-settings: "tnum";
+      color: #34d399;
+    }
+    .radar-rank-badge.top-badge {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.4) 100%);
+      border: 1.5px solid #fbbf24;
+      color: #fef08a;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
+      font-size: 14px;
+      transform: scale(1.06);
+    }
+    .radar-rank-badge.top-badge .radar-rank-val {
+      color: #fbbf24;
+      font-size: 16px;
+    }
+
+    /* 短评留痕 (杂志级单行规整排版，左右滑入交错动效) */
+    .quote-row {
+      background: rgba(10, 20, 14, 0.65);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      border-left: 4px solid #00b51d;
+      opacity: 0;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+    }
+    .gold-quote {
+      border-left-color: #f59e0b;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.06);
+      transform: translateX(-24px);
+    }
+    .red-quote {
+      border-left-color: #ef4444;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.06);
+      transform: translateX(24px);
+    }
+    .dark-section.revealed .quote-row {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .dark-section.revealed .gold-quote:nth-child(2) { transition-delay: 0.1s; }
+    .dark-section.revealed .gold-quote:nth-child(3) { transition-delay: 0.25s; }
+    .dark-section.revealed .gold-quote:nth-child(4) { transition-delay: 0.4s; }
+    .dark-section.revealed .red-quote:nth-child(2) { transition-delay: 0.15s; }
+    .dark-section.revealed .red-quote:nth-child(3) { transition-delay: 0.3s; }
+    .dark-section.revealed .red-quote:nth-child(4) { transition-delay: 0.45s; }
+    .quote-row:hover {
+      transform: translateX(3px) !important;
+      background: rgba(15, 30, 20, 0.8);
+    }
+    .quote-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .quote-film-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      letter-spacing: 0.2px;
+    }
+    .quote-tag {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+    }
+    .gold-tag {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+    }
+    .red-tag {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+    .quote-text {
+      font-size: 13px;
+      color: #d1d5db;
+      line-height: 1.7;
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      letter-spacing: 0.3px;
+    }
+
+    /* 模块 5：AI 选片孪生大脑出口卡片 */
+    .ai-hero-card {
+      background: radial-gradient(circle at 50% 0%, rgba(0, 181, 29, 0.25) 0%, rgba(13, 26, 18, 0.95) 75%);
+      border: 1px solid rgba(0, 181, 29, 0.4);
+      border-radius: 32px;
+      padding: 44px 36px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 181, 29, 0.15);
+    }
+    .ai-btn-primary {
+      background: linear-gradient(135deg, #00b51d 0%, #059669 100%);
+      color: #fff; font-size: 15px; font-weight: 800; border-radius: 16px;
+      padding: 16px 36px; border: none; cursor: pointer; display: inline-flex;
+      align-items: center; gap: 8px; box-shadow: 0 10px 25px rgba(0, 181, 29, 0.4);
+      transition: all 0.25s ease;
+    }
+    .ai-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(0, 181, 29, 0.6);
+    }
+
+    @media (max-width: 768px) {
+      .capsule-grid { grid-template-columns: 1fr 1fr; }
+      .split-2 { grid-template-columns: 1fr; }
+      .poster-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .paper-section, .blue-section, .dark-section, .ai-hero-card { padding: 32px 20px; }
+      .user-main { font-size: 24px; }
     }
   </style>
 </head>
-<body class="min-h-screen py-10 px-4 flex flex-col justify-between">
+<body>
 
-  <!-- 顶部面包屑与导航 -->
-  <header class="max-w-4xl w-full mx-auto mb-10 flex items-center justify-between">
-    <a href="../" class="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition bg-emerald-950/60 px-3.5 py-1.5 rounded-full border border-emerald-500/30">
-      <span>&larr;</span> 返回菜鸟笔记主站 (ucncn.cn)
-    </a>
-    <span class="text-xs font-mono text-gray-500">ucncn.cn / movie</span>
+  <!-- 菜鸟笔记 (ucncn.cn) 子站统一顶栏 (不打扰沉浸体验) -->
+  <header style="position: sticky; top: 0; z-index: 1000; background: rgba(11, 21, 16, 0.92); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0, 181, 29, 0.3); padding: 12px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+    <div style="max-width: 880px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+      <a href="../" style="display: inline-flex; align-items: center; gap: 8px; color: #a7f3d0; text-decoration: none; font-size: 13px; font-weight: 800; transition: color 0.2s ease;">
+        <span style="font-size: 15px;">&larr;</span> 菜鸟笔记 (ucncn.cn)
+      </a>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 12px; font-weight: 800; color: #34d399; background: rgba(0, 181, 29, 0.15); padding: 3px 12px; border-radius: 20px; border: 1px solid rgba(0, 181, 29, 0.35);">
+          🎬 豆瓣电影基因实验室
+        </span>
+        <a href="skills/movie-dna/AGENT_PROMPT.md" target="_blank" style="font-size: 12px; font-weight: 700; color: #fbbf24; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); padding: 4px 12px; border-radius: 8px; text-decoration: none;">
+          🧠 选片智能体
+        </a>
+      </div>
+    </div>
   </header>
 
-  <!-- 主内容区 -->
-  <main class="max-w-4xl w-full mx-auto space-y-10">
-    
-    <!-- Hero 标语 -->
-    <div class="text-center space-y-3">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-900/40 text-emerald-300 border border-emerald-500/30">
-        <span>🎬</span> 菜鸟笔记实验室 · 独立子项目
+  <div class="film-grain"></div>
+
+  <main class="viewport-flow">
+
+    <!-- 拟物金属长尾夹 -->
+    <div class="binder-clip">
+      <div class="clip-wire"></div>
+      <div class="clip-body"></div>
+    </div>
+
+    <!-- 模块一：复古信笺 · 个人光影档案 (自适应人格文案) -->
+    <section class="paper-section reveal-card">
+      <div class="stamp-seal">
+        <div>观影基因</div>
+        <div class="year">2026</div>
+        <div>MovieDNA</div>
       </div>
-      <h1 class="text-4xl md:text-5xl font-black tracking-tight">
-        豆瓣个人 <span class="emerald-gradient">观影基因</span> 系统
-      </h1>
-      <p class="text-gray-400 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
-        基于近 20 年个人全量观影打标沉淀，提炼五维决策雷达、题材红黑榜与专属选片数字孪生模型。
-      </p>
-    </div>
 
-    <!-- 核心报告体验网格 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      
-      <!-- 报告 1：君子专属全景报告 -->
-      <a href="moviedna/output/reports/junzi.html" class="glass-card rounded-2xl p-7 block group">
-        <div class="flex items-center justify-between mb-4">
-          <span class="px-2.5 py-1 rounded-md text-xs font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-            ★ 精选典藏
-          </span>
-          <span class="text-xs text-gray-400 font-mono">2,826 部数据沉淀</span>
-        </div>
-        <h2 class="text-xl font-black text-white group-hover:text-amber-300 transition flex items-center gap-2">
-          君子 · 豆瓣光影纪元报告 <span class="text-amber-400 text-sm">&rarr;</span>
-        </h2>
-        <p class="text-xs text-gray-400 mt-2 leading-relaxed">
-          包含 8×8 殿堂海报成就墙、动态加权五维决策雷达、高饱和发光严苛金字塔、近20年足迹走势与高赞短评灵魂切片。
-        </p>
-        <div class="mt-5 pt-4 border-t border-white/10 flex items-center gap-2 text-xs text-amber-400 font-bold">
-          <span>立即查阅全景动态报告</span>
-        </div>
-      </a>
-
-      <!-- 报告 2：演示标准模板 -->
-      <a href="moviedna/output/reports/cinephile_demo.html" class="glass-card rounded-2xl p-7 block group">
-        <div class="flex items-center justify-between mb-4">
-          <span class="px-2.5 py-1 rounded-md text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-            STANDARD DEMO
-          </span>
-          <span class="text-xs text-gray-400 font-mono">通用标杆样例</span>
-        </div>
-        <h2 class="text-xl font-black text-white group-hover:text-emerald-300 transition flex items-center gap-2">
-          Cinephile 演示报告 <span class="text-emerald-400 text-sm">&rarr;</span>
-        </h2>
-        <p class="text-xs text-gray-400 mt-2 leading-relaxed">
-          标准测试数据集生成的轻量演示样张，展示视口滑入动效、数据清洗算法与图表自适应排版规范。
-        </p>
-        <div class="mt-5 pt-4 border-t border-white/10 flex items-center gap-2 text-xs text-emerald-400 font-bold">
-          <span>查看演示样例效果</span>
-        </div>
-      </a>
-
-    </div>
-
-    <!-- MovieDNA 选片智能体资产专区 -->
-    <div class="glass-card rounded-2xl p-7 space-y-4 border-emerald-500/30 bg-emerald-950/20">
-      <div class="flex items-center justify-between flex-wrap gap-2">
-        <div class="flex items-center gap-3">
-          <span class="text-2xl">🧠</span>
-          <div>
-            <h3 class="text-base font-bold text-white">MovieDNA 专属选片智能体 (Agent Skill)</h3>
-            <p class="text-xs text-gray-400">已沉淀为可给任意 AI（Cursor、Claude、ChatGPT、Dify）使用的标准 Skill 资产</p>
+      <div class="profile-row">
+        <div class="avatar-circle">🐼</div>
+        <div>
+          <div class="user-main">@junzi</div>
+          <div class="user-tagline">
+            <span>✨ 观影人格：<strong>理性现实品鉴家</strong></span>
+            <span>· 第 20 载</span>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <a href="skills/movie-dna/SKILL.md" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-900/60 hover:bg-emerald-800 text-emerald-300 border border-emerald-500/40 transition">
-            查看 SKILL.md
-          </a>
-          <a href="skills/movie-dna/AGENT_PROMPT.md" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-900/60 hover:bg-amber-800 text-amber-300 border border-amber-500/40 transition">
-            查看通用 Prompt
-          </a>
+      </div>
+
+      <!-- 4 格核心指标大卡片 -->
+      <div class="capsule-grid">
+        <div class="capsule-card">
+          <div class="capsule-header">
+            <div class="capsule-title-wrap">
+              <div class="capsule-icon-box">🎬</div>
+              <span class="capsule-label">累计阅片体量</span>
+            </div>
+            <span class="capsule-badge">观影总览</span>
+          </div>
+          <div class="capsule-val-row">
+            <span class="capsule-val counter" data-target="2826">2826</span>
+            <span class="capsule-unit">部电影</span>
+          </div>
+          <div class="capsule-subtext">已记录的所有长片、剧集与动画标记</div>
+        </div>
+
+        <div class="capsule-card">
+          <div class="capsule-header">
+            <div class="capsule-title-wrap">
+              <div class="capsule-icon-box">⭐</div>
+              <span class="capsule-label">个人打分均值</span>
+            </div>
+            <span class="capsule-badge">审美基准</span>
+          </div>
+          <div class="capsule-val-row">
+            <span class="capsule-val">7.19</span>
+            <span class="capsule-unit">/ 10 分</span>
+          </div>
+          <div class="capsule-subtext">相比豆瓣全站基准更显严苛清醒</div>
+        </div>
+
+        <div class="capsule-card">
+          <div class="capsule-header">
+            <div class="capsule-title-wrap">
+              <div class="capsule-icon-box">🏆</div>
+              <span class="capsule-label">五星神作占比</span>
+            </div>
+            <span class="capsule-badge">殿堂比例</span>
+          </div>
+          <div class="capsule-val-row">
+            <span class="capsule-val">19.0</span>
+            <span class="capsule-unit">%</span>
+          </div>
+          <div class="capsule-subtext">给出的极致赞誉，代表毫无保留的共鸣</div>
+        </div>
+
+        <div class="capsule-card">
+          <div class="capsule-header">
+            <div class="capsule-title-wrap">
+              <div class="capsule-icon-box">✍️</div>
+              <span class="capsule-label">真迹短评沉淀</span>
+            </div>
+            <span class="capsule-badge">文字心声</span>
+          </div>
+          <div class="capsule-val-row">
+            <span class="capsule-val counter" data-target="351">351</span>
+            <span class="capsule-unit">篇真迹</span>
+          </div>
+          <div class="capsule-subtext">观影后亲手写下的情绪切片与思想锋芒</div>
         </div>
       </div>
-      <div class="text-xs text-gray-300 bg-black/40 rounded-xl p-3.5 border border-white/5 font-mono leading-relaxed">
-        <strong>核心人设与算法：</strong>1983年生成熟80后 · 艺术设计专业视听底色 · 五维雷达（隔代深情 9.8 / 镜头美学 9.5 / 叙事智性 9.2 / 反装逼 10.0 一票否决）· 影人黑白名单（诺兰/张艺谋 vs 郭敬明/包贝尔）。
-      </div>
-    </div>
 
-    <!-- 本地离线解析服务使用说明 -->
-    <div class="glass-card rounded-2xl p-7 space-y-3">
-      <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-        <span>⚡</span> 本地运行与实时解析服务
+      <!-- 豆瓣诗意书写信笺 (时光打字机与分段便签排版) -->
+      <div class="letter-parchment">
+        <div class="letter-header">
+          <div class="letter-salutation">致 @junzi 的光影私信</div>
+          <div class="letter-machine-badge">
+            <span>⌨️</span> 岁月打字机 · 独家解封
+          </div>
+        </div>
+
+        <div class="letter-body">
+          <div class="letter-paragraph">
+            当跨越 <strong>2007 至 2026</strong> 的时光卷轴缓缓合拢，荧幕渐暗，心声长存。<br>
+            数千个不可替代的夜晚，跨越近二十载寒来暑往。光影早已不仅是消遣，而是与你骨血相融的精神平行宇宙。
+          </div>
+
+          <div class="letter-paragraph">
+            在累计约 <strong>5181 个小时</strong> 的沉浸体验中，均分稳定在 7.19 分，五星神作占 19.0%。不轻易给予盲目狂热，也不肆意宣泄苛责，在品质与诚意之间有着清醒的打分天平。
+          </div>
+
+          <div class="letter-paragraph">
+            留下了 351 篇笔力锋利的真实短评。爱憎分明、直击肯綮，文字是你与创作者之间最真诚的交锋。
+          </div>
+
+          <div class="letter-footer-quote">
+            <span id="typing-quote">每一次标记，都是你交给时间的私人日记；此刻，让穿梭岁月的打字机，为你叩响这片精神家园的专属回响。</span><span class="typing-cursor"></span>
+          </div>
+        </div>
       </div>
-      <p class="text-xs text-gray-400 leading-relaxed">
-        本项目基于 FastAPI 提供纯本地私密解析，零数据上传。在项目目录下运行下方命令即可启动本地提取与解析后台：
+
+      <div style="text-align: right; font-size: 12px; color: #047857; font-weight: 800; margin-top: 10px;">
+        —— 豆瓣光影纪元 · 2007-2026
+      </div>
+    </section>
+
+    <!-- 模块二：经典宝蓝 · 个人年度海报阵列 (还原 8x8 高密度 64 宫格大片成就墙) -->
+    <section class="blue-section reveal-card">
+      <div class="section-head">
+        <div>
+          <div class="section-badge">CINEMA POSTER WALL · 8×8 MOSAIC</div>
+          <h2 class="section-title">殿堂光影海报阵列 (8×8 成就墙)</h2>
+        </div>
+        <div style="font-size: 32px; font-weight: 900; font-feature-settings: 'tnum';">
+          2826 <span style="font-size: 14px; font-weight: 600;">部</span>
+        </div>
+      </div>
+
+      <!-- 核心常驻题材矩阵 (动态最多 10 大维度、双列瀑布流发光进度条) -->
+      <div class="genre-matrix-card">
+        <div class="genre-matrix-header">
+          <div class="genre-matrix-title">
+            <span>⊞</span> 核心常驻题材矩阵
+          </div>
+          <div class="genre-matrix-tip">TOP 10 偏好维度占比</div>
+        </div>
+        <div class="genre-bars-grid">
+          <div class="bar-row">
+              <span class="bar-label">剧情</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--target-width: 100%;"></div>
+              </div>
+              <span class="bar-num">43.9%</span>
+            </div><div class="bar-row">
+              <span class="bar-label">动作</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--target-width: 57%;"></div>
+              </div>
+              <span class="bar-num">24.9%</span>
+            </div><div class="bar-row">
+              <span class="bar-label">犯罪</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--target-width: 49%;"></div>
+              </div>
+              <span class="bar-num">21.6%</span>
+            </div><div class="bar-row">
+              <span class="bar-label">喜剧</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--target-width: 44%;"></div>
+              </div>
+              <span class="bar-num">19.3%</span>
+            </div><div class="bar-row">
+              <span class="bar-label">科幻</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--target-width: 28%;"></div>
+              </div>
+              <span class="bar-num">12.2%</span>
+            </div><div class="bar-row">
+              <span class="bar-label">悬疑</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--target-width: 25%;"></div>
+              </div>
+              <span class="bar-num">11.0%</span>
+            </div><div class="bar-row">
+              <span class="bar-label">奇幻</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--target-width: 22%;"></div>
+              </div>
+              <span class="bar-num">9.5%</span>
+            </div><div class="bar-row">
+              <span class="bar-label">动画</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--target-width: 11%;"></div>
+              </div>
+              <span class="bar-num">4.7%</span>
+            </div><div class="bar-row">
+              <span class="bar-label">战争</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--target-width: 10%;"></div>
+              </div>
+              <span class="bar-num">4.2%</span>
+            </div><div class="bar-row">
+              <span class="bar-label">恐怖</span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--target-width: 9%;"></div>
+              </div>
+              <span class="bar-num">4.1%</span>
+            </div>
+        </div>
+      </div>
+
+      <!-- 4x4 海报网格瀑布 (no-referrer 确保图片完全加载) -->
+      <div class="poster-grid">
+        <div class="poster-card" style="--delay: 0.0s;" title="肖申克的救赎">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">肖申克的救赎</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2934829882.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2934829882.jpg';}else{this.style.opacity='0';}" alt="肖申克的救赎" loading="lazy" />
+              <div class="poster-overlay">肖申克的救赎</div>
+            </div><div class="poster-card" style="--delay: 0.035s;" title="霸王别姬">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">霸王别姬</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2911205318.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2911205318.jpg';}else{this.style.opacity='0';}" alt="霸王别姬" loading="lazy" />
+              <div class="poster-overlay">霸王别姬</div>
+            </div><div class="poster-card" style="--delay: 0.07s;" title="泰坦尼克号">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">泰坦尼克号</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p457760035.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p457760035.jpg';}else{this.style.opacity='0';}" alt="泰坦尼克号" loading="lazy" />
+              <div class="poster-overlay">泰坦尼克号</div>
+            </div><div class="poster-card" style="--delay: 0.105s;" title="阿甘正传">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">阿甘正传</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p510876253.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p510876253.jpg';}else{this.style.opacity='0';}" alt="阿甘正传" loading="lazy" />
+              <div class="poster-overlay">阿甘正传</div>
+            </div><div class="poster-card" style="--delay: 0.14s;" title="千与千寻">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">千与千寻</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2557573348.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2557573348.jpg';}else{this.style.opacity='0';}" alt="千与千寻" loading="lazy" />
+              <div class="poster-overlay">千与千寻</div>
+            </div><div class="poster-card" style="--delay: 0.175s;" title="星际穿越">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">星际穿越</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2614988097.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2614988097.jpg';}else{this.style.opacity='0';}" alt="星际穿越" loading="lazy" />
+              <div class="poster-overlay">星际穿越</div>
+            </div><div class="poster-card" style="--delay: 0.21s;" title="美丽人生">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">美丽人生</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2578474613.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2578474613.jpg';}else{this.style.opacity='0';}" alt="美丽人生" loading="lazy" />
+              <div class="poster-overlay">美丽人生</div>
+            </div><div class="poster-card" style="--delay: 0.245s;" title="这个杀手不太冷">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">这个杀手不太冷</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2913554676.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2913554676.jpg';}else{this.style.opacity='0';}" alt="这个杀手不太冷" loading="lazy" />
+              <div class="poster-overlay">这个杀手不太冷</div>
+            </div><div class="poster-card" style="--delay: 0.035s;" title="盗梦空间">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">盗梦空间</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p513344864.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p513344864.jpg';}else{this.style.opacity='0';}" alt="盗梦空间" loading="lazy" />
+              <div class="poster-overlay">盗梦空间</div>
+            </div><div class="poster-card" style="--delay: 0.07s;" title="楚门的世界">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">楚门的世界</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p479682972.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p479682972.jpg';}else{this.style.opacity='0';}" alt="楚门的世界" loading="lazy" />
+              <div class="poster-overlay">楚门的世界</div>
+            </div><div class="poster-card" style="--delay: 0.105s;" title="辛德勒的名单">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">辛德勒的名单</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p492406163.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p492406163.jpg';}else{this.style.opacity='0';}" alt="辛德勒的名单" loading="lazy" />
+              <div class="poster-overlay">辛德勒的名单</div>
+            </div><div class="poster-card" style="--delay: 0.14s;" title="忠犬八公的故事">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">忠犬八公的故事</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2587099240.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2587099240.jpg';}else{this.style.opacity='0';}" alt="忠犬八公的故事" loading="lazy" />
+              <div class="poster-overlay">忠犬八公的故事</div>
+            </div><div class="poster-card" style="--delay: 0.175s;" title="海上钢琴师">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">海上钢琴师</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2914698334.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2914698334.jpg';}else{this.style.opacity='0';}" alt="海上钢琴师" loading="lazy" />
+              <div class="poster-overlay">海上钢琴师</div>
+            </div><div class="poster-card" style="--delay: 0.21s;" title="疯狂动物城">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">疯狂动物城</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2924128964.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2924128964.jpg';}else{this.style.opacity='0';}" alt="疯狂动物城" loading="lazy" />
+              <div class="poster-overlay">疯狂动物城</div>
+            </div><div class="poster-card" style="--delay: 0.245s;" title="三傻大闹宝莱坞">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">三傻大闹宝莱坞</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p579729551.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p579729551.jpg';}else{this.style.opacity='0';}" alt="三傻大闹宝莱坞" loading="lazy" />
+              <div class="poster-overlay">三傻大闹宝莱坞</div>
+            </div><div class="poster-card" style="--delay: 0.28s;" title="机器人总动员">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">机器人总动员</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2934742160.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2934742160.jpg';}else{this.style.opacity='0';}" alt="机器人总动员" loading="lazy" />
+              <div class="poster-overlay">机器人总动员</div>
+            </div><div class="poster-card" style="--delay: 0.07s;" title="放牛班的春天">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">放牛班的春天</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2884280708.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2884280708.jpg';}else{this.style.opacity='0';}" alt="放牛班的春天" loading="lazy" />
+              <div class="poster-overlay">放牛班的春天</div>
+            </div><div class="poster-card" style="--delay: 0.105s;" title="无间道">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">无间道</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2597979873.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2597979873.jpg';}else{this.style.opacity='0';}" alt="无间道" loading="lazy" />
+              <div class="poster-overlay">无间道</div>
+            </div><div class="poster-card" style="--delay: 0.14s;" title="控方证人">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">控方证人</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2927451337.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2927451337.jpg';}else{this.style.opacity='0';}" alt="控方证人" loading="lazy" />
+              <div class="poster-overlay">控方证人</div>
+            </div><div class="poster-card" style="--delay: 0.175s;" title="寻梦环游记">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">寻梦环游记</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2505426431.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2505426431.jpg';}else{this.style.opacity='0';}" alt="寻梦环游记" loading="lazy" />
+              <div class="poster-overlay">寻梦环游记</div>
+            </div><div class="poster-card" style="--delay: 0.21s;" title="大话西游之大圣娶亲">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">大话西游之大圣娶亲</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2455050536.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2455050536.jpg';}else{this.style.opacity='0';}" alt="大话西游之大圣娶亲" loading="lazy" />
+              <div class="poster-overlay">大话西游之大圣娶亲</div>
+            </div><div class="poster-card" style="--delay: 0.245s;" title="熔炉">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">熔炉</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p1363250216.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p1363250216.jpg';}else{this.style.opacity='0';}" alt="熔炉" loading="lazy" />
+              <div class="poster-overlay">熔炉</div>
+            </div><div class="poster-card" style="--delay: 0.28s;" title="触不可及">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">触不可及</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p1454261925.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p1454261925.jpg';}else{this.style.opacity='0';}" alt="触不可及" loading="lazy" />
+              <div class="poster-overlay">触不可及</div>
+            </div><div class="poster-card" style="--delay: 0.315s;" title="教父">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">教父</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p616779645.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p616779645.jpg';}else{this.style.opacity='0';}" alt="教父" loading="lazy" />
+              <div class="poster-overlay">教父</div>
+            </div><div class="poster-card" style="--delay: 0.105s;" title="哈利·波特与魔法石">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">哈利·波特与魔法石</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2913781448.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2913781448.jpg';}else{this.style.opacity='0';}" alt="哈利·波特与魔法石" loading="lazy" />
+              <div class="poster-overlay">哈利·波特与魔法石</div>
+            </div><div class="poster-card" style="--delay: 0.14s;" title="末代皇帝">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">末代皇帝</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p452089833.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p452089833.jpg';}else{this.style.opacity='0';}" alt="末代皇帝" loading="lazy" />
+              <div class="poster-overlay">末代皇帝</div>
+            </div><div class="poster-card" style="--delay: 0.175s;" title="当幸福来敲门">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">当幸福来敲门</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2220721286.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2220721286.jpg';}else{this.style.opacity='0';}" alt="当幸福来敲门" loading="lazy" />
+              <div class="poster-overlay">当幸福来敲门</div>
+            </div><div class="poster-card" style="--delay: 0.21s;" title="龙猫">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">龙猫</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2540924496.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2540924496.jpg';}else{this.style.opacity='0';}" alt="龙猫" loading="lazy" />
+              <div class="poster-overlay">龙猫</div>
+            </div><div class="poster-card" style="--delay: 0.245s;" title="活着">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">活着</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2597919477.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2597919477.jpg';}else{this.style.opacity='0';}" alt="活着" loading="lazy" />
+              <div class="poster-overlay">活着</div>
+            </div><div class="poster-card" style="--delay: 0.28s;" title="怦然心动">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">怦然心动</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p501177648.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p501177648.jpg';}else{this.style.opacity='0';}" alt="怦然心动" loading="lazy" />
+              <div class="poster-overlay">怦然心动</div>
+            </div><div class="poster-card" style="--delay: 0.315s;" title="蝙蝠侠：黑暗骑士">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">蝙蝠侠：黑暗骑士</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p462657443.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p462657443.jpg';}else{this.style.opacity='0';}" alt="蝙蝠侠：黑暗骑士" loading="lazy" />
+              <div class="poster-overlay">蝙蝠侠：黑暗骑士</div>
+            </div><div class="poster-card" style="--delay: 0.35s;" title="指环王3：王者无敌">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">指环王3：王者无敌</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2642829472.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2642829472.jpg';}else{this.style.opacity='0';}" alt="指环王3：王者无敌" loading="lazy" />
+              <div class="poster-overlay">指环王3：王者无敌</div>
+            </div><div class="poster-card" style="--delay: 0.14s;" title="我不是药神">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">我不是药神</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2527119568.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2527119568.jpg';}else{this.style.opacity='0';}" alt="我不是药神" loading="lazy" />
+              <div class="poster-overlay">我不是药神</div>
+            </div><div class="poster-card" style="--delay: 0.175s;" title="乱世佳人">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">乱世佳人</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p1963126880.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p1963126880.jpg';}else{this.style.opacity='0';}" alt="乱世佳人" loading="lazy" />
+              <div class="poster-overlay">乱世佳人</div>
+            </div><div class="poster-card" style="--delay: 0.21s;" title="让子弹飞">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">让子弹飞</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p1512562287.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p1512562287.jpg';}else{this.style.opacity='0';}" alt="让子弹飞" loading="lazy" />
+              <div class="poster-overlay">让子弹飞</div>
+            </div><div class="poster-card" style="--delay: 0.245s;" title="飞屋环游记">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">飞屋环游记</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p485887754.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p485887754.jpg';}else{this.style.opacity='0';}" alt="飞屋环游记" loading="lazy" />
+              <div class="poster-overlay">飞屋环游记</div>
+            </div><div class="poster-card" style="--delay: 0.28s;" title="哈尔的移动城堡">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">哈尔的移动城堡</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2907583906.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2907583906.jpg';}else{this.style.opacity='0';}" alt="哈尔的移动城堡" loading="lazy" />
+              <div class="poster-overlay">哈尔的移动城堡</div>
+            </div><div class="poster-card" style="--delay: 0.315s;" title="十二怒汉">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">十二怒汉</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2173577632.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2173577632.jpg';}else{this.style.opacity='0';}" alt="十二怒汉" loading="lazy" />
+              <div class="poster-overlay">十二怒汉</div>
+            </div><div class="poster-card" style="--delay: 0.35s;" title="海蒂和爷爷">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">海蒂和爷爷</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2554525534.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2554525534.jpg';}else{this.style.opacity='0';}" alt="海蒂和爷爷" loading="lazy" />
+              <div class="poster-overlay">海蒂和爷爷</div>
+            </div><div class="poster-card" style="--delay: 0.385s;" title="素媛">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">素媛</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2118532944.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2118532944.jpg';}else{this.style.opacity='0';}" alt="素媛" loading="lazy" />
+              <div class="poster-overlay">素媛</div>
+            </div><div class="poster-card" style="--delay: 0.175s;" title="猫鼠游戏">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">猫鼠游戏</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p453924541.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p453924541.jpg';}else{this.style.opacity='0';}" alt="猫鼠游戏" loading="lazy" />
+              <div class="poster-overlay">猫鼠游戏</div>
+            </div><div class="poster-card" style="--delay: 0.21s;" title="天空之城">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">天空之城</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2892409201.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2892409201.jpg';}else{this.style.opacity='0';}" alt="天空之城" loading="lazy" />
+              <div class="poster-overlay">天空之城</div>
+            </div><div class="poster-card" style="--delay: 0.245s;" title="鬼子来了">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">鬼子来了</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2930874010.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2930874010.jpg';}else{this.style.opacity='0';}" alt="鬼子来了" loading="lazy" />
+              <div class="poster-overlay">鬼子来了</div>
+            </div><div class="poster-card" style="--delay: 0.28s;" title="摔跤吧！爸爸">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">摔跤吧！爸爸</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2401676338.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2401676338.jpg';}else{this.style.opacity='0';}" alt="摔跤吧！爸爸" loading="lazy" />
+              <div class="poster-overlay">摔跤吧！爸爸</div>
+            </div><div class="poster-card" style="--delay: 0.315s;" title="少年派的奇幻漂流">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">少年派的奇幻漂流</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p1784592701.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p1784592701.jpg';}else{this.style.opacity='0';}" alt="少年派的奇幻漂流" loading="lazy" />
+              <div class="poster-overlay">少年派的奇幻漂流</div>
+            </div><div class="poster-card" style="--delay: 0.35s;" title="死亡诗社">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">死亡诗社</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2575465690.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2575465690.jpg';}else{this.style.opacity='0';}" alt="死亡诗社" loading="lazy" />
+              <div class="poster-overlay">死亡诗社</div>
+            </div><div class="poster-card" style="--delay: 0.385s;" title="指环王2：双塔奇兵">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">指环王2：双塔奇兵</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2640236255.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2640236255.jpg';}else{this.style.opacity='0';}" alt="指环王2：双塔奇兵" loading="lazy" />
+              <div class="poster-overlay">指环王2：双塔奇兵</div>
+            </div><div class="poster-card" style="--delay: 0.42s;" title="钢琴家">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">钢琴家</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p1381339291.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p1381339291.jpg';}else{this.style.opacity='0';}" alt="钢琴家" loading="lazy" />
+              <div class="poster-overlay">钢琴家</div>
+            </div><div class="poster-card" style="--delay: 0.21s;" title="大话西游之月光宝盒">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">大话西游之月光宝盒</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2561721372.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2561721372.jpg';}else{this.style.opacity='0';}" alt="大话西游之月光宝盒" loading="lazy" />
+              <div class="poster-overlay">大话西游之月光宝盒</div>
+            </div><div class="poster-card" style="--delay: 0.245s;" title="绿皮书">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">绿皮书</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2531065411.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2531065411.jpg';}else{this.style.opacity='0';}" alt="绿皮书" loading="lazy" />
+              <div class="poster-overlay">绿皮书</div>
+            </div><div class="poster-card" style="--delay: 0.28s;" title="何以为家">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">何以为家</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2875749222.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2875749222.jpg';}else{this.style.opacity='0';}" alt="何以为家" loading="lazy" />
+              <div class="poster-overlay">何以为家</div>
+            </div><div class="poster-card" style="--delay: 0.315s;" title="闻香识女人">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">闻香识女人</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2550757929.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2550757929.jpg';}else{this.style.opacity='0';}" alt="闻香识女人" loading="lazy" />
+              <div class="poster-overlay">闻香识女人</div>
+            </div><div class="poster-card" style="--delay: 0.35s;" title="大闹天宫">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">大闹天宫</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2184505167.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2184505167.jpg';}else{this.style.opacity='0';}" alt="大闹天宫" loading="lazy" />
+              <div class="poster-overlay">大闹天宫</div>
+            </div><div class="poster-card" style="--delay: 0.385s;" title="黑客帝国">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">黑客帝国</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p451926968.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p451926968.jpg';}else{this.style.opacity='0';}" alt="黑客帝国" loading="lazy" />
+              <div class="poster-overlay">黑客帝国</div>
+            </div><div class="poster-card" style="--delay: 0.42s;" title="指环王1：护戒使者">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">指环王1：护戒使者</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2197698335.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2197698335.jpg';}else{this.style.opacity='0';}" alt="指环王1：护戒使者" loading="lazy" />
+              <div class="poster-overlay">指环王1：护戒使者</div>
+            </div><div class="poster-card" style="--delay: 0.455s;" title="罗马假日">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">罗马假日</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2189265085.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2189265085.jpg';}else{this.style.opacity='0';}" alt="罗马假日" loading="lazy" />
+              <div class="poster-overlay">罗马假日</div>
+            </div><div class="poster-card" style="--delay: 0.245s;" title="教父2">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">教父2</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2194138787.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2194138787.jpg';}else{this.style.opacity='0';}" alt="教父2" loading="lazy" />
+              <div class="poster-overlay">教父2</div>
+            </div><div class="poster-card" style="--delay: 0.28s;" title="狮子王">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">狮子王</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p726659067.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p726659067.jpg';}else{this.style.opacity='0';}" alt="狮子王" loading="lazy" />
+              <div class="poster-overlay">狮子王</div>
+            </div><div class="poster-card" style="--delay: 0.315s;" title="天堂电影院">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">天堂电影院</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2653054340.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2653054340.jpg';}else{this.style.opacity='0';}" alt="天堂电影院" loading="lazy" />
+              <div class="poster-overlay">天堂电影院</div>
+            </div><div class="poster-card" style="--delay: 0.35s;" title="饮食男女">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">饮食男女</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p1910899751.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p1910899751.jpg';}else{this.style.opacity='0';}" alt="饮食男女" loading="lazy" />
+              <div class="poster-overlay">饮食男女</div>
+            </div><div class="poster-card" style="--delay: 0.385s;" title="辩护人">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">辩护人</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2158166535.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2158166535.jpg';}else{this.style.opacity='0';}" alt="辩护人" loading="lazy" />
+              <div class="poster-overlay">辩护人</div>
+            </div><div class="poster-card" style="--delay: 0.42s;" title="本杰明·巴顿奇事">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">本杰明·巴顿奇事</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2192535722.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2192535722.jpg';}else{this.style.opacity='0';}" alt="本杰明·巴顿奇事" loading="lazy" />
+              <div class="poster-overlay">本杰明·巴顿奇事</div>
+            </div><div class="poster-card" style="--delay: 0.455s;" title="搏击俱乐部">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">搏击俱乐部</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p1910931622.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p1910931622.jpg';}else{this.style.opacity='0';}" alt="搏击俱乐部" loading="lazy" />
+              <div class="poster-overlay">搏击俱乐部</div>
+            </div><div class="poster-card" style="--delay: 0.49s;" title="美丽心灵">
+              <div class="poster-fallback-badge">
+                <span class="poster-badge-icon">🎬</span>
+                <span class="poster-fallback-title">美丽心灵</span>
+              </div>
+              <img src="/api/proxy/image?url=https://img3.doubanio.com/view/photo/s_ratio_poster/public/p1665997400.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://img3.doubanio.com/view/photo/s_ratio_poster/public/p1665997400.jpg';}else{this.style.opacity='0';}" alt="美丽心灵" loading="lazy" />
+              <div class="poster-overlay">美丽心灵</div>
+            </div>
+      </div>
+    </section>
+
+    <!-- 模块三：五维观影决策雷达 (独立全幅大卡片) -->
+    <section class="dark-section reveal-card">
+      <div class="section-head">
+        <div>
+          <div class="section-badge" style="color: #34d399;">AESTHETIC RADAR ENGINE</div>
+          <h2 class="section-title">五维观影决策雷达</h2>
+        </div>
+        <div style="font-size: 13px; color: #a7f3d0; font-weight: 700;">
+          镜象美学 · 叙事智性 · 质朴深情 · 社会隐喻 · 反装逼雷达
+        </div>
+      </div>
+      <div id="chart-radar" style="height: 440px; width: 100%;"></div>
+      <div class="radar-rank-bar">
+        <div class="radar-rank-badge top-badge">
+              <div class="radar-rank-label">
+                👑 反装逼雷达
+              </div>
+              <div class="radar-rank-val">100 分</div>
+            </div><div class="radar-rank-badge ">
+              <div class="radar-rank-label">
+                镜头美学
+              </div>
+              <div class="radar-rank-val">98 分</div>
+            </div><div class="radar-rank-badge ">
+              <div class="radar-rank-label">
+                质朴深情
+              </div>
+              <div class="radar-rank-val">98 分</div>
+            </div><div class="radar-rank-badge ">
+              <div class="radar-rank-label">
+                叙事智性
+              </div>
+              <div class="radar-rank-val">96 分</div>
+            </div><div class="radar-rank-badge ">
+              <div class="radar-rank-label">
+                社会隐喻
+              </div>
+              <div class="radar-rank-val">95 分</div>
+            </div>
+      </div>
+    </section>
+
+    <!-- 模块四：星级严苛度分值金字塔 (独立全幅大卡片) -->
+    <section class="dark-section reveal-card">
+      <div class="section-head">
+        <div>
+          <div class="section-badge" style="color: #fbbf24;">RATING PYRAMID & SCALE</div>
+          <h2 class="section-title">评分严苛度分值金字塔</h2>
+        </div>
+        <div style="font-size: 13px; color: #fbbf24; font-weight: 700;">
+          全量评分分布与审美天平切片
+        </div>
+      </div>
+
+      <!-- 顶部双核心严苛度指标卡片 -->
+      <div class="pyramid-overview-grid">
+        <div class="pyramid-stat-card">
+          <div class="pyramid-stat-title">
+            <span>👑</span> 五星殿堂准入门槛
+          </div>
+          <div class="pyramid-stat-val" style="color: #fbbf24; text-shadow: 0 0 16px rgba(245, 158, 11, 0.5);">
+            19.0%
+          </div>
+          <div class="pyramid-stat-sub">
+            共计 <strong>414</strong> 部 · 黄金天平 · 殿堂率 19.0%
+          </div>
+        </div>
+
+        <div class="pyramid-stat-card green-card">
+          <div class="pyramid-stat-title">
+            <span>⚖️</span> 全周期严苛均分与底线
+          </div>
+          <div class="pyramid-stat-val" style="color: #34d399; text-shadow: 0 0 16px rgba(52, 211, 153, 0.5);">
+            7.19 <span style="font-size: 14px; font-weight: 700; color: #a7f3d0;">分</span>
+          </div>
+          <div class="pyramid-stat-sub">
+            低星避坑痛批率 <strong>14.7%</strong> (318 部)
+          </div>
+        </div>
+      </div>
+
+      <!-- 金字塔超感发光进度条阵列 -->
+      <div class="metric-subcard">
+        <div class="star-bar-row">
+          <div class="star-bar-meta">
+            <span class="star-bar-label" style="color: #fbbf24; text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);">★★★★★ 殿堂神作</span>
+            <span class="star-count-badge">已加冕 414 部</span>
+          </div>
+          <div class="star-bar-track">
+            <div class="star-bar-fill" style="--target-width: 19.0%; background: linear-gradient(90deg, #b45309 0%, #f59e0b 50%, #fef08a 100%); box-shadow: 0 0 20px rgba(245, 158, 11, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.5);"></div>
+          </div>
+          <span class="star-bar-num" style="color: #fbbf24; text-shadow: 0 0 12px rgba(245, 158, 11, 0.45);">19.0%</span>
+        </div>
+
+        <div class="star-bar-row">
+          <div class="star-bar-meta">
+            <span class="star-bar-label" style="color: #34d399; text-shadow: 0 0 10px rgba(52, 211, 153, 0.4);">★★★★☆ 诚意佳作</span>
+            <span class="star-count-badge">入选 908 部</span>
+          </div>
+          <div class="star-bar-track">
+            <div class="star-bar-fill" style="--target-width: 41.7%; background: linear-gradient(90deg, #047857 0%, #10b981 50%, #6ee7b7 100%); box-shadow: 0 0 20px rgba(16, 185, 129, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.5);"></div>
+          </div>
+          <span class="star-bar-num" style="color: #34d399; text-shadow: 0 0 12px rgba(52, 211, 153, 0.45);">41.7%</span>
+        </div>
+
+        <div class="star-bar-row">
+          <div class="star-bar-meta">
+            <span class="star-bar-label" style="color: #60a5fa; text-shadow: 0 0 10px rgba(96, 165, 250, 0.4);">★★★☆☆ 平庸消遣</span>
+            <span class="star-count-badge">记录 536 部</span>
+          </div>
+          <div class="star-bar-track">
+            <div class="star-bar-fill" style="--target-width: 24.6%; background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 50%, #93c5fd 100%); box-shadow: 0 0 20px rgba(59, 130, 246, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.5);"></div>
+          </div>
+          <span class="star-bar-num" style="color: #60a5fa; text-shadow: 0 0 12px rgba(96, 165, 250, 0.45);">24.6%</span>
+        </div>
+
+        <div class="star-bar-row">
+          <div class="star-bar-meta">
+            <span class="star-bar-label" style="color: #f87171; text-shadow: 0 0 10px rgba(248, 113, 113, 0.4);">★☆☆☆☆ 踩雷痛批</span>
+            <span class="star-count-badge">批判 318 部</span>
+          </div>
+          <div class="star-bar-track">
+            <div class="star-bar-fill" style="--target-width: 14.7%; background: linear-gradient(90deg, #b91c1c 0%, #ef4444 50%, #fca5a5 100%); box-shadow: 0 0 20px rgba(239, 68, 68, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.5);"></div>
+          </div>
+          <span class="star-bar-num" style="color: #f87171; text-shadow: 0 0 12px rgba(248, 113, 113, 0.45);">14.7%</span>
+        </div>
+
+        <!-- 底部审美哲学沉淀条 -->
+        <div class="pyramid-footer-philosophy">
+          <span class="pyramid-footer-tag">审美天平定势</span>
+          <span>严格把守殿堂门槛，四星佳作广布，三星平庸不宥，评分分布严谨稳固。</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模块五：光影足迹历年走势 (独立全幅大卡片) -->
+    <section class="dark-section reveal-card">
+      <div class="section-head">
+        <div>
+          <div class="section-badge" style="color: #38bdf8;">TIMELINE & FOOTPRINTS</div>
+          <h2 class="section-title">光影足迹历年走势</h2>
+        </div>
+        <div style="font-size: 13px; color: #38bdf8; font-weight: 700;">
+          2007 - 2026 跨越时光的视听见证
+        </div>
+      </div>
+      <div id="chart-timeline" style="height: 340px; width: 100%; margin-top: 10px;"></div>
+    </section>
+
+    <!-- 模块四：短评留痕 · 殿堂神作 vs 辛辣毒舌 -->
+    <section class="dark-section reveal-card">
+      <div class="section-head">
+        <div>
+          <div class="section-badge" style="color: #fbbf24;">AUTHENTIC CRITICS WALL</div>
+          <h2 class="section-title">短评留痕 · 灵魂切片</h2>
+        </div>
+      </div>
+
+      <div class="split-2" style="align-items: start;">
+        <div>
+          <div style="font-size: 13px; font-weight: 800; color: #fbbf24; margin-bottom: 10px;">✨ 殿堂挚爱真迹</div>
+          <div class="quote-row gold-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="一出好戏">《一出好戏》</span>
+                <span class="quote-tag gold-tag">★★★★★ 10分</span>
+              </div>
+              <div class="quote-text">“故事结束，每个人离开孤岛回到尚未毁灭的人类世界。你以为历尽劫难必当彻底悔悟，重新为人。而在我眼里，他们只是又一次重新做回了自己。道家谓天地一成一毁为一劫，周而复始。”</div>
+            </div><div class="quote-row gold-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="给阿嬷的情书">《给阿嬷的情书》</span>
+                <span class="quote-tag gold-tag">★★★★★ 10分</span>
+              </div>
+              <div class="quote-text">“虽然包场，但忍住不哭出声来也很痛苦。比起两个阿嬷的相见，比起一代又一代的阿嬷，大人物算个屁。”</div>
+            </div><div class="quote-row gold-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="心犬相随">《心犬相随》</span>
+                <span class="quote-tag gold-tag">★★★★★ 10分</span>
+              </div>
+              <div class="quote-text">“他是一只好狗狗，值得过上幸福的生活，可惜我给不了...请重新给它起一个名字，并一直叫下去。”</div>
+            </div><div class="quote-row gold-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="凶降喜讯">《凶降喜讯》</span>
+                <span class="quote-tag gold-tag">★★★★★ 10分</span>
+              </div>
+              <div class="quote-text">“世界笑着坠落，只有讽刺在上升。”</div>
+            </div><div class="quote-row gold-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="姥姥的外孙">《姥姥的外孙》</span>
+                <span class="quote-tag gold-tag">★★★★★ 10分</span>
+              </div>
+              <div class="quote-text">“奶奶外婆那一辈生了三四个孩子，然后她们只有一个角色就是“母亲”，成为孙辈眼里“这个世界上最好的人”。”</div>
+            </div><div class="quote-row gold-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="鲭鱼罐头">《鲭鱼罐头》</span>
+                <span class="quote-tag gold-tag">★★★★★ 10分</span>
+              </div>
+              <div class="quote-text">“太阳、河边、田野、小伙伴，那么无聊却又无比怀念的、生命力满满的日子。”</div>
+            </div>
+        </div>
+        <div>
+          <div style="font-size: 13px; font-weight: 800; color: #f87171; margin-bottom: 10px;">⚡ 绝对雷区痛批</div>
+          <div class="quote-row red-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="老舅">《老舅》</span>
+                <span class="quote-tag red-tag">★☆☆☆☆ 2分</span>
+              </div>
+              <div class="quote-text">“仙人跳部分，我以为剧作方把观众踩地上摩擦一次就算了，他倒是擦上瘾了，最后还侮辱观众智商！”</div>
+            </div><div class="quote-row red-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="惊变28年">《惊变28年》</span>
+                <span class="quote-tag red-tag">★☆☆☆☆ 2分</span>
+              </div>
+              <div class="quote-text">“那些满嘴夸最好的丧尸片、丧尸文艺片、宏大主题、哲学意味的，只能说给你装到了。”</div>
+            </div><div class="quote-row red-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="你好1983">《你好1983》</span>
+                <span class="quote-tag red-tag">★☆☆☆☆ 2分</span>
+              </div>
+              <div class="quote-text">“看了十分钟，音乐轰鸣，吵吵闹闹。我是真的83年的老人了，能不能安静点。”</div>
+            </div><div class="quote-row red-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="伪钞重案">《伪钞重案》</span>
+                <span class="quote-tag red-tag">★☆☆☆☆ 2分</span>
+              </div>
+              <div class="quote-text">“AI都拍不出这种PPT似的镜头语言，视听语言全面塌房。”</div>
+            </div><div class="quote-row red-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="老炮儿">《老炮儿》</span>
+                <span class="quote-tag red-tag">★☆☆☆☆ 2分</span>
+              </div>
+              <div class="quote-text">“装腔作势，伪江湖气，满屏都是自我感动的虚伪。”</div>
+            </div><div class="quote-row red-quote">
+              <div class="quote-header">
+                <span class="quote-film-title" title="今晚正好">《今晚正好》</span>
+                <span class="quote-tag red-tag">★☆☆☆☆ 2分</span>
+              </div>
+              <div class="quote-text">“拍纯欲就别搞纯爱，台词情节都 low 到爆，典型的文化工作者没文化！”</div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模块五：AI 数字孪生选片大脑正规激活出口 -->
+    <section class="ai-hero-card reveal-card">
+      <span style="display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; background: rgba(0,181,29,0.15); border: 1px solid rgba(0,181,29,0.3); color: #34d399; margin-bottom: 16px;">
+        AI DIGITAL TWIN ENGINE
+      </span>
+      <h2 style="font-size: 28px; font-weight: 900; color: #ffffff; margin-bottom: 10px;">
+        生成你的数字孪生选片大脑
+      </h2>
+      <p style="font-size: 14px; color: var(--text-muted); max-width: 600px; margin: 0 auto 24px auto;">
+        已基于你近 20 年的 2826 部打标、五维审美雷达与真实短评建立起特征工程资产。一键提取专属于你的 MovieDNA 智能体决策算法。
       </p>
-      <div class="bg-black/60 rounded-xl p-3.5 border border-white/10 font-mono text-xs text-emerald-300 flex items-center justify-between">
-        <code>python moviedna/server.py</code>
-        <span class="text-gray-500 text-[11px]">端口 8765</span>
+
+      <button class="ai-btn-primary" onclick="toggleDnaModal()">
+        <span>🧠 立即激活专属 MovieDNA 选片智能体</span>
+      </button>
+
+      <!-- 隐藏的 Prompt 展开容器 -->
+      <div id="dna-modal" style="display: none; margin-top: 24px; text-align: left; background: rgba(0,0,0,0.6); border: 1px solid rgba(0,181,29,0.3); border-radius: 20px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 12px; font-weight: 700; color: #34d399;">📋 专属数字孪生 Prompt (已注入全量观影特征)</span>
+          <button onclick="copyPromptCode()" style="padding: 6px 14px; background: #00b51d; border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer;">一键复制 Prompt</button>
+        </div>
+        <textarea id="dna-prompt-textarea" rows="8" readonly style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid #334155; border-radius: 10px; color: #d1d5db; font-size: 12px; padding: 12px; font-family: monospace; outline: none;"></textarea>
       </div>
-    </div>
+    </section>
+
+    <!-- 底部版权 -->
+    <footer style="text-align: center; font-size: 12px; color: #059669; padding-top: 10px;">
+      MovieDNA · 致敬豆瓣光影精神家园 · 纯本地私密渲染 · 永久专属保存
+    </footer>
 
   </main>
 
-  <!-- 底部备案与版权 -->
-  <footer class="max-w-4xl w-full mx-auto mt-16 pt-6 border-t border-white/10 text-center text-xs text-gray-500 space-y-1">
-    <div>&copy; 2024-2026 菜鸟笔记 (ucncn.cn) · 电影基因实验室子项目</div>
-    <div>
-      <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-400 transition">
-        苏ICP备2024150485号-5
-      </a>
-    </div>
-  </footer>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let radarChart = null;
+      let timelineChart = null;
+
+      function initRadarChart() {
+        if (typeof echarts === "undefined" || radarChart) return;
+        const radarEl = document.getElementById('chart-radar');
+        if (!radarEl) return;
+        try {
+          radarChart = echarts.init(radarEl, 'dark');
+          radarChart.setOption({
+            animation: true,
+            animationDuration: 1400,
+            animationEasing: 'cubicOut',
+            backgroundColor: 'transparent',
+            tooltip: { trigger: 'item' },
+            radar: {
+              indicator: [{"name": "{high|\u955c\u5934\u7f8e\u5b66}\n{high|\u2726 \u7a81\u51fa 98\u5206}\n{sub|(\u89c6\u89c9\u98ce\u683c/\u6784\u56fe)}", "max": 100}, {"name": "{high|\u53d9\u4e8b\u667a\u6027}\n{high|\u2726 \u7a81\u51fa 96\u5206}\n{sub|(\u5267\u4f5c/\u903b\u8f91/\u53cd\u8f6c)}", "max": 100}, {"name": "{high|\u8d28\u6734\u6df1\u60c5}\n{high|\u2726 \u7a81\u51fa 98\u5206}\n{sub|(\u4eba\u6027\u5171\u9e23/\u6cbb\u6108)}", "max": 100}, {"name": "{high|\u793e\u4f1a\u9690\u55bb}\n{high|\u2726 \u7a81\u51fa 95\u5206}\n{sub|(\u65f6\u4ee3/\u6279\u5224/\u5386\u53f2)}", "max": 100}, {"name": "{top|\u53cd\u88c5\u903c\u96f7\u8fbe}\n{top|\ud83d\udc51 \u6838\u5fc3\u6781\u503c 100\u5206}\n{sub|(\u4e25\u6253\u60ac\u6d6e/\u865a\u4f2a)}", "max": 100}],
+              radius: '66%',
+              center: ['50%', '48%'],
+              splitNumber: 5,
+              axisName: {
+                formatter: (val) => val,
+                lineHeight: 18,
+                rich: {
+                  top: {
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#fbbf24',
+                    textShadowBlur: 14,
+                    textShadowColor: 'rgba(251, 191, 36, 0.9)',
+                    lineHeight: 22,
+                    align: 'center'
+                  },
+                  high: {
+                    fontSize: 13,
+                    fontWeight: 800,
+                    color: '#34d399',
+                    textShadowBlur: 6,
+                    textShadowColor: 'rgba(52, 211, 153, 0.5)',
+                    lineHeight: 18,
+                    align: 'center'
+                  },
+                  mid: {
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#a7f3d0',
+                    lineHeight: 16,
+                    align: 'center'
+                  },
+                  low: {
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: '#94a3b8',
+                    lineHeight: 15,
+                    align: 'center'
+                  },
+                  sub: {
+                    fontSize: 10,
+                    fontWeight: 500,
+                    color: '#6ee7b7',
+                    lineHeight: 14,
+                    align: 'center'
+                  }
+                }
+              },
+              splitLine: { lineStyle: { color: 'rgba(154, 230, 180, 0.22)', width: 1.2 } },
+              splitArea: { areaStyle: { color: ['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.45)'] } },
+              axisLine: { lineStyle: { color: 'rgba(154, 230, 180, 0.35)', width: 1.5 } }
+            },
+            series: [{
+              type: 'radar',
+              data: [{
+                value: [98, 96, 98, 95, 100],
+                symbol: 'circle',
+                symbolSize: 8,
+                label: {
+                  show: true,
+                  formatter: (p) => p.value + '分',
+                  color: '#ffffff',
+                  fontSize: 11,
+                  fontWeight: 800,
+                  textBorderColor: '#064e3b',
+                  textBorderWidth: 2
+                },
+                areaStyle: { color: 'rgba(0, 181, 29, 0.42)' },
+                lineStyle: { color: '#00b51d', width: 3.5, shadowBlur: 14, shadowColor: 'rgba(0, 181, 29, 0.8)' },
+                itemStyle: { color: '#34d399', borderColor: '#ffffff', borderWidth: 2 }
+              }]
+            }]
+          });
+        } catch(e) {
+          console.error("Radar init error:", e);
+        }
+      }
+
+      function initTimelineChart() {
+        if (typeof echarts === "undefined" || timelineChart) return;
+        const timelineEl = document.getElementById('chart-timeline');
+        if (!timelineEl) return;
+        try {
+          timelineChart = echarts.init(timelineEl, 'dark');
+          timelineChart.setOption({
+            animation: true,
+            animationDuration: 1600,
+            animationEasing: 'cubicOut',
+            backgroundColor: 'transparent',
+            tooltip: {
+              trigger: 'axis',
+              formatter: '<div style="font-weight:bold;color:#38bdf8;">{b} 年</div>观影记录：<strong>{c}</strong> 部'
+            },
+            grid: {
+              left: '3%',
+              right: '3%',
+              top: '15%',
+              bottom: '8%',
+              containLabel: true
+            },
+            xAxis: {
+              type: 'category',
+              data: ["2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"],
+              axisLabel: { color: '#93c5fd', fontSize: 12, fontWeight: 700 },
+              axisLine: { lineStyle: { color: 'rgba(255,255,255,0.2)' } }
+            },
+            yAxis: {
+              type: 'value',
+              splitLine: { lineStyle: { color: 'rgba(255,255,255,0.08)' } },
+              axisLabel: { color: '#93c5fd', fontSize: 12 }
+            },
+            series: [{
+              data: [42, 110, 296, 191, 175, 128, 135, 112, 140, 156, 184, 207, 192, 138, 125, 118, 120, 115, 102, 40],
+              type: 'bar',
+              barMaxWidth: 32,
+              label: {
+                show: true,
+                position: 'top',
+                color: '#bae6fd',
+                fontSize: 10,
+                fontWeight: 700
+              },
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#38bdf8' },
+                  { offset: 1, color: '#0284c7' }
+                ]),
+                borderRadius: [6, 6, 0, 0],
+                shadowColor: 'rgba(56, 189, 248, 0.3)',
+                shadowBlur: 8
+              },
+              emphasis: {
+                itemStyle: {
+                  color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: '#ffffff' },
+                    { offset: 1, color: '#38bdf8' }
+                  ])
+                }
+              }
+            }]
+          });
+        } catch(e) {
+          console.error("Timeline init error:", e);
+        }
+      }
+
+      // 动效系统：IntersectionObserver 滑入视口时触发对应动效
+      try {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('revealed');
+              // 触发数字跳动
+              entry.target.querySelectorAll('.counter').forEach(counter => {
+                if (counter.dataset.animated) return;
+                counter.dataset.animated = "true";
+                const target = +counter.getAttribute('data-target') || 0;
+                if (!target) return;
+                let count = 0;
+                const inc = Math.max(1, Math.floor(target / 40));
+                const timer = setInterval(() => {
+                  count += inc;
+                  if (count >= target) {
+                    counter.innerText = target;
+                    clearInterval(timer);
+                  } else {
+                    counter.innerText = count;
+                  }
+                }, 20);
+              });
+
+              // 触发信笺诗意金句打字机效果 (只触发一次)
+              const typingEl = entry.target.querySelector('#typing-quote');
+              if (typingEl && !typingEl.dataset.typed) {
+                typingEl.dataset.typed = "true";
+                const fullText = typingEl.innerText;
+                typingEl.innerText = "";
+                let charIndex = 0;
+                const typingInterval = setInterval(() => {
+                  if (charIndex < fullText.length) {
+                    typingEl.innerText += fullText.charAt(charIndex);
+                    charIndex++;
+                  } else {
+                    clearInterval(typingInterval);
+                  }
+                }, 35);
+              }
+
+              // 模块三：滑动到五维观影决策雷达时，开启动态展开渲染
+              if (entry.target.querySelector('#chart-radar')) {
+                initRadarChart();
+              }
+
+              // 模块五：滑动到光影足迹历年走势时，开启柱状图拔地而起动效
+              if (entry.target.querySelector('#chart-timeline')) {
+                initTimelineChart();
+              }
+            }
+          });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal-card').forEach(card => observer.observe(card));
+      } catch (e) {
+        console.warn("IntersectionObserver disabled:", e);
+        initRadarChart();
+        initTimelineChart();
+      }
+
+      window.addEventListener('resize', () => {
+        if (radarChart) radarChart.resize();
+        if (timelineChart) timelineChart.resize();
+      });
+    });
+
+    // 4. AI 选片大脑出口交互
+    function toggleDnaModal() {
+      const m = document.getElementById('dna-modal');
+      if (!m) return;
+      const isHidden = m.style.display === 'none';
+      m.style.display = isHidden ? 'block' : 'none';
+      const ta = document.getElementById('dna-prompt-textarea');
+      if (isHidden && ta && !ta.value) {
+        ta.value = "";
+      }
+    }
+
+    function copyPromptCode() {
+      const ta = document.getElementById('dna-prompt-textarea');
+      if (ta) {
+        navigator.clipboard.writeText(ta.value);
+        alert('MovieDNA 选片智能体 Prompt 已复制到剪贴板！可直接发送给 ChatGPT、Claude 或 Gemini 激活。');
+      }
+    }
+  </script>
 </body>
 </html>
