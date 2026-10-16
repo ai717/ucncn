@@ -1,0 +1,45 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            TARGET_DIR="/www/wwwroot/ucncn.cn"
+            echo "🚀 开始自动部署到目录: $TARGET_DIR"
+
+            # 确保目标目录存在
+            if [ ! -d "$TARGET_DIR" ]; then
+              mkdir -p "$TARGET_DIR"
+            fi
+
+            cd "$TARGET_DIR"
+
+            # 如果目录内还不是 git 仓库，自动初始化并拉取
+            if [ ! -d ".git" ]; then
+              echo "📦 正在初次克隆仓库..."
+              git init
+              git remote add origin https://github.com/ai717/ucncn.git || git remote set-url origin https://github.com/ai717/ucncn.git
+              git fetch origin main
+              git checkout -f -B main origin/main
+            else
+              echo "🔄 正在同步 GitHub 最新版本..."
+              git fetch origin main
+              git reset --hard origin/main
+            fi
+
+            echo "✅ 菜鸟笔记 (ucncn.cn) 线上已同步至最新代码！"
