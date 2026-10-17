@@ -600,21 +600,20 @@
       gap: 36px;
     }
 
-    /* 模块入场视口滚动渐现动效 */
+    /* 全模块保证 100% 完整呈现，避免动效脚本未触发时空白隐形 */
     .reveal-card {
-      opacity: 0;
-      transform: translateY(36px);
-      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
     }
     .reveal-card.revealed {
       opacity: 1;
-      transform: translateY(0);
+      transform: none;
     }
-    /* 首屏信笺保证立即呈现 */
     .paper-section {
       opacity: 1 !important;
-      transform: translateY(0) !important;
+      transform: none !important;
     }
 
     /* 金属长尾夹拟物隐喻 */
@@ -927,15 +926,15 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      opacity: 0;
-      transform: translateY(18px) scale(0.92);
+      opacity: 1;
+      transform: none;
       transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s),
                   transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s),
                   box-shadow 0.2s ease;
     }
-    .blue-section.revealed .poster-card {
+    .poster-card {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: none;
     }
     .poster-fallback-badge {
       display: flex;
@@ -1283,22 +1282,21 @@
       padding: 16px 18px;
       margin-bottom: 14px;
       border-left: 4px solid #00b51d;
-      opacity: 0;
+      opacity: 1;
+      transform: none;
       transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
     }
     .gold-quote {
       border-left-color: #f59e0b;
       box-shadow: 0 4px 16px rgba(245, 158, 11, 0.06);
-      transform: translateX(-24px);
     }
     .red-quote {
       border-left-color: #ef4444;
       box-shadow: 0 4px 16px rgba(239, 68, 68, 0.06);
-      transform: translateX(24px);
     }
-    .dark-section.revealed .quote-row {
+    .quote-row {
       opacity: 1;
-      transform: translateX(0);
+      transform: none;
     }
     .dark-section.revealed .gold-quote:nth-child(2) { transition-delay: 0.1s; }
     .dark-section.revealed .gold-quote:nth-child(3) { transition-delay: 0.25s; }
@@ -1724,7 +1722,7 @@
   </main>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    function __initReportInteractions() {
       let radarChart = null;
       let timelineChart = null;
 
@@ -1954,7 +1952,13 @@
         if (radarChart) radarChart.resize();
         if (timelineChart) timelineChart.resize();
       });
-    });
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(__initReportInteractions, 30);
+    } else {
+      document.addEventListener("DOMContentLoaded", __initReportInteractions);
+    }
 
     // 4. AI 选片大脑出口交互
     function toggleDnaModal() {

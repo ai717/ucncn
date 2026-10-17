@@ -1,12 +1,12 @@
 /**
- * MovieDNA - 豆瓣观影数据免插件一键提取书签脚本 (Bookmarklet)
+ * MovieDNA - 豆瓣观影数据免插件一键提取书签脚本 (Bookmarklet v2.1)
  *
  * 使用方式：
  * 1. 登录豆瓣，进入个人电影主页 (movie.douban.com/mine 或 movie.douban.com/people/{id}/collect)
- * 2. 点击浏览器书签栏中的本脚本，或直接在控制台粘贴执行
- * 3. 脚本在页面右上方展示实时进度，爬取完毕后自动触发下载 douban_movie_{id}_{date}.json
+ * 2. 点击浏览器书签栏中的本脚本
+ * 3. 面板弹出后请核对目标账号，点击【确认账号，开始提取】，完成后自动下载 douban_movie_{id}_{date}.json
  */
-(async function () {
+(function () {
   if (window.__MOVIEDNA_RUNNING__) {
     alert("MovieDNA 提取任务已在运行中，请勿重复点击！");
     return;
@@ -20,7 +20,7 @@
     return;
   }
 
-  // 2. 智能精准识别当前登录用户 ID (禁止在正文区盲目抓取其他豆友链接)
+  // 2. 账号精准探测（绝不从页面正文或影评列表盲抓路人链接）
   let userId = null;
 
   // 策略 A: 从当前 URL 识别 (/people/{id}/...)
@@ -31,7 +31,7 @@
 
   // 策略 B: 从豆瓣全站统一顶栏自身账号区提取 (#db-global-nav .top-nav-info)
   if (!userId) {
-    const navUser = document.querySelector('#db-global-nav .top-nav-info a[href*="/people/"], #db-global-nav .nav-user-account a[href*="/people/"], a.bn-more[href*="/people/"]');
+    const navUser = document.querySelector('#db-global-nav .top-nav-info a[href*="/people/"], #db-global-nav .nav-user-account a[href*="/people/"]');
     if (navUser) {
       const match = navUser.href.match(/\/people\/([^/]+)/);
       if (match && !['login', 'register', 'help'].includes(match[1])) {
@@ -40,87 +40,98 @@
     }
   }
 
-  // 策略 C: 异步发起 /mine 重定向探测（已登录时会直接跟随重定向到个人主页 URL）
+  // 策略 C: 若仍未自动识别，直接弹窗输入
   if (!userId) {
-    try {
-      const resp = await fetch('https://movie.douban.com/mine', { credentials: 'include', redirect: 'follow' });
-      if (resp && resp.url) {
-        const m = resp.url.match(/\/people\/([^/]+)/);
-        if (m && !['login', 'register', 'help'].includes(m[1])) {
-          userId = m[1];
-        }
-      }
-    } catch (e) {}
-  }
-
-  // 策略 D: 弹窗确认或手动输入（绝不随意将页面其他网友作为目标用户！）
-  if (!userId) {
-    userId = prompt("【MovieDNA】未能自动检测到您的豆瓣登录账号。\n请输入您的豆瓣个性域名或数字 ID（即个人主页 URL /people/你的ID/ 中的字符）：");
-    if (!userId) {
+    userId = prompt("【MovieDNA】未能自动检测到您的豆瓣登录账号。\n请输入您的豆瓣账号 ID（打开个人主页 URL /people/你的ID/ 中的这串字符）：");
+    if (!userId || !userId.trim()) {
       window.__MOVIEDNA_RUNNING__ = false;
       return;
     }
     userId = userId.trim().replace(/^@/, '');
   }
 
-  // 3. 构建悬浮面板 UI
+  // 3. 构建高辨识度悬浮确认与进度面板
   const panel = document.createElement("div");
   panel.id = "moviedna-panel";
   panel.style.cssText = `
     position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 999999;
-    background: #111827;
-    color: #f3f4f6;
-    padding: 18px 22px;
-    border-radius: 14px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    top: 24px;
+    right: 24px;
+    z-index: 9999999;
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 20px 22px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    min-width: 320px;
-    border: 1px solid #374151;
+    min-width: 330px;
+    max-width: 380px;
   `;
 
   panel.innerHTML = `
-    <div style="font-weight: 700; font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-      <span>🎬 MovieDNA 数据提取器</span>
-      <span id="mdna-status" style="font-size: 12px; color: #10b981; font-weight: 600;">准备就绪</span>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+      <span style="font-weight: 800; font-size: 15px; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
+        <span>🎬</span> MovieDNA 数据提取器
+      </span>
+      <span id="mdna-status-badge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-weight: 700;">
+        待核对
+      </span>
     </div>
-    <div style="font-size: 12px; color: #9ca3af; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 8px;">
-      <span>目标账号: <strong id="mdna-user-val" style="color: #fbbf24; font-size: 13px;">@${userId}</strong></span>
-      <a href="javascript:void(0)" id="mdna-btn-change" style="color: #60a5fa; text-decoration: underline; cursor: pointer; font-size: 11px;">不是我？修改</a>
+
+    <!-- 账号确认区 (醒目展示，彻底避免误抓他人) -->
+    <div id="mdna-account-box" style="background: rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.1);">
+      <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">🎯 即将提取的豆瓣账号：</div>
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <strong id="mdna-user-val" style="color: #fbbf24; font-size: 17px; font-family: monospace; letter-spacing: 0.5px;">@${userId}</strong>
+        <button id="mdna-btn-change" style="background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #93c5fd; padding: 3px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700;">不是我？修改</button>
+      </div>
+      <div style="font-size: 10px; color: #64748b; margin-top: 6px;">若账号不对请点击修改，避免数据混淆</div>
     </div>
-    <div style="background: #374151; border-radius: 6px; height: 8px; overflow: hidden; margin-bottom: 10px;">
-      <div id="mdna-bar" style="width: 0%; height: 100%; background: #3b82f6; transition: width 0.3s;"></div>
+
+    <!-- 初始确认按钮组 -->
+    <div id="mdna-action-group" style="display: flex; gap: 10px;">
+      <button id="mdna-btn-start" style="flex: 2; padding: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #022c22; font-weight: 900; font-size: 13px; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+        🚀 确认无误，开始提取
+      </button>
+      <button id="mdna-btn-cancel" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.08); color: #94a3b8; font-size: 12px; border: none; border-radius: 10px; cursor: pointer;">
+        取消
+      </button>
     </div>
-    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #d1d5db; margin-bottom: 12px;">
-      <span id="mdna-count">已抓取: 0 部</span>
-      <span id="mdna-page">第 0 页</span>
-    </div>
-    <div style="display: flex; gap: 8px;">
-      <button id="mdna-btn-stop" style="flex: 1; padding: 7px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">中止并导出</button>
-      <button id="mdna-btn-close" style="display: none; flex: 1; padding: 7px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">关闭</button>
+
+    <!-- 运行中进度与状态区 (开始后展示) -->
+    <div id="mdna-running-box" style="display: none;">
+      <div style="background: #334155; border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 10px;">
+        <div id="mdna-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #38bdf8 0%, #10b981 100%); transition: width 0.3s;"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #cbd5e1; margin-bottom: 12px;">
+        <span id="mdna-count" style="font-weight: 700;">已抓取: 0 部</span>
+        <span id="mdna-page" style="color: #94a3b8;">第 0 页</span>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button id="mdna-btn-stop" style="flex: 1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700;">中止并导出当前数据</button>
+        <button id="mdna-btn-close" style="display: none; flex: 1; padding: 8px; background: #10b981; color: #022c22; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 900;">完成并关闭</button>
+      </div>
     </div>
   `;
   document.body.appendChild(panel);
 
-  const statusEl = document.getElementById("mdna-status");
+  const statusBadge = document.getElementById("mdna-status-badge");
+  const userValEl = document.getElementById("mdna-user-val");
+  const changeBtn = document.getElementById("mdna-btn-change");
+  const startBtn = document.getElementById("mdna-btn-start");
+  const cancelBtn = document.getElementById("mdna-btn-cancel");
+  const actionGroup = document.getElementById("mdna-action-group");
+  const runningBox = document.getElementById("mdna-running-box");
+
   const barEl = document.getElementById("mdna-bar");
   const countEl = document.getElementById("mdna-count");
   const pageEl = document.getElementById("mdna-page");
   const stopBtn = document.getElementById("mdna-btn-stop");
   const closeBtn = document.getElementById("mdna-btn-close");
-  const changeBtn = document.getElementById("mdna-btn-change");
-  const userValEl = document.getElementById("mdna-user-val");
 
   let isAborted = false;
-  stopBtn.onclick = () => {
-    isAborted = true;
-    statusEl.innerText = "已手动中止";
-    statusEl.style.color = "#f59e0b";
-  };
 
-  closeBtn.onclick = () => {
+  cancelBtn.onclick = () => {
     panel.remove();
     window.__MOVIEDNA_RUNNING__ = false;
   };
@@ -130,13 +141,18 @@
     if (newId && newId.trim()) {
       userId = newId.trim().replace(/^@/, '');
       userValEl.innerText = "@" + userId;
-      isAborted = true;
-      setTimeout(() => {
-        panel.remove();
-        window.__MOVIEDNA_RUNNING__ = false;
-        alert("已切换目标账号为 @" + userId + "，请再次点击书签立即开始抓取！");
-      }, 300);
     }
+  };
+
+  stopBtn.onclick = () => {
+    isAborted = true;
+    statusBadge.innerText = "已手动中止";
+    statusBadge.style.color = "#f59e0b";
+  };
+
+  closeBtn.onclick = () => {
+    panel.remove();
+    window.__MOVIEDNA_RUNNING__ = false;
   };
 
   // 4. 解析单页数据
@@ -216,17 +232,21 @@
     URL.revokeObjectURL(url);
   }
 
-  // 6. 随机休眠函数
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  // 7. 主采集流水线
-  async function runScraper() {
+  // 6. 点击确认开始抓取
+  startBtn.onclick = async function () {
+    actionGroup.style.display = "none";
+    changeBtn.style.display = "none";
+    runningBox.style.display = "block";
+    statusBadge.innerText = "采集中";
+    statusBadge.style.color = "#34d399";
+    statusBadge.style.background = "rgba(52, 211, 153, 0.15)";
+
     let start = 0;
     let page = 1;
     let allRecords = [];
     let totalExpected = null;
-
-    statusEl.innerText = "采集中...";
 
     while (!isAborted) {
       pageEl.innerText = `第 ${page} 页`;
@@ -263,14 +283,14 @@
         await sleep(delay);
       } catch (e) {
         console.error("抓取失败:", e);
-        statusEl.innerText = "网络异常";
-        statusEl.style.color = "#ef4444";
+        statusBadge.innerText = "网络异常";
+        statusBadge.style.color = "#ef4444";
         break;
       }
     }
 
-    statusEl.innerText = isAborted ? "已中止并导出" : "已完成！";
-    statusEl.style.color = "#10b981";
+    statusBadge.innerText = isAborted ? "已中止" : "已完成";
+    statusBadge.style.color = "#10b981";
     barEl.style.width = "100%";
     stopBtn.style.display = "none";
     closeBtn.style.display = "block";
@@ -281,15 +301,13 @@
           douban_id: userId,
           export_time: new Date().toISOString(),
           total_count: allRecords.length,
-          client: "MovieDNA Bookmarklet v2.0",
+          client: "MovieDNA Bookmarklet v2.1",
         },
         records: allRecords,
       };
       downloadJson(exportPayload);
     } else {
-      alert("未获取到任何观影记录！\n请检查：\n1. 账号 @" + userId + " 的看过的电影是否设置为仅自己可见；\n2. 请确认当前是否已登录豆瓣。");
+      alert("未获取到任何观影记录！\n请检查：\n1. 账号 @" + userId + " 的“我看过的电影”是否设置为仅自己可见；\n2. 请确认该账号是否有观影标记。");
     }
-  }
-
-  runScraper();
+  };
 })();
