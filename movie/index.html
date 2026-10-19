@@ -54,6 +54,21 @@
       white-space: nowrap;
       vertical-align: baseline;
     }
+    @keyframes flowArrow {
+      from { stroke-dashoffset: 48; }
+      to { stroke-dashoffset: 0; }
+    }
+    .arrow-dash-flow {
+      stroke-dasharray: 8 6;
+      animation: flowArrow 1.2s linear infinite;
+    }
+    @keyframes floatArrow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .float-motion {
+      animation: floatArrow 2.2s ease-in-out infinite;
+    }
   </style>
 </head>
 <body class="min-h-screen py-10 px-4 flex flex-col items-center justify-between">
@@ -132,81 +147,46 @@
             <span>🎬 豆瓣数据提取</span>
           </a>
 
-          <!-- 首次打开网站时的悬浮示意图引导卡片 (Popover) -->
-          <div id="drag-guide-popover" class="hidden absolute left-0 sm:left-1/2 sm:-translate-x-1/2 bottom-full mb-3.5 w-[330px] sm:w-[380px] max-w-[calc(100vw-36px)] z-50 transition-all duration-300 opacity-0 transform translate-y-2 pointer-events-auto">
-            <div class="glass-card rounded-2xl p-4 border border-amber-400/40 bg-slate-950/95 shadow-2xl shadow-amber-500/20 text-left space-y-3">
-              <!-- 顶部标题与关闭按钮 -->
-              <div class="flex items-center justify-between pb-1 border-b border-gray-800">
-                <div class="flex items-center gap-1.5 text-xs font-bold text-amber-300">
-                  <span class="inline-block animate-pulse">💡</span>
-                  <span>首次使用指引：拖入浏览器书签栏</span>
-                </div>
-                <button type="button" onclick="closeDragGuide()" class="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition text-sm leading-none" title="关闭且不再提示">
-                  ✕
+          <!-- 首次访问指引（纯净无弹窗设计：旋转大箭头指向上方书签栏 + 醒目大字） -->
+          <div id="drag-guide-popover" class="hidden absolute left-0 sm:left-2 bottom-full mb-2 w-[340px] sm:w-[480px] max-w-[calc(100vw-32px)] z-50 transition-all duration-300 opacity-0 pointer-events-auto select-none float-motion">
+            <div class="relative">
+              
+              <!-- 醒目大字标题栏与关闭按钮 (无沉重黑框) -->
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <span class="text-2xl sm:text-3xl font-black text-amber-300 tracking-tight drop-shadow-[0_2px_14px_rgba(245,158,11,0.7)] flex items-center gap-1.5">
+                  <span class="animate-bounce inline-block text-xl">👆</span>
+                  <span>拖入浏览器书签栏</span>
+                </span>
+                <button type="button" onclick="closeDragGuide()" class="text-gray-400 hover:text-white hover:bg-slate-800/90 px-2 py-0.5 rounded-full text-xs transition border border-gray-700/80 bg-slate-900/80 backdrop-blur flex items-center gap-1 cursor-pointer" title="关闭且不再显示">
+                  <span>✕</span>
+                  <span class="text-[11px]">关闭</span>
                 </button>
               </div>
 
-              <!-- 模拟浏览器顶部书签栏示意图 (SVG 图解) -->
-              <div class="bg-slate-900/90 rounded-xl p-2.5 border border-slate-700/80 shadow-inner">
-                <svg class="w-full h-auto" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <!-- 浏览器外框与顶栏 -->
-                  <rect x="2" y="2" width="316" height="52" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
-                  
-                  <!-- 窗口控制三色圆点 -->
-                  <circle cx="16" cy="16" r="3.5" fill="#ef4444"/>
-                  <circle cx="28" cy="16" r="3.5" fill="#f59e0b"/>
-                  <circle cx="40" cy="16" r="3.5" fill="#10b981"/>
-                  
-                  <!-- 模拟标签页 -->
-                  <path d="M55 24 L62 10 L150 10 L157 24 Z" fill="#1e293b"/>
-                  <text x="70" y="20" fill="#94a3b8" font-size="9" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">豆瓣电影</text>
+              <!-- 极简说明文案 -->
+              <div class="text-xs sm:text-sm text-gray-300 font-medium mt-1 flex items-center gap-2 drop-shadow">
+                <span>鼠标按住黄色按钮，向上拖到顶部松手即可</span>
+                <span class="text-amber-400/90 text-xs hidden sm:inline">(快捷键 Ctrl+Shift+B 唤出书签栏)</span>
+              </div>
 
-                  <!-- 模拟书签栏分割线 -->
-                  <line x1="2" y1="28" x2="318" y2="28" stroke="#334155" stroke-width="1"/>
+              <!-- 旋转弯曲向上发光大箭头，直指屏幕顶部的浏览器书签栏位置 -->
+              <div class="w-full h-24 -mt-1 pointer-events-none">
+                <svg class="w-full h-full overflow-visible" viewBox="0 0 380 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- 弯曲旋转主轨迹：从左下方按钮上方，向右上方优雅旋转直指顶部标签栏 -->
+                  <path d="M 35 85 C 45 42, 95 18, 185 8" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round" class="arrow-dash-flow" filter="drop-shadow(0 0 8px rgba(245,158,11,0.75))"/>
                   
-                  <!-- 书签栏文字 -->
-                  <text x="14" y="43" fill="#64748b" font-size="10" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">⭐ 书签栏</text>
+                  <!-- 箭头尖端 (朝向右上方的浏览器书签栏方向) -->
+                  <polygon points="176,-1 198,7 183,20" fill="#fbbf24" filter="drop-shadow(0 0 10px #f59e0b)"/>
                   
-                  <!-- 目标放置槽位 (高亮发光虚线框) -->
-                  <rect x="75" y="32" width="165" height="19" rx="5" fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 3"/>
-                  <text x="157" y="45.5" fill="#fbbf24" font-size="9.5" font-weight="bold" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" text-anchor="middle">🎯 松开鼠标 · 放置在此处</text>
-
-                  <!-- 向上动态引导虚线与箭头 -->
-                  <path d="M157 105 C157 82, 157 72, 157 56" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"/>
-                  <polygon points="153,57 157,51 161,57" fill="#fbbf24"/>
-
-                  <!-- 底部被拖动的按钮示意 (Mini) -->
-                  <rect x="92" y="88" width="130" height="24" rx="6" fill="#f59e0b"/>
-                  <text x="157" y="104" fill="#000" font-size="11" font-weight="900" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" text-anchor="middle">🎬 豆瓣数据提取</text>
-
-                  <!-- 鼠标拖拽手势动效 -->
-                  <g transform="translate(196, 82)">
-                    <text x="0" y="18" font-size="16">👆</text>
-                  </g>
+                  <!-- 顶部指向微标引导文字 -->
+                  <text x="206" y="11" fill="#fde68a" font-size="11" font-weight="bold" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.8))">↑ 浏览器上方书签栏位置</text>
+                  
+                  <!-- 起点定位光晕圆点 -->
+                  <circle cx="35" cy="85" r="4.5" fill="#f59e0b" filter="drop-shadow(0 0 6px #f59e0b)"/>
                 </svg>
               </div>
 
-              <!-- 核心操作文案与关闭按钮 -->
-              <div class="flex items-center justify-between text-xs text-gray-300 pt-0.5 gap-2">
-                <div class="space-y-0.5">
-                  <div class="font-semibold text-gray-200 text-xs flex items-center gap-1">
-                    <span>按住此黄色按钮</span>
-                    <span class="text-amber-400 font-bold">&uarr;</span>
-                    <span>向上拖入书签栏</span>
-                  </div>
-                  <div class="text-[11px] text-gray-400">
-                    书签栏没显示？按快捷键 <kbd class="px-1 py-0.2 bg-gray-800 rounded text-amber-400 border border-gray-700 font-mono text-[10px]">Ctrl+Shift+B</kbd>
-                  </div>
-                </div>
-
-                <button type="button" onclick="closeDragGuide()" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs transition shadow-md shadow-amber-500/20 flex-shrink-0 cursor-pointer">
-                  我知道了
-                </button>
-              </div>
             </div>
-
-            <!-- 底部向下指示小三角指针，直指下方黄色按钮 -->
-            <div class="w-3.5 h-3.5 bg-slate-950 border-r border-b border-amber-400/40 transform rotate-45 left-10 sm:left-1/2 sm:-translate-x-1/2 relative -mt-1.5 shadow-md"></div>
           </div>
         </div>
 
