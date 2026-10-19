@@ -412,16 +412,16 @@
 
             setTimeout(() => {
               try {
-                document.open();
-                document.write(html);
-                document.close();
-              } catch (writeErr) {
-                console.warn('document.write 异常，降级使用 Blob 呈现:', writeErr);
                 const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
                 const blobUrl = URL.createObjectURL(blob);
                 window.location.href = blobUrl;
+              } catch (blobErr) {
+                console.warn('Blob URL 异常，降级使用 document.write 呈现:', blobErr);
+                document.open();
+                document.write(html);
+                document.close();
               }
-            }, 300);
+            }, 200);
 
             return;
           }

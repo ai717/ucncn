@@ -511,7 +511,7 @@
             <span class="poster-badge-icon">🎬</span>
             <span class="poster-fallback-title">${ct}</span>
           </div>
-          <img src="${p.img}" alt="${p.title}" loading="lazy" onerror="this.style.opacity='0';" />
+          <img src="${p.img}" alt="${p.title}" referrerpolicy="no-referrer" loading="lazy" onload="this.previousElementSibling.style.display='none';" onerror="this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='none';" />
           <div class="poster-overlay">${ct}</div>
         </div>`;
     }).join('');
@@ -553,9 +553,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
   <script src="/static/echarts.min.js"></script>
-  <script src="https://registry.npmmirror.com/echarts/5.4.3/files/dist/echarts.min.js"></script>
+  <script>
+    if (typeof echarts === 'undefined') {
+      document.write('<script src="https://registry.npmmirror.com/echarts/5.4.3/files/dist/echarts.min.js"><\/script>');
+    }
+  </script>
   <script src="/static/marked.min.js"></script>
-  <script src="https://registry.npmmirror.com/marked/9.1.6/files/marked.min.js"></script>
+  <script>
+    if (typeof marked === 'undefined') {
+      document.write('<script src="https://registry.npmmirror.com/marked/9.1.6/files/marked.min.js"><\/script>');
+    }
+  </script>
   <style>
     :root {
       --bg-forest: #0b1510;
@@ -1105,7 +1113,8 @@
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 100%);
       border-radius: 14px 14px 0 0;
     }
-    .dark-section.revealed .star-bar-fill {
+    .dark-section.revealed .star-bar-fill,
+    .reveal-card.revealed .star-bar-fill {
       width: var(--target-width);
     }
     .dark-section.revealed .star-bar-row:nth-child(1) .star-bar-fill { transition-delay: 0.1s; }
@@ -1218,7 +1227,8 @@
       width: 0;
       transition: width 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
     }
-    .blue-section.revealed .bar-fill {
+    .blue-section.revealed .bar-fill,
+    .reveal-card.revealed .bar-fill {
       width: var(--target-width);
     }
     .bar-num {
@@ -1727,9 +1737,13 @@
       let timelineChart = null;
 
       function initRadarChart() {
-        if (typeof echarts === "undefined" || radarChart) return;
+        if (radarChart) return;
         const radarEl = document.getElementById('chart-radar');
         if (!radarEl) return;
+        if (typeof echarts === "undefined") {
+          setTimeout(initRadarChart, 150);
+          return;
+        }
         try {
           radarChart = echarts.init(radarEl, 'dark');
           radarChart.setOption({
@@ -1819,9 +1833,13 @@
       }
 
       function initTimelineChart() {
-        if (typeof echarts === "undefined" || timelineChart) return;
+        if (timelineChart) return;
         const timelineEl = document.getElementById('chart-timeline');
         if (!timelineEl) return;
+        if (typeof echarts === "undefined") {
+          setTimeout(initTimelineChart, 150);
+          return;
+        }
         try {
           timelineChart = echarts.init(timelineEl, 'dark');
           timelineChart.setOption({
@@ -1886,67 +1904,77 @@
         }
       }
 
+      function triggerCardReveal(target) {
+        if (!target) return;
+        target.classList.add('revealed');
+        // 触发数字跳动
+        target.querySelectorAll('.counter').forEach(counter => {
+          if (counter.dataset.animated) return;
+          counter.dataset.animated = "true";
+          const targetVal = +counter.getAttribute('data-target') || 0;
+          if (!targetVal) return;
+          let count = 0;
+          const inc = Math.max(1, Math.floor(targetVal / 40));
+          const timer = setInterval(() => {
+            count += inc;
+            if (count >= targetVal) {
+              counter.innerText = targetVal;
+              clearInterval(timer);
+            } else {
+              counter.innerText = count;
+            }
+          }, 20);
+        });
+
+        // 触发信笺诗意金句打字机效果 (只触发一次)
+        const typingEl = target.querySelector('#typing-quote');
+        if (typingEl && !typingEl.dataset.typed) {
+          typingEl.dataset.typed = "true";
+          const fullText = typingEl.innerText;
+          typingEl.innerText = "";
+          let charIndex = 0;
+          const typingInterval = setInterval(() => {
+            if (charIndex < fullText.length) {
+              typingEl.innerText += fullText.charAt(charIndex);
+              charIndex++;
+            } else {
+              clearInterval(typingInterval);
+            }
+          }, 35);
+        }
+
+        // 模块三：滑动到五维观影决策雷达时，开启动态展开渲染
+        if (target.querySelector('#chart-radar')) {
+          initRadarChart();
+        }
+
+        // 模块五：滑动到光影足迹历年走势时，开启柱状图拔地而起动效
+        if (target.querySelector('#chart-timeline')) {
+          initTimelineChart();
+        }
+      }
+
       // 动效系统：IntersectionObserver 滑入视口时触发对应动效
       try {
         const observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('revealed');
-              // 触发数字跳动
-              entry.target.querySelectorAll('.counter').forEach(counter => {
-                if (counter.dataset.animated) return;
-                counter.dataset.animated = "true";
-                const target = +counter.getAttribute('data-target') || 0;
-                if (!target) return;
-                let count = 0;
-                const inc = Math.max(1, Math.floor(target / 40));
-                const timer = setInterval(() => {
-                  count += inc;
-                  if (count >= target) {
-                    counter.innerText = target;
-                    clearInterval(timer);
-                  } else {
-                    counter.innerText = count;
-                  }
-                }, 20);
-              });
-
-              // 触发信笺诗意金句打字机效果 (只触发一次)
-              const typingEl = entry.target.querySelector('#typing-quote');
-              if (typingEl && !typingEl.dataset.typed) {
-                typingEl.dataset.typed = "true";
-                const fullText = typingEl.innerText;
-                typingEl.innerText = "";
-                let charIndex = 0;
-                const typingInterval = setInterval(() => {
-                  if (charIndex < fullText.length) {
-                    typingEl.innerText += fullText.charAt(charIndex);
-                    charIndex++;
-                  } else {
-                    clearInterval(typingInterval);
-                  }
-                }, 35);
-              }
-
-              // 模块三：滑动到五维观影决策雷达时，开启动态展开渲染
-              if (entry.target.querySelector('#chart-radar')) {
-                initRadarChart();
-              }
-
-              // 模块五：滑动到光影足迹历年走势时，开启柱状图拔地而起动效
-              if (entry.target.querySelector('#chart-timeline')) {
-                initTimelineChart();
-              }
+              triggerCardReveal(entry.target);
             }
           });
-        }, { threshold: 0.15 });
+        }, { threshold: 0.1 });
 
         document.querySelectorAll('.reveal-card').forEach(card => observer.observe(card));
       } catch (e) {
         console.warn("IntersectionObserver disabled:", e);
+      }
+
+      // 双保险兜底机制：即使 Observer 未触发或用户未滑动，500ms 内全部激活
+      setTimeout(() => {
+        document.querySelectorAll('.reveal-card').forEach(card => triggerCardReveal(card));
         initRadarChart();
         initTimelineChart();
-      }
+      }, 500);
 
       window.addEventListener('resize', () => {
         if (radarChart) radarChart.resize();
