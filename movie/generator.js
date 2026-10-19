@@ -386,6 +386,7 @@
 
   function generateHtml(stats, meta) {
     const doubanId = meta.douban_id || 'cinephile';
+    const origin = (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin !== 'null') ? window.location.origin : 'https://ucncn.cn';
     const overview = stats.overview || {};
     const ratingDist = stats.rating_distribution || {};
     const yearTimeline = stats.year_timeline || {};
@@ -505,13 +506,14 @@
     const posterWallHtml = activePosters.map((p, idx) => {
       const delay = +(((idx % 8) + Math.floor(idx / 8)) * 0.035).toFixed(3);
       const ct = cleanTitle(p.title);
+      const fullImg = p.img.startsWith('http') ? p.img : `${origin}${p.img}`;
       return `
         <div class="poster-card" style="--delay: ${delay}s;" title="${p.title}">
           <div class="poster-fallback-badge">
             <span class="poster-badge-icon">🎬</span>
             <span class="poster-fallback-title">${ct}</span>
           </div>
-          <img src="${p.img}" alt="${p.title}" referrerpolicy="no-referrer" loading="lazy" onload="this.previousElementSibling.style.display='none';" onerror="this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='none';" />
+          <img src="${fullImg}" alt="${p.title}" referrerpolicy="no-referrer" loading="lazy" onload="if(this.previousElementSibling)this.previousElementSibling.style.display='none';" onerror="this.style.opacity='0';" />
           <div class="poster-overlay">${ct}</div>
         </div>`;
     }).join('');
@@ -545,15 +547,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="${origin}/">
   <!-- 核心设置：no-referrer 彻底穿透豆瓣防盗链，确保海报 100% 显示 -->
   <meta name="referrer" content="no-referrer">
   <title>我的光影纪 · @${doubanId} 豆瓣观影报告</title>
-  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="${origin}/static/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <script src="/static/echarts.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://registry.npmmirror.com/echarts/5.4.3/files/dist/echarts.min.js';document.head.appendChild(s);"></script>
-  <script src="/static/marked.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://registry.npmmirror.com/marked/9.1.6/files/marked.min.js';document.head.appendChild(s);"></script>
+  <script src="${origin}/movie/static/echarts.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://registry.npmmirror.com/echarts/5.4.3/files/dist/echarts.min.js';document.head.appendChild(s);"></script>
+  <script src="${origin}/movie/static/marked.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://registry.npmmirror.com/marked/9.1.6/files/marked.min.js';document.head.appendChild(s);"></script>
   <style>
     :root {
       --bg-forest: #0b1510;
@@ -924,15 +927,15 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      opacity: 1;
-      transform: none;
+      opacity: 0.2;
+      transform: scale(0.92) translateY(8px);
       transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s),
                   transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s),
                   box-shadow 0.2s ease;
     }
-    .poster-card {
+    .blue-section.revealed .poster-card {
       opacity: 1;
-      transform: none;
+      transform: scale(1) translateY(0);
     }
     .poster-fallback-badge {
       display: flex;
@@ -1215,12 +1218,22 @@
       background: linear-gradient(90deg, #38bdf8 0%, #ffffff 100%);
       box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
       width: 0;
-      transition: width 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+      transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .blue-section.revealed .bar-fill,
     .reveal-card.revealed .bar-fill {
       width: var(--target-width);
     }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(1) .bar-fill { transition-delay: 0.05s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(2) .bar-fill { transition-delay: 0.11s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(3) .bar-fill { transition-delay: 0.17s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(4) .bar-fill { transition-delay: 0.23s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(5) .bar-fill { transition-delay: 0.29s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(6) .bar-fill { transition-delay: 0.35s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(7) .bar-fill { transition-delay: 0.41s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(8) .bar-fill { transition-delay: 0.47s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(9) .bar-fill { transition-delay: 0.53s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(10) .bar-fill { transition-delay: 0.59s; }
     .bar-num {
       width: 52px;
       text-align: right;
@@ -1954,27 +1967,23 @@
         }
       }
 
-      // 动效系统：IntersectionObserver 滑入视口时触发对应动效
+      // 动效系统：IntersectionObserver 当每个独立大模块滑入视口时，才当场触发专属动效
       try {
         const observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
               triggerCardReveal(entry.target);
+              observer.unobserve(entry.target); // 触发后解绑，保证每次滑入流畅展示专属动效
             }
           });
-        }, { threshold: 0.1 });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
         document.querySelectorAll('.reveal-card').forEach(card => observer.observe(card));
       } catch (e) {
         console.warn("IntersectionObserver disabled:", e);
-      }
-
-      // 双保险兜底机制：即使 Observer 未触发或用户未滑动，500ms 内全部激活
-      setTimeout(() => {
+        // 降级：仅在不支持 IntersectionObserver 时直接激活全部
         document.querySelectorAll('.reveal-card').forEach(card => triggerCardReveal(card));
-        initRadarChart();
-        initTimelineChart();
-      }, 500);
+      }
 
       window.addEventListener('resize', () => {
         if (radarChart) radarChart.resize();
