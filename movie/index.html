@@ -126,10 +126,89 @@
       </p>
 
       <div class="flex flex-wrap items-center gap-3 pt-1">
-        <!-- 核心可拖拽 a 标签 -->
-        <a id="bookmarklet-link" href="#" class="bookmarklet-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-sm shadow-lg shadow-amber-500/20 transition transform hover:-translate-y-0.5" title="按住拖拽至浏览器书签栏">
-          <span>🎬 豆瓣数据提取</span>
-        </a>
+        <!-- 核心可拖拽 a 标签外层包裹相对容器，用于精确定位悬浮图解指引 -->
+        <div class="relative inline-block" id="bookmarklet-wrapper">
+          <a id="bookmarklet-link" href="#" class="bookmarklet-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-sm shadow-lg shadow-amber-500/20 transition transform hover:-translate-y-0.5" title="按住拖拽至浏览器书签栏">
+            <span>🎬 豆瓣数据提取</span>
+          </a>
+
+          <!-- 首次打开网站时的悬浮示意图引导卡片 (Popover) -->
+          <div id="drag-guide-popover" class="hidden absolute left-0 sm:left-1/2 sm:-translate-x-1/2 bottom-full mb-3.5 w-[330px] sm:w-[380px] max-w-[calc(100vw-36px)] z-50 transition-all duration-300 opacity-0 transform translate-y-2 pointer-events-auto">
+            <div class="glass-card rounded-2xl p-4 border border-amber-400/40 bg-slate-950/95 shadow-2xl shadow-amber-500/20 text-left space-y-3">
+              <!-- 顶部标题与关闭按钮 -->
+              <div class="flex items-center justify-between pb-1 border-b border-gray-800">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-amber-300">
+                  <span class="inline-block animate-pulse">💡</span>
+                  <span>首次使用指引：拖入浏览器书签栏</span>
+                </div>
+                <button type="button" onclick="closeDragGuide()" class="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition text-sm leading-none" title="关闭且不再提示">
+                  ✕
+                </button>
+              </div>
+
+              <!-- 模拟浏览器顶部书签栏示意图 (SVG 图解) -->
+              <div class="bg-slate-900/90 rounded-xl p-2.5 border border-slate-700/80 shadow-inner">
+                <svg class="w-full h-auto" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- 浏览器外框与顶栏 -->
+                  <rect x="2" y="2" width="316" height="52" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+                  
+                  <!-- 窗口控制三色圆点 -->
+                  <circle cx="16" cy="16" r="3.5" fill="#ef4444"/>
+                  <circle cx="28" cy="16" r="3.5" fill="#f59e0b"/>
+                  <circle cx="40" cy="16" r="3.5" fill="#10b981"/>
+                  
+                  <!-- 模拟标签页 -->
+                  <path d="M55 24 L62 10 L150 10 L157 24 Z" fill="#1e293b"/>
+                  <text x="70" y="20" fill="#94a3b8" font-size="9" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">豆瓣电影</text>
+
+                  <!-- 模拟书签栏分割线 -->
+                  <line x1="2" y1="28" x2="318" y2="28" stroke="#334155" stroke-width="1"/>
+                  
+                  <!-- 书签栏文字 -->
+                  <text x="14" y="43" fill="#64748b" font-size="10" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">⭐ 书签栏</text>
+                  
+                  <!-- 目标放置槽位 (高亮发光虚线框) -->
+                  <rect x="75" y="32" width="165" height="19" rx="5" fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 3"/>
+                  <text x="157" y="45.5" fill="#fbbf24" font-size="9.5" font-weight="bold" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" text-anchor="middle">🎯 松开鼠标 · 放置在此处</text>
+
+                  <!-- 向上动态引导虚线与箭头 -->
+                  <path d="M157 105 C157 82, 157 72, 157 56" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"/>
+                  <polygon points="153,57 157,51 161,57" fill="#fbbf24"/>
+
+                  <!-- 底部被拖动的按钮示意 (Mini) -->
+                  <rect x="92" y="88" width="130" height="24" rx="6" fill="#f59e0b"/>
+                  <text x="157" y="104" fill="#000" font-size="11" font-weight="900" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" text-anchor="middle">🎬 豆瓣数据提取</text>
+
+                  <!-- 鼠标拖拽手势动效 -->
+                  <g transform="translate(196, 82)">
+                    <text x="0" y="18" font-size="16">👆</text>
+                  </g>
+                </svg>
+              </div>
+
+              <!-- 核心操作文案与关闭按钮 -->
+              <div class="flex items-center justify-between text-xs text-gray-300 pt-0.5 gap-2">
+                <div class="space-y-0.5">
+                  <div class="font-semibold text-gray-200 text-xs flex items-center gap-1">
+                    <span>按住此黄色按钮</span>
+                    <span class="text-amber-400 font-bold">&uarr;</span>
+                    <span>向上拖入书签栏</span>
+                  </div>
+                  <div class="text-[11px] text-gray-400">
+                    书签栏没显示？按快捷键 <kbd class="px-1 py-0.2 bg-gray-800 rounded text-amber-400 border border-gray-700 font-mono text-[10px]">Ctrl+Shift+B</kbd>
+                  </div>
+                </div>
+
+                <button type="button" onclick="closeDragGuide()" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs transition shadow-md shadow-amber-500/20 flex-shrink-0 cursor-pointer">
+                  我知道了
+                </button>
+              </div>
+            </div>
+
+            <!-- 底部向下指示小三角指针，直指下方黄色按钮 -->
+            <div class="w-3.5 h-3.5 bg-slate-950 border-r border-b border-amber-400/40 transform rotate-45 left-10 sm:left-1/2 sm:-translate-x-1/2 relative -mt-1.5 shadow-md"></div>
+          </div>
+        </div>
 
         <button onclick="copyBookmarkletCode()" class="text-xs text-gray-300 hover:text-white px-3.5 py-2 rounded-xl bg-gray-800/90 border border-gray-700 hover:border-gray-600 transition flex items-center gap-1.5">
           <span>📋 复制脚本代码</span>
@@ -237,6 +316,54 @@
     const bLink = document.getElementById('bookmarklet-link');
     if (bLink) {
       bLink.href = BOOKMARKLET_RAW;
+    }
+
+    // 首次进入页面时展示拖拽书签指引
+    function initDragGuide() {
+      const guideClosed = localStorage.getItem('moviedna_drag_guide_dismissed');
+      const popover = document.getElementById('drag-guide-popover');
+      const btn = document.getElementById('bookmarklet-link');
+      if (!popover || !btn) return;
+
+      if (!guideClosed) {
+        setTimeout(() => {
+          popover.classList.remove('hidden');
+          void popover.offsetWidth; // 触发回流执行动画
+          popover.classList.remove('opacity-0', 'translate-y-2');
+          popover.classList.add('opacity-100', 'translate-y-0');
+          btn.classList.add('ring-4', 'ring-amber-400/50', 'ring-offset-2', 'ring-offset-slate-900');
+        }, 350);
+      }
+
+      // 用户按住拖动书签按钮时，自动关闭并记录已完成
+      btn.addEventListener('dragstart', () => {
+        closeDragGuide();
+      });
+    }
+
+    function closeDragGuide() {
+      const popover = document.getElementById('drag-guide-popover');
+      const btn = document.getElementById('bookmarklet-link');
+      try {
+        localStorage.setItem('moviedna_drag_guide_dismissed', 'true');
+      } catch (e) {}
+
+      if (popover) {
+        popover.classList.remove('opacity-100', 'translate-y-0');
+        popover.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => {
+          popover.classList.add('hidden');
+        }, 300);
+      }
+      if (btn) {
+        btn.classList.remove('ring-4', 'ring-amber-400/50', 'ring-offset-2', 'ring-offset-slate-900');
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initDragGuide);
+    } else {
+      initDragGuide();
     }
 
     function copyBookmarkletCode() {
