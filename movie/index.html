@@ -414,12 +414,42 @@
               try {
                 const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
                 const blobUrl = URL.createObjectURL(blob);
-                window.location.href = blobUrl;
+
+                // 方案一：保持地址栏在 https://ucncn.cn/movie/#report，杜绝 blob: 暴露，100% 保护本地隐私
+                if (window.history && window.history.pushState) {
+                  window.history.pushState({ isReport: true }, '', '#report');
+                }
+
+                let iframe = document.getElementById('movie-report-frame');
+                if (!iframe) {
+                  iframe = document.createElement('iframe');
+                  iframe.id = 'movie-report-frame';
+                  iframe.style.position = 'fixed';
+                  iframe.style.top = '0';
+                  iframe.style.left = '0';
+                  iframe.style.width = '100vw';
+                  iframe.style.height = '100vh';
+                  iframe.style.border = 'none';
+                  iframe.style.zIndex = '999999';
+                  iframe.style.backgroundColor = '#0b1510';
+                  document.body.appendChild(iframe);
+
+                  window.addEventListener('popstate', () => {
+                    if (!location.hash.includes('report') && iframe) {
+                      iframe.style.display = 'none';
+                      iframe.src = 'about:blank';
+                      document.body.style.overflow = '';
+                    }
+                  });
+                }
+
+                document.body.style.overflow = 'hidden';
+                iframe.style.display = 'block';
+                iframe.src = blobUrl;
               } catch (blobErr) {
-                console.warn('Blob URL 异常，降级使用 document.write 呈现:', blobErr);
-                document.open();
-                document.write(html);
-                document.close();
+                console.warn('渲染异常，降级打开:', blobErr);
+                const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+                window.location.href = URL.createObjectURL(blob);
               }
             }, 200);
 

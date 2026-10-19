@@ -552,18 +552,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <script src="/static/echarts.min.js"></script>
-  <script>
-    if (typeof echarts === 'undefined') {
-      document.write('<script src="https://registry.npmmirror.com/echarts/5.4.3/files/dist/echarts.min.js"><\/script>');
-    }
-  </script>
-  <script src="/static/marked.min.js"></script>
-  <script>
-    if (typeof marked === 'undefined') {
-      document.write('<script src="https://registry.npmmirror.com/marked/9.1.6/files/marked.min.js"><\/script>');
-    }
-  </script>
+  <script src="/static/echarts.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://registry.npmmirror.com/echarts/5.4.3/files/dist/echarts.min.js';document.head.appendChild(s);"></script>
+  <script src="/static/marked.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://registry.npmmirror.com/marked/9.1.6/files/marked.min.js';document.head.appendChild(s);"></script>
   <style>
     :root {
       --bg-forest: #0b1510;
@@ -1399,6 +1389,16 @@
   <div class="film-grain"></div>
 
   <main class="viewport-flow">
+
+    <!-- 顶栏快捷导航 -->
+    <nav style="display:flex; justify-content:space-between; align-items:center; margin-bottom:-10px; z-index:40; position:relative;">
+      <button onclick="if(window.parent && window.parent.history && window.parent !== window) window.parent.history.back(); else window.history.back();" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; padding:7px 16px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px; backdrop-filter:blur(8px); transition:all 0.2s ease;">
+        <span>←</span> 返回重新上传
+      </button>
+      <button onclick="window.downloadThisReport()" style="background:rgba(0,181,29,0.18); border:1px solid rgba(0,181,29,0.4); color:#a7f3d0; padding:7px 16px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px; backdrop-filter:blur(8px); transition:all 0.2s ease;">
+        <span>💾</span> 导出离线 HTML
+      </button>
+    </nav>
 
     <!-- 拟物金属长尾夹 -->
     <div class="binder-clip">
