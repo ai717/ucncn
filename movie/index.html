@@ -55,19 +55,19 @@
       vertical-align: baseline;
     }
     @keyframes flowArrow {
-      from { stroke-dashoffset: 48; }
+      from { stroke-dashoffset: 64; }
       to { stroke-dashoffset: 0; }
     }
     .arrow-dash-flow {
-      stroke-dasharray: 8 6;
-      animation: flowArrow 1.2s linear infinite;
+      stroke-dasharray: 10 7;
+      animation: flowArrow 1.3s linear infinite;
     }
-    @keyframes floatArrow {
+    @keyframes bobbing {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
+      50% { transform: translateY(-8px); }
     }
-    .float-motion {
-      animation: floatArrow 2.2s ease-in-out infinite;
+    .bobbing-head {
+      animation: bobbing 1.6s ease-in-out infinite;
     }
   </style>
 </head>
@@ -147,43 +147,53 @@
             <span>🎬 豆瓣数据提取</span>
           </a>
 
-          <!-- 首次访问指引（纯净无弹窗设计：旋转大箭头指向上方书签栏 + 醒目大字） -->
-          <div id="drag-guide-popover" class="hidden absolute left-0 sm:left-2 bottom-full mb-2 w-[340px] sm:w-[480px] max-w-[calc(100vw-32px)] z-50 transition-all duration-300 opacity-0 pointer-events-auto select-none float-motion">
+          <!-- 首次访问指引（有扎实底色防文字重叠 + 提示紧贴按钮 + 箭头单独超高耸起直指书签栏） -->
+          <div id="drag-guide-popover" class="hidden absolute left-0 bottom-full mb-2.5 z-50 transition-all duration-300 opacity-0 pointer-events-auto select-none">
             <div class="relative">
               
-              <!-- 醒目大字标题栏与关闭按钮 (无沉重黑框) -->
-              <div class="flex items-center gap-2.5 flex-wrap">
-                <span class="text-2xl sm:text-3xl font-black text-amber-300 tracking-tight drop-shadow-[0_2px_14px_rgba(245,158,11,0.7)] flex items-center gap-1.5">
-                  <span class="animate-bounce inline-block text-xl">👆</span>
-                  <span>拖入浏览器书签栏</span>
-                </span>
-                <button type="button" onclick="closeDragGuide()" class="text-gray-400 hover:text-white hover:bg-slate-800/90 px-2 py-0.5 rounded-full text-xs transition border border-gray-700/80 bg-slate-900/80 backdrop-blur flex items-center gap-1 cursor-pointer" title="关闭且不再显示">
-                  <span>✕</span>
-                  <span class="text-[11px]">关闭</span>
-                </button>
-              </div>
+              <!-- 1. 独立超高旋转弧线大箭头 (高 280px，直冲天际逼近浏览器最顶端书签栏) -->
+              <div class="absolute left-8 bottom-full mb-1 w-[280px] sm:w-[340px] h-[240px] sm:h-[280px] pointer-events-none overflow-visible">
+                <svg class="w-full h-full overflow-visible" viewBox="0 0 280 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- 弯曲旋转主轨迹：从底部提示卡片上方出发，大幅向右上弯曲直刺屏幕最顶部 -->
+                  <path d="M 25 245 C 10 160, 55 65, 145 15" stroke="#fbbf24" stroke-width="4.5" stroke-linecap="round" class="arrow-dash-flow" filter="drop-shadow(0 0 10px rgba(245,158,11,0.85))"/>
+                  
+                  <!-- 箭头尖端 (朝向右上方的浏览器顶部书签栏位置) -->
+                  <g class="bobbing-head">
+                    <polygon points="134,22 150,6 160,24" fill="#fbbf24" filter="drop-shadow(0 0 12px #f59e0b)"/>
+                    
+                    <!-- 顶部指向文字发光小胶囊 -->
+                    <g transform="translate(162, 0)">
+                      <rect x="0" y="0" width="118" height="24" rx="12" fill="#020617" stroke="#f59e0b" stroke-width="1.5" filter="drop-shadow(0 4px 12px rgba(0,0,0,0.9))"/>
+                      <text x="59" y="16" fill="#fde68a" font-size="11" font-weight="900" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" text-anchor="middle">↑ 放进上方书签栏</text>
+                    </g>
+                  </g>
 
-              <!-- 极简说明文案 -->
-              <div class="text-xs sm:text-sm text-gray-300 font-medium mt-1 flex items-center gap-2 drop-shadow">
-                <span>鼠标按住黄色按钮，向上拖到顶部松手即可</span>
-                <span class="text-amber-400/90 text-xs hidden sm:inline">(快捷键 Ctrl+Shift+B 唤出书签栏)</span>
-              </div>
-
-              <!-- 旋转弯曲向上发光大箭头，直指屏幕顶部的浏览器书签栏位置 -->
-              <div class="w-full h-24 -mt-1 pointer-events-none">
-                <svg class="w-full h-full overflow-visible" viewBox="0 0 380 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <!-- 弯曲旋转主轨迹：从左下方按钮上方，向右上方优雅旋转直指顶部标签栏 -->
-                  <path d="M 35 85 C 45 42, 95 18, 185 8" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round" class="arrow-dash-flow" filter="drop-shadow(0 0 8px rgba(245,158,11,0.75))"/>
-                  
-                  <!-- 箭头尖端 (朝向右上方的浏览器书签栏方向) -->
-                  <polygon points="176,-1 198,7 183,20" fill="#fbbf24" filter="drop-shadow(0 0 10px #f59e0b)"/>
-                  
-                  <!-- 顶部指向微标引导文字 -->
-                  <text x="206" y="11" fill="#fde68a" font-size="11" font-weight="bold" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.8))">↑ 浏览器上方书签栏位置</text>
-                  
-                  <!-- 起点定位光晕圆点 -->
-                  <circle cx="35" cy="85" r="4.5" fill="#f59e0b" filter="drop-shadow(0 0 6px #f59e0b)"/>
+                  <!-- 起点定位发光圆点 -->
+                  <circle cx="25" cy="245" r="5" fill="#f59e0b" filter="drop-shadow(0 0 8px #f59e0b)"/>
                 </svg>
+              </div>
+
+              <!-- 2. 紧贴按钮的提示语卡片 (扎实深色底色，彻底防止与页面正文重叠！) -->
+              <div class="relative bg-slate-950 border-2 border-amber-400/80 rounded-2xl p-3 sm:p-3.5 shadow-2xl shadow-black ring-1 ring-amber-400/30 w-[320px] sm:w-[360px] space-y-1.5">
+                
+                <!-- 醒目大字标题与关闭按钮 -->
+                <div class="flex items-center justify-between gap-2 border-b border-slate-800/90 pb-1.5">
+                  <span class="text-xl sm:text-2xl font-black text-amber-300 tracking-tight flex items-center gap-1.5 drop-shadow">
+                    <span class="animate-bounce inline-block text-lg">👆</span>
+                    <span>拖入浏览器书签栏</span>
+                  </span>
+                  <button type="button" onclick="closeDragGuide()" class="text-gray-300 hover:text-white hover:bg-slate-800 px-2.5 py-1 rounded-lg text-xs font-bold transition border border-slate-700 bg-slate-900 leading-none cursor-pointer flex items-center gap-1 flex-shrink-0" title="关闭且不再提示">
+                    <span>✕</span>
+                    <span>关闭</span>
+                  </button>
+                </div>
+
+                <!-- 极简说明文案 -->
+                <div class="text-xs text-gray-300 font-medium leading-relaxed">
+                  鼠标按住下方黄色按钮，向上拖到顶部松手即可
+                  <span class="text-amber-400 font-bold block text-[11px] mt-0.5">快捷键 Ctrl+Shift+B 调出书签栏</span>
+                </div>
+
               </div>
 
             </div>
