@@ -106,6 +106,34 @@
       </p>
     </div>
 
+        <!-- 本地记忆报告快捷横幅 (检测到已生成历史报告时自动呈现) -->
+    <div id="cached-report-banner" class="hidden glass-card rounded-2xl p-5 text-left border-2 border-emerald-400/50 bg-gradient-to-r from-emerald-950/40 via-slate-900/90 to-teal-950/40 shadow-xl shadow-emerald-950/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4 text-center sm:text-left">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-2xl shrink-0 shadow-inner">
+          🎬
+        </div>
+        <div>
+          <div class="flex items-center justify-center sm:justify-start gap-2">
+            <span class="text-sm sm:text-base font-black text-gray-100">已就绪的专属观影报告</span>
+            <span id="cached-user-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-500/25 text-amber-300 border border-amber-400/40">@cinephile</span>
+          </div>
+          <div id="cached-desc" class="text-xs text-gray-300 mt-1">
+            包含 2323 部作品分析 · 纯本地记忆已就绪
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+        <button id="btn-open-cached" onclick="openCachedReport()" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 text-xs sm:text-sm font-black shadow-lg shadow-emerald-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+          <span>✨</span>
+          <span>立即查看我的报告</span>
+        </button>
+        <button onclick="clearCachedReportUI()" class="px-3.5 py-2.5 rounded-xl bg-slate-800/80 hover:bg-rose-950/50 border border-slate-700 hover:border-rose-500/50 text-gray-400 hover:text-rose-300 text-xs font-semibold transition cursor-pointer flex items-center gap-1" title="清除本次记忆，重新生成">
+          <span>✕</span>
+          <span class="hidden sm:inline">清除记忆</span>
+        </button>
+      </div>
+    </div>
+
     <!-- 快捷体验通道：典藏样例卡片 -->
     <div class="glass-card rounded-2xl p-4 md:p-5 text-left border border-amber-500/30 bg-gradient-to-r from-amber-950/20 via-slate-900/60 to-emerald-950/20 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="space-y-1 text-center sm:text-left">
@@ -410,47 +438,12 @@
 
             statusText.innerText = `🎉 解析完成！共分析 ${count} 部作品，正在呈现报告...`;
 
+            // 保存到浏览器本地记忆库 (100% 本地隐私，不上传服务器，刷新/关闭不丢失)
+            saveReportToCache({ html, meta: result.meta, count, time: Date.now() });
+            updateCachedBannerUI(doubanId, count);
+
             setTimeout(() => {
-              try {
-                const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-                const blobUrl = URL.createObjectURL(blob);
-
-                // 方案一：保持地址栏在 https://ucncn.cn/movie/#report，杜绝 blob: 暴露，100% 保护本地隐私
-                if (window.history && window.history.pushState) {
-                  window.history.pushState({ isReport: true }, '', '#report');
-                }
-
-                let iframe = document.getElementById('movie-report-frame');
-                if (!iframe) {
-                  iframe = document.createElement('iframe');
-                  iframe.id = 'movie-report-frame';
-                  iframe.style.position = 'fixed';
-                  iframe.style.top = '0';
-                  iframe.style.left = '0';
-                  iframe.style.width = '100vw';
-                  iframe.style.height = '100vh';
-                  iframe.style.border = 'none';
-                  iframe.style.zIndex = '999999';
-                  iframe.style.backgroundColor = '#0b1510';
-                  document.body.appendChild(iframe);
-
-                  window.addEventListener('popstate', () => {
-                    if (!location.hash.includes('report') && iframe) {
-                      iframe.style.display = 'none';
-                      iframe.src = 'about:blank';
-                      document.body.style.overflow = '';
-                    }
-                  });
-                }
-
-                document.body.style.overflow = 'hidden';
-                iframe.style.display = 'block';
-                iframe.src = blobUrl;
-              } catch (blobErr) {
-                console.warn('渲染异常，降级打开:', blobErr);
-                const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-                window.location.href = URL.createObjectURL(blob);
-              }
+              displayReportHtml(html);
             }, 200);
 
             return;

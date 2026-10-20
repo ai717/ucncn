@@ -1405,7 +1405,7 @@
 
     <!-- 顶栏快捷导航 -->
     <nav style="display:flex; justify-content:space-between; align-items:center; margin-bottom:-10px; z-index:40; position:relative;">
-      <button onclick="if(window.parent && window.parent.history && window.parent !== window) window.parent.history.back(); else window.history.back();" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; padding:7px 16px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px; backdrop-filter:blur(8px); transition:all 0.2s ease;">
+      <button onclick="if(window.parent && window.parent.closeReportView) window.parent.closeReportView(); else if(window.parent && window.parent.history && window.parent !== window) window.parent.history.back(); else window.history.back();" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; padding:7px 16px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px; backdrop-filter:blur(8px); transition:all 0.2s ease;">
         <span>←</span> 返回重新上传
       </button>
       <button onclick="window.downloadThisReport()" style="background:rgba(0,181,29,0.18); border:1px solid rgba(0,181,29,0.4); color:#a7f3d0; padding:7px 16px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px; backdrop-filter:blur(8px); transition:all 0.2s ease;">
