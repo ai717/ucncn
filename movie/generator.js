@@ -591,14 +591,276 @@
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
 
-    /* 宽屏版心：桌面端宽阔优雅 880px，支持大体一屏一模块的自然呼吸感 */
-    .viewport-flow {
+    /* ===== 逐屏漫游 (Story Mode) vs 全景长卷 (Overview Mode) ===== */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body.story-mode {
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+    }
+
+    body.story-mode .viewport-flow {
+      max-width: 100%;
+      padding: 0;
+      gap: 0;
+    }
+
+    .story-mode .story-slide-wrapper {
+      height: 100vh;
+      min-height: 100vh;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 70px 16px 36px 16px;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .story-mode .story-slide-wrapper > section {
+      width: 100%;
+      max-width: 880px;
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(16, 185, 129, 0.4) transparent;
+    }
+
+    /* 全景长卷模式 (Overview Mode) */
+    body.overview-mode {
+      height: auto !important;
+      overflow-y: visible !important;
+      scroll-snap-type: none !important;
+    }
+
+    body.overview-mode .viewport-flow {
       max-width: 880px;
       margin: 0 auto;
-      padding: 40px 20px 80px 20px;
+      padding: 85px 20px 80px 20px;
       display: flex;
       flex-direction: column;
       gap: 36px;
+    }
+
+    body.overview-mode .story-slide-wrapper {
+      height: auto !important;
+      min-height: auto !important;
+      scroll-snap-align: none !important;
+      padding: 0 !important;
+      display: block !important;
+    }
+
+    body.overview-mode .story-slide-wrapper > section {
+      max-height: none !important;
+      overflow: visible !important;
+    }
+
+    body.overview-mode #bottom-scroll-cue,
+    body.overview-mode #story-nav-dots {
+      display: none !important;
+    }
+
+    /* 顶部悬浮控制栏 */
+    .story-top-bar {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 880px;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      border-radius: 24px;
+      background: rgba(11, 21, 16, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .top-nav-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .top-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+    }
+
+    .top-nav-btn.download-btn {
+      background: rgba(0, 181, 29, 0.18);
+      border-color: rgba(0, 181, 29, 0.4);
+      color: #a7f3d0;
+    }
+    .top-nav-btn.download-btn:hover {
+      background: rgba(0, 181, 29, 0.32);
+    }
+
+    .mode-switch-pill {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 20px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .mode-btn {
+      padding: 4px 12px;
+      border-radius: 16px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-btn.active {
+      background: #00b51d;
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 181, 29, 0.4);
+    }
+
+    /* 右侧悬浮分页点 */
+    .story-nav-dots {
+      position: fixed;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .nav-dot-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      outline: none;
+    }
+
+    .nav-dot:hover, .nav-dot.active {
+      background: #00b51d;
+      transform: scale(1.4);
+      box-shadow: 0 0 12px #00b51d;
+    }
+
+    .nav-dot.active {
+      border-color: #ffffff;
+    }
+
+    .dot-label {
+      position: absolute;
+      right: 22px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(6px);
+      transition: all 0.2s ease;
+    }
+
+    .nav-dot-wrap:hover .dot-label {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* 底部滚动提示箭头 */
+    .bottom-scroll-cue {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 80;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: rgba(11, 21, 16, 0.8);
+      border: 1px solid rgba(0, 181, 29, 0.35);
+      color: #a7f3d0;
+      font-size: 11px;
+      font-weight: 800;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      animation: floatCue 2s infinite ease-in-out;
+      transition: opacity 0.3s ease;
+    }
+
+    @keyframes floatCue {
+      0%, 100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, -6px); }
+    }
+
+    /* 漫游通关全景解锁卡片 */
+    .completion-unlock-box {
+      background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.22) 0%, rgba(15, 23, 42, 0.95) 75%);
+      border: 1.5px solid rgba(245, 158, 11, 0.4);
+      border-radius: 24px;
+      padding: 24px 20px;
+      text-align: center;
+      margin-top: 24px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    }
+
+    .unlock-btn {
+      padding: 12px 28px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #000;
+      font-size: 13px;
+      font-weight: 900;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .unlock-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(245, 158, 11, 0.6);
     }
 
     /* 全模块保证 100% 完整呈现，避免动效脚本未触发时空白隐形 */
@@ -1398,23 +1660,45 @@
     }
   </style>
 </head>
-<body>
+<body class="story-mode">
   <div class="film-grain"></div>
+
+  <!-- 顶部悬浮控制栏 (常驻大屏，兼顾逐屏与全景) -->
+  <header class="story-top-bar">
+    <button onclick="if(window.parent && window.parent.closeReportView) window.parent.closeReportView(); else if(window.parent && window.parent.history && window.parent !== window) window.parent.history.back(); else window.history.back();" class="top-nav-btn">
+      <span>←</span> <span>返回重新上传</span>
+    </button>
+    <div class="mode-switch-pill">
+      <button id="btn-mode-story" onclick="toggleViewMode('story')" class="mode-btn active">📖 逐屏漫游</button>
+      <button id="btn-mode-overview" onclick="toggleViewMode('overview')" class="mode-btn">📜 全景长卷</button>
+    </div>
+    <button onclick="window.downloadThisReport()" class="top-nav-btn download-btn">
+      <span>💾</span> <span>导出离线 HTML</span>
+    </button>
+  </header>
+
+  <!-- 右侧逐屏导航锚点 -->
+  <aside class="story-nav-dots" id="story-nav-dots">
+    <div class="nav-dot-wrap"><span class="dot-label">1. 个人档案</span><button class="nav-dot active" onclick="goToSlide(1)" data-index="1"></button></div>
+    <div class="nav-dot-wrap"><span class="dot-label">2. 殿堂海报</span><button class="nav-dot" onclick="goToSlide(2)" data-index="2"></button></div>
+    <div class="nav-dot-wrap"><span class="dot-label">3. 决策雷达</span><button class="nav-dot" onclick="goToSlide(3)" data-index="3"></button></div>
+    <div class="nav-dot-wrap"><span class="dot-label">4. 严苛金字塔</span><button class="nav-dot" onclick="goToSlide(4)" data-index="4"></button></div>
+    <div class="nav-dot-wrap"><span class="dot-label">5. 历年足迹</span><button class="nav-dot" onclick="goToSlide(5)" data-index="5"></button></div>
+    <div class="nav-dot-wrap"><span class="dot-label">6. 短评切片</span><button class="nav-dot" onclick="goToSlide(6)" data-index="6"></button></div>
+    <div class="nav-dot-wrap"><span class="dot-label">7. 数字孪生</span><button class="nav-dot" onclick="goToSlide(7)" data-index="7"></button></div>
+  </aside>
+
+  <!-- 底部向下滑动探索提示 -->
+  <div class="bottom-scroll-cue" id="bottom-scroll-cue" onclick="goToNextSlide()">
+    <span>向下滚动探索下一章</span>
+    <span>↓</span>
+  </div>
 
   <main class="viewport-flow">
 
-    <!-- 顶栏快捷导航 -->
-    <nav style="display:flex; justify-content:space-between; align-items:center; margin-bottom:-10px; z-index:40; position:relative;">
-      <button onclick="if(window.parent && window.parent.closeReportView) window.parent.closeReportView(); else if(window.parent && window.parent.history && window.parent !== window) window.parent.history.back(); else window.history.back();" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; padding:7px 16px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px; backdrop-filter:blur(8px); transition:all 0.2s ease;">
-        <span>←</span> 返回重新上传
-      </button>
-      <button onclick="window.downloadThisReport()" style="background:rgba(0,181,29,0.18); border:1px solid rgba(0,181,29,0.4); color:#a7f3d0; padding:7px 16px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px; backdrop-filter:blur(8px); transition:all 0.2s ease;">
-        <span>💾</span> 导出离线 HTML
-      </button>
-    </nav>
-
-    <!-- 拟物金属长尾夹 -->
-    <div class="binder-clip">
+    <div class="story-slide-wrapper" id="slide-1" data-index="1" data-title="个人档案">
+      <!-- 拟物金属长尾夹 -->
+      <div class="binder-clip">
       <div class="clip-wire"></div>
       <div class="clip-body"></div>
     </div>
@@ -1534,7 +1818,9 @@
         —— 豆瓣光影纪元 · ${startYear}-${endYear}
       </div>
     </section>
+    </div>
 
+    <div class="story-slide-wrapper" id="slide-2" data-index="2" data-title="殿堂海报">
     <!-- 模块二：经典宝蓝 · 个人年度海报阵列 (还原 8x8 高密度 64 宫格大片成就墙) -->
     <section class="blue-section reveal-card">
       <div class="section-head">
@@ -1565,7 +1851,9 @@
         ${posterWallHtml}
       </div>
     </section>
+    </div>
 
+    <div class="story-slide-wrapper" id="slide-3" data-index="3" data-title="决策雷达">
     <!-- 模块三：五维观影决策雷达 (独立全幅大卡片) -->
     <section class="dark-section reveal-card">
       <div class="section-head">
@@ -1582,7 +1870,9 @@
         ${radarRankHtml}
       </div>
     </section>
+    </div>
 
+    <div class="story-slide-wrapper" id="slide-4" data-index="4" data-title="严苛金字塔">
     <!-- 模块四：星级严苛度分值金字塔 (独立全幅大卡片) -->
     <section class="dark-section reveal-card">
       <div class="section-head">
@@ -1675,7 +1965,9 @@
         </div>
       </div>
     </section>
+    </div>
 
+    <div class="story-slide-wrapper" id="slide-5" data-index="5" data-title="历年足迹">
     <!-- 模块五：光影足迹历年走势 (独立全幅大卡片) -->
     <section class="dark-section reveal-card">
       <div class="section-head">
@@ -1689,7 +1981,9 @@
       </div>
       <div id="chart-timeline" style="height: 340px; width: 100%; margin-top: 10px;"></div>
     </section>
+    </div>
 
+    <div class="story-slide-wrapper" id="slide-6" data-index="6" data-title="短评切片">
     <!-- 模块四：短评留痕 · 殿堂神作 vs 辛辣毒舌 -->
     <section class="dark-section reveal-card">
       <div class="section-head">
@@ -1710,7 +2004,9 @@
         </div>
       </div>
     </section>
+    </div>
 
+    <div class="story-slide-wrapper" id="slide-7" data-index="7" data-title="数字孪生">
     <!-- 模块五：AI 数字孪生选片大脑正规激活出口 -->
     <section class="ai-hero-card reveal-card">
       <span style="display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; background: rgba(0,181,29,0.15); border: 1px solid rgba(0,181,29,0.3); color: #34d399; margin-bottom: 16px;">
@@ -1735,10 +2031,20 @@
         </div>
         <textarea id="dna-prompt-textarea" rows="8" readonly style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid #334155; border-radius: 10px; color: #d1d5db; font-size: 12px; padding: 12px; font-family: monospace; outline: none;">${promptContent}</textarea>
       </div>
+
+      <!-- 漫游通关全景解锁卡片 -->
+      <div class="completion-unlock-box">
+        <div style="font-size: 20px; font-weight: 900; color: #fbbf24; margin-bottom: 6px;">🎉 光影基因探索漫游已全部完成！</div>
+        <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 16px;">恭喜您通览专属影迷画像。点击下方按钮即可进入全景长卷模式，通览整页长卷！</div>
+        <button onclick="toggleViewMode('overview')" class="unlock-btn">
+          <span>📜</span> 解锁全景长卷模式 (自由滚动浏览)
+        </button>
+      </div>
     </section>
+    </div>
 
     <!-- 底部版权 -->
-    <footer style="text-align: center; font-size: 12px; color: #059669; padding-top: 10px;">
+    <footer class="overview-footer" style="text-align: center; padding: 30px 20px 60px 20px; font-size: 12px; color: #64748b; border-top: 1px dashed rgba(255,255,255,0.15); margin-top: 20px;" style="text-align: center; font-size: 12px; color: #059669; padding-top: 10px;">
       MovieDNA · 致敬豆瓣光影精神家园 · 纯本地私密渲染 · 永久专属保存
     </footer>
 
@@ -1967,21 +2273,120 @@
         }
       }
 
-      // 动效系统：IntersectionObserver 当每个独立大模块滑入视口时，才当场触发专属动效
+      // ===== 逐屏漫游控制器与状态机 =====
+      let currentMode = 'story'; // 'story' | 'overview'
+      let currentSlideIndex = 1;
+      const totalSlides = 7;
+
+      window.toggleViewMode = function(mode) {
+        currentMode = mode;
+        const body = document.body;
+        const btnStory = document.getElementById('btn-mode-story');
+        const btnOverview = document.getElementById('btn-mode-overview');
+        const cue = document.getElementById('bottom-scroll-cue');
+        const dots = document.getElementById('story-nav-dots');
+
+        if (mode === 'overview') {
+          body.classList.remove('story-mode');
+          body.classList.add('overview-mode');
+          if (btnStory) btnStory.classList.remove('active');
+          if (btnOverview) btnOverview.classList.add('active');
+          if (cue) cue.style.display = 'none';
+          if (dots) dots.style.display = 'none';
+
+          // 激活所有卡片与图表
+          document.querySelectorAll('.reveal-card').forEach(c => triggerCardReveal(c));
+          initRadarChart();
+          initTimelineChart();
+        } else {
+          body.classList.remove('overview-mode');
+          body.classList.add('story-mode');
+          if (btnStory) btnStory.classList.add('active');
+          if (btnOverview) btnOverview.classList.remove('active');
+          if (cue) cue.style.display = 'inline-flex';
+          if (dots) dots.style.display = 'flex';
+          goToSlide(currentSlideIndex || 1);
+        }
+
+        setTimeout(() => {
+          if (radarChart) radarChart.resize();
+          if (timelineChart) timelineChart.resize();
+        }, 200);
+      };
+
+      window.goToSlide = function(index) {
+        index = Math.max(1, Math.min(totalSlides, index));
+        currentSlideIndex = index;
+        const targetSlide = document.getElementById('slide-' + index);
+        if (targetSlide) {
+          targetSlide.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        updateNavDots(index);
+      };
+
+      window.goToNextSlide = function() {
+        if (currentSlideIndex < totalSlides) {
+          goToSlide(currentSlideIndex + 1);
+        } else {
+          toggleViewMode('overview');
+        }
+      };
+
+      function updateNavDots(index) {
+        document.querySelectorAll('.nav-dot').forEach(dot => {
+          const idx = +dot.getAttribute('data-index');
+          if (idx === index) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+
+        const cue = document.getElementById('bottom-scroll-cue');
+        if (cue) {
+          if (index >= totalSlides) {
+            cue.style.opacity = '0';
+            cue.style.pointerEvents = 'none';
+          } else {
+            cue.style.opacity = '1';
+            cue.style.pointerEvents = 'auto';
+          }
+        }
+      }
+
+      // 键盘快捷上下页翻屏
+      window.addEventListener('keydown', (e) => {
+        if (currentMode !== 'story') return;
+        if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+          e.preventDefault();
+          goToNextSlide();
+        } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+          e.preventDefault();
+          goToSlide(currentSlideIndex - 1);
+        }
+      });
+
+      // 视口监听：每滑入一屏，激活对应动效并更新指示器
       try {
-        const observer = new IntersectionObserver((entries) => {
+        const slideObserver = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              triggerCardReveal(entry.target);
-              observer.unobserve(entry.target); // 触发后解绑，保证每次滑入流畅展示专属动效
+              const idx = +entry.target.getAttribute('data-index');
+              if (idx) {
+                currentSlideIndex = idx;
+                updateNavDots(idx);
+              }
+              const card = entry.target.querySelector('.reveal-card');
+              if (card) {
+                triggerCardReveal(card);
+              }
             }
           });
-        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        }, { threshold: 0.35 });
 
-        document.querySelectorAll('.reveal-card').forEach(card => observer.observe(card));
+        document.querySelectorAll('.story-slide-wrapper').forEach(wrapper => slideObserver.observe(wrapper));
       } catch (e) {
         console.warn("IntersectionObserver disabled:", e);
-        // 降级：仅在不支持 IntersectionObserver 时直接激活全部
         document.querySelectorAll('.reveal-card').forEach(card => triggerCardReveal(card));
       }
 
