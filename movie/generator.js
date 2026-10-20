@@ -299,15 +299,28 @@
     const totalCount = records.length;
     if (totalCount === 0) return null;
 
-    const ratedRecords = records.filter(r => r.rating !== null && r.rating !== undefined && !isNaN(r.rating));
+    const ratedRecords = records.filter(r => r.rating !== null && r.rating !== undefined && !isNaN(r.rating) && Number(r.rating) > 0);
     const unratedCount = totalCount - ratedRecords.length;
 
-    const ratings = ratedRecords.map(r => Number(r.rating));
+    // 智能适配 5分制 / 10分制
+    const rawRatings = ratedRecords.map(r => Number(r.rating));
+    const isFiveScale = rawRatings.length > 0 && Math.max(...rawRatings) <= 5;
+
+    ratedRecords.forEach(r => {
+      let num = Number(r.rating);
+      if (isFiveScale) num = num * 2;
+      r._calc_rating = num;
+    });
+
+    const ratings = ratedRecords.map(r => r._calc_rating !== undefined ? r._calc_rating : Number(r.rating));
     const avgRating = ratings.length ? +(ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2) : 0.0;
 
     const ratingDist = { 10: 0, 8: 0, 6: 0, 4: 0, 2: 0 };
     ratings.forEach(r => {
-      if (ratingDist[r] !== undefined) ratingDist[r]++;
+      let bucket = Math.round(r / 2) * 2;
+      if (bucket > 10) bucket = 10;
+      if (bucket < 2) bucket = 2;
+      if (ratingDist[bucket] !== undefined) ratingDist[bucket]++;
     });
 
     const n = ratings.length || 1;
@@ -2444,9 +2457,32 @@
   // Public MovieDNA Engine Interface
   window.MovieDNAEngine = {
     parseDoubanJson(raw) {
-      const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      const meta = data.meta || { douban_id: 'cinephile' };
-      const records = data.records || [];
+      let data = raw;
+      if (typeof raw === 'string') {
+        // 去除可能的 UTF-8 BOM 头与首尾空白
+        const cleaned = raw.trim().replace(/^\uFEFF/, '');
+        data = JSON.parse(cleaned);
+      }
+      if (!data) {
+        throw new Error('JSON 数据解析为空');
+      }
+
+      let meta = { douban_id: 'cinephile' };
+      let records = [];
+
+      if (Array.isArray(data)) {
+        // 直接就是条目数组
+        records = data;
+      } else if (typeof data === 'object') {
+        if (data.meta && typeof data.meta === 'object') {
+          meta = data.meta;
+        }
+        records = data.records || data.items || data.data || data.movies || data.list || [];
+        if (!records.length && Array.isArray(data.rows)) {
+          records = data.rows;
+        }
+      }
+
       return { meta, records };
     },
 

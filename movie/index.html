@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
   <title>MovieDNA - 豆瓣个人观影基因一键生成</title>
-  <link rel="icon" type="image/svg+xml" href="moviedna/web/static/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="generator.js"></script>
+  <script src="/movie/generator.js?v=2.6"></script>
   <style>
     body {
       background: #090e17;
@@ -429,68 +429,39 @@
         try {
           statusText.innerText = '✨ 正在计算评分分布、年份历程与五维审美雷达...';
           
-          // 纯前端本地解析生成
-          if (window.MovieDNAEngine) {
-            const result = window.MovieDNAEngine.buildReportFromRawJson(textContent);
-            const html = result.html;
-            const doubanId = result.meta.douban_id || 'cinephile';
-            const count = (result.stats.overview && result.stats.overview.total_movies) || result.meta.total_count || 0;
-
-            statusText.innerText = `🎉 解析完成！共分析 ${count} 部作品，正在呈现报告...`;
-
-            // 保存到浏览器本地记忆库 (100% 本地隐私，不上传服务器，刷新/关闭不丢失)
-            saveReportToCache({ html, meta: result.meta, count, time: Date.now() });
-            updateCachedBannerUI(doubanId, count);
-
-            setTimeout(() => {
-              displayReportHtml(html);
-            }, 200);
-
-            return;
+          // 纯前端本地解析生成（零服务器依赖，100% 隐私）
+          if (!window.MovieDNAEngine) {
+            throw new Error('本地分析引擎尚未加载完成，请刷新网页（Ctrl+F5）重试！');
           }
 
-          // 降级：如果未加载 generator.js，尝试调用后端 /api/analyze
-          sendToServer(file);
+          const result = window.MovieDNAEngine.buildReportFromRawJson(textContent);
+          const html = result.html;
+          const doubanId = (result.meta && result.meta.douban_id) || 'cinephile';
+          const count = (result.stats && result.stats.overview && result.stats.overview.total_movies) || (result.meta && result.meta.total_count) || (result.records && result.records.length) || 0;
+
+          statusText.innerText = `🎉 解析完成！共分析 ${count} 部作品，正在呈现报告...`;
+
+          // 保存到浏览器本地记忆库 (100% 本地隐私，不上传服务器，刷新/关闭不丢失)
+          saveReportToCache({ html, meta: result.meta, count, time: Date.now() });
+          updateCachedBannerUI(doubanId, count);
+
+          setTimeout(() => {
+            displayReportHtml(html);
+          }, 200);
 
         } catch (err) {
-          console.error(err);
-          // 尝试调用后端 /api/analyze
-          sendToServer(file);
+          console.error('MovieDNA 本地解析异常:', err);
+          statusContainer.classList.add('hidden');
+          alert('解析出错：' + (err.message || '文件格式不正确，请确保上传完整的 JSON 文件'));
         }
       };
 
       reader.onerror = function() {
-        sendToServer(file);
+        statusContainer.classList.add('hidden');
+        alert('读取本地文件失败，请检查文件权限后重试！');
       };
 
       reader.readAsText(file);
-    }
-
-    function sendToServer(file) {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      statusText.innerText = '📡 正在请求服务引擎生成报告...';
-
-      fetch('/api/analyze', {
-        method: 'POST',
-        body: formData
-      })
-      .then(resp => {
-        if (!resp.ok) throw new Error('解析失败，请检查文件格式是否为 MovieDNA 导出的 JSON');
-        return resp.json();
-      })
-      .then(data => {
-        if (data.redirect_url) {
-          window.location.href = data.redirect_url;
-        } else {
-          location.reload();
-        }
-      })
-      .catch(err => {
-        alert('解析出错：' + err.message);
-        statusContainer.classList.add('hidden');
-      });
     }
   </script>
 </body>
