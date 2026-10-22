@@ -442,8 +442,12 @@
           statusText.innerText = `🎉 解析完成！共分析 ${count} 部作品，正在呈现报告...`;
 
           // 保存到浏览器本地记忆库 (100% 本地隐私，不上传服务器，刷新/关闭不丢失)
-          saveReportToCache({ html, meta: result.meta, count, time: Date.now() });
-          updateCachedBannerUI(doubanId, count);
+          try {
+            saveReportToCache({ html, meta: result.meta, count, time: Date.now() });
+            updateCachedBannerUI(doubanId, count);
+          } catch (cacheErr) {
+            console.warn('本地记忆存储警告:', cacheErr);
+          }
 
           setTimeout(() => {
             displayReportHtml(html);
@@ -463,6 +467,210 @@
 
       reader.readAsText(file);
     }
+  
+
+    /* ==========================================================================
+       本地记忆库与全屏无缝报告查看器 (纯前端 IndexedDB + History API)
+       ========================================================================== */
+    const DB_NAME = 'MovieDNA_Storage';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'reports';
+
+    function getDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+          reject(new Error('浏览器不支持 IndexedDB'));
+          return;
+        }
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = function(e) {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = function() {
+          resolve(req.result);
+        };
+        req.onerror = function() {
+          reject(req.error);
+        };
+      });
+    }
+
+    async function saveReportToCache(reportData) {
+      const meta = reportData.meta || {};
+      const doubanId = meta.douban_id || 'cinephile';
+      const count = reportData.count || 0;
+
+      // 1. 同步保存元数据至 localStorage (用于打开页面瞬间唤醒快捷横幅)
+      try {
+        localStorage.setItem('moviedna_cached_meta', JSON.stringify({
+          doubanId,
+          count,
+          time: reportData.time || Date.now()
+        }));
+      } catch (e) {
+        console.warn('localStorage 保存失败:', e);
+      }
+
+      // 2. 将完整报告 HTML 存储于 IndexedDB
+      try {
+        const db = await getDB();
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        store.put({
+          id: 'latest',
+          html: reportData.html,
+          meta: reportData.meta,
+          count: count,
+          time: reportData.time || Date.now()
+        });
+      } catch (e) {
+        console.warn('IndexedDB 写入失败:', e);
+      }
+    }
+
+    async function loadReportFromCache() {
+      const db = await getDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.get('latest');
+        req.onsuccess = function() {
+          if (req.result && req.result.html) {
+            resolve(req.result);
+          } else {
+            reject(new Error('未在本地记忆库中找到历史报告'));
+          }
+        };
+        req.onerror = function() {
+          reject(req.error);
+        };
+      });
+    }
+
+    function updateCachedBannerUI(doubanId, count) {
+      const banner = document.getElementById('cached-report-banner');
+      const userBadge = document.getElementById('cached-user-badge');
+      const desc = document.getElementById('cached-desc');
+      if (!banner) return;
+
+      if (doubanId && count) {
+        if (userBadge) userBadge.innerText = '@' + doubanId;
+        if (desc) desc.innerText = '包含 ' + count + ' 部作品分析 · 纯本地记忆已就绪';
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    async function openCachedReport() {
+      try {
+        const cached = await loadReportFromCache();
+        if (cached && cached.html) {
+          displayReportHtml(cached.html);
+        } else {
+          alert('未能调出本地记忆报告，请重新上传文件！');
+          clearCachedReportUI();
+        }
+      } catch (err) {
+        console.warn(err);
+        alert('未能调出本地记忆报告，请重新上传文件！');
+        clearCachedReportUI();
+      }
+    }
+
+    async function clearCachedReportUI() {
+      try {
+        localStorage.removeItem('moviedna_cached_meta');
+        const db = await getDB();
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete('latest');
+      } catch (e) {
+        console.warn('清除缓存失败:', e);
+      }
+      const banner = document.getElementById('cached-report-banner');
+      if (banner) banner.classList.add('hidden');
+    }
+
+    function displayReportHtml(html) {
+      try {
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const blobUrl = URL.createObjectURL(blob);
+
+        if (window.history && window.history.pushState) {
+          window.history.pushState({ isReport: true }, '', '#report');
+        }
+
+        let iframe = document.getElementById('movie-report-frame');
+        if (!iframe) {
+          iframe = document.createElement('iframe');
+          iframe.id = 'movie-report-frame';
+          iframe.style.position = 'fixed';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
+          iframe.style.width = '100vw';
+          iframe.style.height = '100vh';
+          iframe.style.border = 'none';
+          iframe.style.zIndex = '999999';
+          iframe.style.backgroundColor = '#0b1510';
+          document.body.appendChild(iframe);
+
+          window.addEventListener('popstate', function() {
+            if (!location.hash.includes('report') && iframe) {
+              iframe.style.display = 'none';
+              iframe.src = 'about:blank';
+              document.body.style.overflow = '';
+            }
+          });
+        }
+
+        document.body.style.overflow = 'hidden';
+        iframe.style.display = 'block';
+        iframe.src = blobUrl;
+      } catch (blobErr) {
+        console.warn('渲染异常，降级通过新窗口呈现:', blobErr);
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        window.location.href = URL.createObjectURL(blob);
+      }
+    }
+
+    function closeReportView() {
+      const iframe = document.getElementById('movie-report-frame');
+      if (iframe) {
+        iframe.style.display = 'none';
+        iframe.src = 'about:blank';
+      }
+      document.body.style.overflow = '';
+      if (location.hash.includes('report')) {
+        history.back();
+      }
+    }
+
+    // 挂载至全局以供 HTML 与子 frame 调用
+    window.openCachedReport = openCachedReport;
+    window.clearCachedReportUI = clearCachedReportUI;
+    window.closeReportView = closeReportView;
+    window.displayReportHtml = displayReportHtml;
+    window.saveReportToCache = saveReportToCache;
+    window.updateCachedBannerUI = updateCachedBannerUI;
+
+    // 页面启动时自动检测是否存在历史报告记忆
+    (function initLocalMemoryBanner() {
+      try {
+        const savedMetaStr = localStorage.getItem('moviedna_cached_meta');
+        if (savedMetaStr) {
+          const saved = JSON.parse(savedMetaStr);
+          if (saved && saved.count) {
+            updateCachedBannerUI(saved.doubanId, saved.count);
+          }
+        }
+      } catch (e) {
+        console.warn('检测历史记忆异常:', e);
+      }
+    })();
+
   </script>
 </body>
 </html>
