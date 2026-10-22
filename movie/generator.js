@@ -609,69 +609,123 @@
       scroll-behavior: smooth;
     }
 
+    /* 逐屏漫游：一整屏全景画布，彻底消除卡片断层与黑缝隙 */
     body.story-mode {
       height: 100vh;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-      scroll-behavior: smooth;
+      width: 100vw;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
     }
 
     body.story-mode .viewport-flow {
-      max-width: 100%;
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
       padding: 0;
-      gap: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
     }
 
-    .story-mode .story-slide-wrapper {
+    body.story-mode .story-slide-wrapper {
+      width: 100vw;
       height: 100vh;
       min-height: 100vh;
-      scroll-snap-align: start;
-      scroll-snap-stop: always;
+      max-height: 100vh;
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 70px 16px 36px 16px;
+      padding: 68px 24px 62px 24px;
       box-sizing: border-box;
       position: relative;
+      overflow: hidden;
     }
 
-    .story-mode .story-slide-wrapper > section {
+    /* 专属各章节主题光影氛围（满屏柔和极光呼吸，消除硬边） */
+    #slide-1 {
+      background: radial-gradient(circle at 50% 32%, rgba(16, 185, 129, 0.16) 0%, rgba(9, 21, 16, 0.98) 75%);
+    }
+    #slide-2 {
+      background: radial-gradient(circle at 50% 32%, rgba(14, 165, 233, 0.16) 0%, rgba(8, 18, 30, 0.98) 75%);
+    }
+    #slide-3 {
+      background: radial-gradient(circle at 50% 32%, rgba(52, 211, 153, 0.16) 0%, rgba(9, 21, 16, 0.98) 75%);
+    }
+    #slide-4 {
+      background: radial-gradient(circle at 50% 32%, rgba(245, 158, 11, 0.16) 0%, rgba(20, 15, 8, 0.98) 75%);
+    }
+    #slide-5 {
+      background: radial-gradient(circle at 50% 32%, rgba(56, 189, 248, 0.16) 0%, rgba(8, 18, 28, 0.98) 75%);
+    }
+    #slide-6 {
+      background: radial-gradient(circle at 50% 32%, rgba(245, 158, 11, 0.13) 0%, rgba(17, 12, 18, 0.98) 75%);
+    }
+    #slide-7 {
+      background: radial-gradient(circle at 50% 32%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 16, 12, 0.98) 75%);
+    }
+
+    body.story-mode .story-slide-wrapper > section {
       width: 100%;
-      max-width: 880px;
-      max-height: calc(100vh - 110px);
+      max-width: 900px;
+      max-height: calc(100vh - 128px);
       overflow-y: auto;
       scrollbar-width: thin;
-      scrollbar-color: rgba(16, 185, 129, 0.4) transparent;
+      scrollbar-color: rgba(16, 185, 129, 0.35) transparent;
+      margin: 0 auto;
+      border-radius: 26px;
     }
 
-    /* 全景长卷模式 (Overview Mode) */
+    /* 全景长卷模式 (Overview Mode) —— 连贯画卷，光影过渡，杜绝生硬切割 */
     body.overview-mode {
       height: auto !important;
-      overflow-y: visible !important;
-      scroll-snap-type: none !important;
+      overflow-y: auto !important;
+      position: static !important;
     }
 
     body.overview-mode .viewport-flow {
-      max-width: 880px;
+      position: static !important;
+      transform: none !important;
+      max-width: 900px;
       margin: 0 auto;
       padding: 85px 20px 80px 20px;
       display: flex;
       flex-direction: column;
-      gap: 36px;
+      gap: 32px;
     }
 
     body.overview-mode .story-slide-wrapper {
+      width: 100% !important;
       height: auto !important;
       min-height: auto !important;
-      scroll-snap-align: none !important;
+      max-height: none !important;
       padding: 0 !important;
+      background: none !important;
       display: block !important;
     }
 
     body.overview-mode .story-slide-wrapper > section {
       max-height: none !important;
       overflow: visible !important;
+    }
+
+    /* 长卷模式模块间高级微光胶片分割条 */
+    body.overview-mode .story-slide-wrapper:not(:last-child)::after {
+      content: "";
+      display: block;
+      width: 180px;
+      height: 2px;
+      margin: 32px auto 0 auto;
+      background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.35), transparent);
     }
 
     body.overview-mode #bottom-scroll-cue,
@@ -816,7 +870,7 @@
       transform: translateX(0);
     }
 
-    /* 底部滚动提示箭头 */
+    /* 底部翻页控制器与当前页码指示 */
     .bottom-scroll-cue {
       position: fixed;
       bottom: 18px;
@@ -825,24 +879,25 @@
       z-index: 80;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 16px;
-      border-radius: 20px;
-      background: rgba(11, 21, 16, 0.8);
-      border: 1px solid rgba(0, 181, 29, 0.35);
+      gap: 10px;
+      padding: 8px 22px;
+      border-radius: 24px;
+      background: rgba(11, 21, 16, 0.9);
+      border: 1px solid rgba(52, 211, 153, 0.4);
       color: #a7f3d0;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(16px);
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-      animation: floatCue 2s infinite ease-in-out;
-      transition: opacity 0.3s ease;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 20px rgba(16, 185, 129, 0.2);
+      transition: all 0.25s ease;
+      user-select: none;
     }
-
-    @keyframes floatCue {
-      0%, 100% { transform: translate(-50%, 0); }
-      50% { transform: translate(-50%, -6px); }
+    .bottom-scroll-cue:hover {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: #34d399;
+      transform: translateX(-50%) translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6), 0 0 25px rgba(52, 211, 153, 0.35);
     }
 
     /* 漫游通关全景解锁卡片 */
@@ -892,43 +947,17 @@
       transform: none !important;
     }
 
-    /* 金属长尾夹拟物隐喻 */
-    .binder-clip {
-      width: 56px;
-      height: 48px;
-      margin: 0 auto -20px auto;
-      position: relative;
-      z-index: 30;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .clip-wire {
-      width: 32px;
-      height: 28px;
-      border: 3px solid #71717a;
-      border-bottom: none;
-      border-radius: 12px 12px 0 0;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-    }
-    .clip-body {
-      width: 52px;
-      height: 18px;
-      background: linear-gradient(180deg, #27272a 0%, #18181b 100%);
-      border-radius: 4px;
-      border: 1px solid #3f3f46;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
-
-    /* 模块 1：复古牛油果淡青信纸 (吸收图 1、图 4、图 5) */
+    /* 模块 1：深邃墨绿 & 典藏黄金私信殿堂 (纯正电影暗夜质感，杜绝白卡片割裂) */
     .paper-section {
-      background: var(--paper-cream);
-      color: var(--text-dark);
-      border-radius: 32px;
-      padding: 48px 44px 40px 44px;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 181, 29, 0.12);
+      background: linear-gradient(145deg, rgba(16, 36, 26, 0.88) 0%, rgba(8, 20, 15, 0.96) 100%);
+      color: var(--text-light);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      border-radius: 28px;
+      padding: 40px 38px 34px 38px;
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.65), 0 0 30px rgba(0, 181, 29, 0.12);
       position: relative;
       overflow: hidden;
+      backdrop-filter: blur(20px);
     }
 
     /* 复古邮戳印章 */
@@ -973,7 +1002,7 @@
       font-size: 32px;
       box-shadow: 0 6px 16px rgba(0,0,0,0.08);
     }
-    .user-main { font-size: 28px; font-weight: 900; color: #064e3b; letter-spacing: -0.5px; }
+    .user-main { font-size: 28px; font-weight: 900; color: #f8fafc; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
     .user-tagline {
       display: inline-flex; align-items: center; gap: 6px;
       font-size: 13px; font-weight: 700; color: #047857;
@@ -989,11 +1018,11 @@
       margin-bottom: 32px;
     }
     .capsule-card {
-      background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      border-radius: 24px;
-      padding: 24px 22px 20px 22px;
-      box-shadow: 0 8px 24px -6px rgba(6, 78, 59, 0.08), 0 2px 6px rgba(0, 0, 0, 0.02);
+      background: rgba(11, 26, 19, 0.78);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      border-radius: 20px;
+      padding: 22px 20px 18px 20px;
+      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.45);
       transition: transform 0.25s ease, box-shadow 0.25s ease;
       position: relative;
       overflow: hidden;
@@ -1035,9 +1064,9 @@
       font-size: 16px;
     }
     .capsule-label {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
-      color: #064e3b;
+      color: #e2e8f0;
       letter-spacing: 0.2px;
     }
     .capsule-badge {
@@ -1054,12 +1083,13 @@
       gap: 4px;
     }
     .capsule-val {
-      font-size: 46px;
+      font-size: 42px;
       font-weight: 950;
-      color: #064e3b;
+      color: #34d399;
       line-height: 1;
-      letter-spacing: -1.5px;
+      letter-spacing: -1.2px;
       font-feature-settings: "tnum";
+      text-shadow: 0 0 15px rgba(52, 211, 153, 0.35);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .capsule-unit {
@@ -1076,12 +1106,12 @@
     /* 电影信笺区域：时光打字机、分段便签式排版与层次重构 */
     .letter-parchment {
       font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
-      background: linear-gradient(180deg, #ffffff 0%, #f7faf7 100%);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      border-radius: 20px;
-      padding: 32px 28px;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 20px rgba(6, 78, 59, 0.04);
+      background: rgba(7, 18, 13, 0.82);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      border-radius: 18px;
+      padding: 28px 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
       position: relative;
     }
     .letter-header {
@@ -1093,9 +1123,9 @@
       border-bottom: 1px dashed rgba(4, 120, 87, 0.2);
     }
     .letter-salutation {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
-      color: #064e3b;
+      color: #a7f3d0;
       letter-spacing: 0.5px;
     }
     .letter-machine-badge {
@@ -1116,30 +1146,30 @@
       gap: 16px;
     }
     .letter-paragraph {
-      font-size: 15px;
+      font-size: 14.5px;
       line-height: 2.1;
-      color: #374151;
+      color: #cbd5e1;
       text-align: justify;
       position: relative;
       padding-left: 18px;
-      border-left: 2px solid rgba(16, 185, 129, 0.35);
+      border-left: 2px solid rgba(52, 211, 153, 0.4);
     }
     .letter-paragraph strong {
-      color: #064e3b;
+      color: #a7f3d0;
       font-weight: 700;
-      background: rgba(16, 185, 129, 0.12);
+      background: rgba(16, 185, 129, 0.18);
       padding: 1px 4px;
       border-radius: 4px;
     }
     .letter-footer-quote {
       margin-top: 10px;
       padding: 14px 18px;
-      background: rgba(220, 252, 231, 0.5);
+      background: rgba(6, 78, 59, 0.25);
       border-radius: 12px;
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      font-size: 14px;
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      font-size: 13.5px;
       line-height: 1.9;
-      color: #064e3b;
+      color: #6ee7b7;
       font-style: italic;
     }
     .typing-cursor {
@@ -1156,12 +1186,14 @@
       50% { opacity: 0; }
     }
 
-    /* 模块 2：经典宝蓝光影海报阵列 (吸收图 2) */
+    /* 模块 2：深邃午夜蓝宝石 · 殿堂级海报阵列 */
     .blue-section {
-      background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
-      border-radius: 32px;
-      padding: 40px 36px;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(2, 132, 199, 0.25);
+      background: linear-gradient(145deg, rgba(10, 30, 48, 0.88) 0%, rgba(6, 18, 30, 0.96) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 28px;
+      padding: 36px 34px;
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.65), 0 0 30px rgba(14, 165, 233, 0.12);
+      backdrop-filter: blur(20px);
     }
     .section-head {
       display: flex;
@@ -1710,13 +1742,7 @@
   <main class="viewport-flow">
 
     <div class="story-slide-wrapper" id="slide-1" data-index="1" data-title="个人档案">
-      <!-- 拟物金属长尾夹 -->
-      <div class="binder-clip">
-      <div class="clip-wire"></div>
-      <div class="clip-body"></div>
-    </div>
-
-    <!-- 模块一：复古信笺 · 个人光影档案 (自适应人格文案) -->
+    <!-- 模块一：典藏墨绿 · 个人光影档案 (自适应人格文案) -->
     <section class="paper-section reveal-card">
       <div class="stamp-seal">
         <div>观影基因</div>
@@ -1827,7 +1853,7 @@
         </div>
       </div>
 
-      <div style="text-align: right; font-size: 12px; color: #047857; font-weight: 800; margin-top: 10px;">
+      <div style="text-align: right; font-size: 12px; color: #34d399; font-weight: 800; margin-top: 10px;">
         —— 豆瓣光影纪元 · ${startYear}-${endYear}
       </div>
     </section>
@@ -2286,14 +2312,16 @@
         }
       }
 
-      // ===== 逐屏漫游控制器与状态机 =====
+      // ===== 真正一页一页滑动与平滑漫游控制器 (Slide Flip Deck Engine) =====
       let currentMode = 'story'; // 'story' | 'overview'
       let currentSlideIndex = 1;
       const totalSlides = 7;
+      const SLIDE_TITLES = ['个人档案', '殿堂海报', '决策雷达', '严苛金字塔', '历年足迹', '短评切片', '数字孪生'];
 
       window.toggleViewMode = function(mode) {
         currentMode = mode;
         const body = document.body;
+        const flow = document.querySelector('.viewport-flow');
         const btnStory = document.getElementById('btn-mode-story');
         const btnOverview = document.getElementById('btn-mode-overview');
         const cue = document.getElementById('bottom-scroll-cue');
@@ -2302,12 +2330,13 @@
         if (mode === 'overview') {
           body.classList.remove('story-mode');
           body.classList.add('overview-mode');
+          if (flow) flow.style.transform = 'none';
           if (btnStory) btnStory.classList.remove('active');
           if (btnOverview) btnOverview.classList.add('active');
           if (cue) cue.style.display = 'none';
           if (dots) dots.style.display = 'none';
 
-          // 激活所有卡片与图表
+          // 激活所有卡片动画
           document.querySelectorAll('.reveal-card').forEach(c => triggerCardReveal(c));
           initRadarChart();
           initTimelineChart();
@@ -2324,17 +2353,39 @@
         setTimeout(() => {
           if (radarChart) radarChart.resize();
           if (timelineChart) timelineChart.resize();
-        }, 200);
+        }, 250);
       };
 
       window.goToSlide = function(index) {
         index = Math.max(1, Math.min(totalSlides, index));
         currentSlideIndex = index;
-        const targetSlide = document.getElementById('slide-' + index);
-        if (targetSlide) {
-          targetSlide.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        if (currentMode === 'story') {
+          const flow = document.querySelector('.viewport-flow');
+          if (flow) {
+            flow.style.transform = 'translateY(-' + ((index - 1) * 100) + 'vh)';
+          }
+        } else {
+          const targetSlide = document.getElementById('slide-' + index);
+          if (targetSlide) {
+            targetSlide.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         }
+
         updateNavDots(index);
+
+        // 激活当前页卡片入场动画
+        const curWrapper = document.getElementById('slide-' + index);
+        if (curWrapper) {
+          const card = curWrapper.querySelector('.reveal-card');
+          if (card) triggerCardReveal(card);
+        }
+
+        // 调整图表尺寸
+        setTimeout(() => {
+          if (index === 3 && radarChart) radarChart.resize();
+          if (index === 5 && timelineChart) timelineChart.resize();
+        }, 300);
       };
 
       window.goToNextSlide = function() {
@@ -2357,17 +2408,79 @@
 
         const cue = document.getElementById('bottom-scroll-cue');
         if (cue) {
-          if (index >= totalSlides) {
-            cue.style.opacity = '0';
-            cue.style.pointerEvents = 'none';
+          if (index < totalSlides) {
+            const nextTitle = SLIDE_TITLES[index] || '下一章';
+            cue.innerHTML = '<span style="font-size:11px; opacity:0.85;"><strong>0' + index + ' / 0' + totalSlides + '</strong> · ' + SLIDE_TITLES[index-1] + '</span> <span style="color:#34d399;">▾</span> <span>翻至：' + nextTitle + '</span>';
+            cue.style.opacity = '1';
+            cue.style.pointerEvents = 'auto';
           } else {
+            cue.innerHTML = '<span><strong style="color:#fbbf24;">07 / 07</strong> · 漫游完成</span> <span>📜 展开全景长卷</span>';
             cue.style.opacity = '1';
             cue.style.pointerEvents = 'auto';
           }
         }
       }
 
-      // 键盘快捷上下页翻屏
+      // 智能滚轮翻页（防卡在两屏中间，支持内部自适应内容滚动）
+      let isScrollingLock = false;
+
+      window.addEventListener('wheel', (e) => {
+        if (currentMode !== 'story') return;
+
+        // 如果在当前屏内部有滚动条
+        const activeWrapper = document.getElementById('slide-' + currentSlideIndex);
+        const activeSection = activeWrapper ? activeWrapper.querySelector('section') : null;
+
+        if (activeSection && activeSection.scrollHeight > activeSection.clientHeight + 12) {
+          const atTop = activeSection.scrollTop <= 6;
+          const atBottom = activeSection.scrollTop + activeSection.clientHeight >= activeSection.scrollHeight - 6;
+
+          if (e.deltaY > 0 && !atBottom) {
+            return; // 允许在卡片内部正常向下滚
+          }
+          if (e.deltaY < 0 && !atTop) {
+            return; // 允许在卡片内部正常向上滚
+          }
+        }
+
+        e.preventDefault();
+
+        if (isScrollingLock) return;
+        if (Math.abs(e.deltaY) < 18) return;
+
+        isScrollingLock = true;
+        setTimeout(() => { isScrollingLock = false; }, 650);
+
+        if (e.deltaY > 0) {
+          goToNextSlide();
+        } else if (e.deltaY < 0) {
+          goToSlide(currentSlideIndex - 1);
+        }
+      }, { passive: false });
+
+      // 触控滑动翻页
+      let touchStartY = 0;
+      window.addEventListener('touchstart', (e) => {
+        if (currentMode !== 'story') return;
+        if (e.touches && e.touches.length > 0) {
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchend', (e) => {
+        if (currentMode !== 'story') return;
+        if (!e.changedTouches || e.changedTouches.length === 0) return;
+        const deltaY = touchStartY - e.changedTouches[0].clientY;
+        if (Math.abs(deltaY) > 50) {
+          if (deltaY > 0) {
+            goToNextSlide();
+          } else {
+            goToSlide(currentSlideIndex - 1);
+          }
+        }
+      }, { passive: true });
+
+      // 键盘快捷键切页
       window.addEventListener('keydown', (e) => {
         if (currentMode !== 'story') return;
         if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
@@ -2379,29 +2492,8 @@
         }
       });
 
-      // 视口监听：每滑入一屏，激活对应动效并更新指示器
-      try {
-        const slideObserver = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const idx = +entry.target.getAttribute('data-index');
-              if (idx) {
-                currentSlideIndex = idx;
-                updateNavDots(idx);
-              }
-              const card = entry.target.querySelector('.reveal-card');
-              if (card) {
-                triggerCardReveal(card);
-              }
-            }
-          });
-        }, { threshold: 0.35 });
-
-        document.querySelectorAll('.story-slide-wrapper').forEach(wrapper => slideObserver.observe(wrapper));
-      } catch (e) {
-        console.warn("IntersectionObserver disabled:", e);
-        document.querySelectorAll('.reveal-card').forEach(card => triggerCardReveal(card));
-      }
+      // 初始化第一屏指示器
+      updateNavDots(1);
 
       window.addEventListener('resize', () => {
         if (radarChart) radarChart.resize();
