@@ -2633,7 +2633,7 @@ ${criticLines}
       const ta = document.getElementById('dna-prompt-textarea');
       if (ta) {
         navigator.clipboard.writeText(ta.value).then(() => {
-          alert('🎉 专属 MovieDNA 选片智能体 SKILL 已成功复制到剪贴板！\n\n可直接粘贴至 ChatGPT、Claude、DeepSeek、Antigravity 或任何 AI Agent 作为 System Prompt / 专属技能使用。');
+          alert('🎉 专属 MovieDNA 选片智能体 SKILL 已成功复制到剪贴板！可直接粘贴至 ChatGPT、Claude、DeepSeek、Antigravity 或任何 AI Agent 作为 System Prompt / 专属技能使用。');
         }).catch(() => {
           ta.select();
           document.execCommand('copy');
