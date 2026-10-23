@@ -733,6 +733,13 @@
       display: none !important;
     }
 
+    body.story-mode .overview-footer {
+      display: none !important;
+    }
+    body.overview-mode .overview-footer {
+      display: block !important;
+    }
+
     /* 顶部悬浮控制栏 */
     .story-top-bar {
       position: fixed;
@@ -898,37 +905,6 @@
       border-color: #34d399;
       transform: translateX(-50%) translateY(-2px);
       box-shadow: 0 10px 25px rgba(0,0,0,0.6), 0 0 25px rgba(52, 211, 153, 0.35);
-    }
-
-    /* 漫游通关全景解锁卡片 */
-    .completion-unlock-box {
-      background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.22) 0%, rgba(15, 23, 42, 0.95) 75%);
-      border: 1.5px solid rgba(245, 158, 11, 0.4);
-      border-radius: 24px;
-      padding: 24px 20px;
-      text-align: center;
-      margin-top: 24px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-    }
-
-    .unlock-btn {
-      padding: 12px 28px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      color: #000;
-      font-size: 13px;
-      font-weight: 900;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
-      transition: all 0.25s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .unlock-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(245, 158, 11, 0.6);
     }
 
     /* 全模块保证 100% 完整呈现，避免动效脚本未触发时空白隐形 */
@@ -2070,20 +2046,11 @@
         </div>
         <textarea id="dna-prompt-textarea" rows="8" readonly style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid #334155; border-radius: 10px; color: #d1d5db; font-size: 12px; padding: 12px; font-family: monospace; outline: none;">${promptContent}</textarea>
       </div>
-
-      <!-- 漫游通关全景解锁卡片 -->
-      <div class="completion-unlock-box">
-        <div style="font-size: 20px; font-weight: 900; color: #fbbf24; margin-bottom: 6px;">🎉 光影基因探索漫游已全部完成！</div>
-        <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 16px;">恭喜您通览专属影迷画像。点击下方按钮即可进入全景长卷模式，通览整页长卷！</div>
-        <button onclick="toggleViewMode('overview')" class="unlock-btn">
-          <span>📜</span> 解锁全景长卷模式 (自由滚动浏览)
-        </button>
-      </div>
     </section>
     </div>
 
     <!-- 底部版权 -->
-    <footer class="overview-footer" style="text-align: center; padding: 30px 20px 60px 20px; font-size: 12px; color: #64748b; border-top: 1px dashed rgba(255,255,255,0.15); margin-top: 20px;" style="text-align: center; font-size: 12px; color: #059669; padding-top: 10px;">
+    <footer class="overview-footer" style="text-align: center; padding: 30px 20px 60px 20px; font-size: 12px; color: #64748b; border-top: 1px dashed rgba(255,255,255,0.15); margin-top: 20px;">
       MovieDNA · 致敬豆瓣光影精神家园 · 纯本地私密渲染 · 永久专属保存
     </footer>
 
@@ -2391,8 +2358,6 @@
       window.goToNextSlide = function() {
         if (currentSlideIndex < totalSlides) {
           goToSlide(currentSlideIndex + 1);
-        } else {
-          toggleViewMode('overview');
         }
       };
 
@@ -2414,9 +2379,8 @@
             cue.style.opacity = '1';
             cue.style.pointerEvents = 'auto';
           } else {
-            cue.innerHTML = '<span><strong style="color:#fbbf24;">07 / 07</strong> · 漫游完成</span> <span>📜 展开全景长卷</span>';
-            cue.style.opacity = '1';
-            cue.style.pointerEvents = 'auto';
+            cue.style.opacity = '0';
+            cue.style.pointerEvents = 'none';
           }
         }
       }
