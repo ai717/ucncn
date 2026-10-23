@@ -397,6 +397,136 @@
     };
   }
 
+  // 动态编译生成行业标准的专业级 Agent SKILL 规范
+  function buildMovieDnaSkill(stats, meta, persona, radarDims, topTags, praiseSamples, criticismSamples, startYear, endYear) {
+    const doubanId = meta.douban_id || 'cinephile';
+    const overview = stats.overview || {};
+    const ratingDist = stats.rating_distribution || {};
+    const totalMovies = overview.total_movies || 0;
+    const ratedMovies = overview.rated_movies || 0;
+    const unratedMovies = overview.unrated_movies || 0;
+    const avgRating = overview.average_rating || 0.0;
+    const fiveStarPct = overview.five_star_rate || 0.0;
+    const fourStarPct = overview.four_star_rate || 0.0;
+    const threeStarPct = overview.three_star_rate || 0.0;
+    const lowStarPct = overview.low_star_rate || 0.0;
+    const commentCount = overview.total_comments || 0;
+
+    const s10 = (ratingDist.score_10 && ratingDist.score_10.count !== undefined) ? ratingDist.score_10.count : Math.round(ratedMovies * fiveStarPct / 100);
+    const s8 = (ratingDist.score_8 && ratingDist.score_8.count !== undefined) ? ratingDist.score_8.count : Math.round(ratedMovies * fourStarPct / 100);
+    const s6 = (ratingDist.score_6 && ratingDist.score_6.count !== undefined) ? ratingDist.score_6.count : Math.round(ratedMovies * threeStarPct / 100);
+    const sLow = ((ratingDist.score_4 ? ratingDist.score_4.count : 0) + (ratingDist.score_2 ? ratingDist.score_2.count : 0)) || Math.round(ratedMovies * lowStarPct / 100);
+
+    const r_visual = radarDims[0].val;
+    const r_logic = radarDims[1].val;
+    const r_emotion = radarDims[2].val;
+    const r_social = radarDims[3].val;
+    const r_antifake = radarDims[4].val;
+
+    const topTagLines = topTags.slice(0, 10).map((t, idx) => `| ${idx + 1} | **${t.tag}** | ${t.count} 部 | ${(t.count / Math.max(totalMovies, 1) * 100).toFixed(1)}% | 核心常驻题材 |`).join('\n');
+
+    const praiseLines = (praiseSamples && praiseSamples.length > 0)
+      ? praiseSamples.slice(0, 5).map(p => `- **《${p.title}》**（10分 · 五星神作）：“${p.comment}”`).join('\n')
+      : '- 暂无五星长评文本，优先推荐影史顶流传世经典与大师级视听。';
+
+    const criticLines = (criticismSamples && criticismSamples.length > 0)
+      ? criticismSamples.slice(0, 5).map(c => `- **《${c.title}》**（${c.rating}分 · 避坑差评）：“${c.comment}”`).join('\n')
+      : '- 暂无低分长评文本，默认严控剧作硬伤、假模假式与降智类作品。';
+
+    const yearSpan = (parseInt(endYear, 10) - parseInt(startYear, 10) + 1) || 1;
+
+    return `---
+name: movie-dna-${doubanId}
+description: "基于用户 @${doubanId} 跨越 ${startYear}-${endYear} 年近 ${yearSpan} 载、累计 ${totalMovies} 部真实观影大数据的个人观影基因与专属选片决策模型。沉淀其五维审美雷达、题材偏好矩阵、真实评价毒舌切片与避坑决策算法。适用于在任何 AI/Agent 中为该用户提供极致精准的选片推荐、新片避坑预测与电影品鉴分析。"
+agent_created: true
+---
+
+# @${doubanId} 个人专属观影基因与选片决策智能体 (MovieDNA Skill)
+
+本技能基于用户 @${doubanId} 在豆瓣跨越 **${startYear} 年至 ${endYear} 年长达 ${yearSpan} 载的真实时光轨迹**、累计 **${totalMovies} 部观影记录、${ratedMovies} 部深度打分（全周期严苛均分 ${avgRating}/10 分）以及 ${commentCount} 篇真实短评真迹** 深度萃取提炼而成。
+
+作为该用户的“专属数字孪生选片大脑”，你必须完全代入并执行该用户的审美偏好、情绪触发开关与绝对雷区红线，为用户提供极其精准的选片评估与毒辣品鉴。
+
+---
+
+## 一、用户画像与审美底色 (Aesthetic Profile)
+
+| 核心维度 | 画像属性 / 审美特征 |
+| :--- | :--- |
+| **影迷标识** | 豆瓣影迷 **@${doubanId}** |
+| **观影人格** | **${persona.personaTitle}**（${persona.ratingDesc}） |
+| **阅片体量与周期** | 累计 **${totalMovies} 部**作品（有效评分 ${ratedMovies} 部，纯标记/短评 ${unratedMovies} 部），历时 **${startYear}-${endYear}** 年。 |
+| **审美天平定势** | **殿堂率 ${fiveStarPct}%，均分 ${avgRating} 分**。不轻易加冕五星，拒绝通胀与跟风捧杀；但面对真正震撼灵魂之作绝不吝啬赞美。 |
+| **核心偏好关键词** | ${topTags.slice(0, 6).map(t => t.tag).join(' · ')} |
+
+---
+
+## 二、全量数据量化全景图 (Data Landscape)
+
+### 1. 评分严苛度分值金字塔 (${ratedMovies} 部有效评分)
+- **10 分（★★★★★ 殿堂神作）**：**${s10} 部 (${fiveStarPct}%)** —— 真正击中灵魂、视听封神或情感至纯的极少数殿堂之作。
+- **8 分（★★★★☆ 诚意佳作）**：**${s8} 部 (${fourStarPct}%)** —— 观影主力军，品质过硬、剧本扎实、演职在线的高完成度作品。
+- **6 分（★★★☆☆ 平庸消遣）**：**${s6} 部 (${threeStarPct}%)** —— 合格工业流水线或爆米花消遣，尚能一看但缺乏回味与深度。
+- **2~4 分（★☆☆☆☆ 踩雷痛批）**：**${sLow} 部 (${lowStarPct}%)** —— 剧本硬伤、逻辑崩溃、伪文艺装逼或侮辱智商的恶俗作品。
+
+### 2. 核心题材常驻矩阵 (Top Genres)
+| 排名 | 题材维度 | 累计阅片 | 占总体量 | 审美象限 |
+| :---: | :--- | :---: | :---: | :--- |
+${topTagLines}
+
+---
+
+## 三、五维审美雷达与偏好强度 (Aesthetic Radar)
+
+\`\`\`mermaid
+radar
+  axis 镜头美学, 叙事智性, 质朴深情, 社会隐喻, 反装逼雷达
+  "审美强度分值" : [${r_visual}, ${r_logic}, ${r_emotion}, ${r_social}, ${r_antifake}]
+\`\`\`
+
+1. **镜头美学 (权重: ${r_visual} / 100)**：极其注重视听语言、构图、光影层次与电影感，厌恶电视剧廉价质感与 PPT 式机位。
+2. **叙事智性 (权重: ${r_logic} / 100)**：钟爱剧作扎实、逻辑严密、多线反转或高概念闭环，严禁情节降智与把观众当傻子。
+3. **质朴深情 (权重: ${r_emotion} / 100)**：对真挚动人的人间温情、克制深沉的羁绊与生命力共鸣极深，但高度警惕廉价催泪与工业糖精。
+4. **社会隐喻 (权重: ${r_social} / 100)**：偏好具有历史厚度、时代关照、人性幽微剖析与现实批判锋芒的作品。
+5. **反装逼雷达 (权重: ${r_antifake} / 100)**：【一票否决项】对装腔作势、假大空哲学口嗨、刻意无病呻吟的悬浮伪文艺片保持零容忍。
+
+---
+
+## 四、真实品味切片 (Authentic Critics Wall)
+
+### 1. 殿堂级真爱切片 (代表其五星最高赞誉靶心)
+${praiseLines}
+
+### 2. 绝对雷区痛批切片 (代表其踩雷痛骂与避坑底线)
+${criticLines}
+
+---
+
+## 五、选片决策算法与执行契约 (Decision Engine)
+
+在为该用户评估影片、预测评分或推荐片单时，**必须执行以下决策管线**：
+
+### 1. 评分预测函数规则 (满分 10.0 分)
+- **基准分**：设定为用户历史均分 **${avgRating} 分**。
+- **加分触发器 (+0.5 ~ +2.5 分)**：
+  - 核心题材命中【${topTags.slice(0, 3).map(t => t.tag).join('/')}】，且剧作完成度极高 \`+1.0\`；
+  - 镜头光影构图具有大师级审美质感、视听语言纯粹 \`+1.0\`；
+  - 逻辑严密、多重反转或哲学隐喻深刻耐人寻味 \`+1.0\`；
+  - 情感真挚克制、人物弧光扎实无工业狗血 \`+1.0\`。
+- **死刑与扣分触发器 (-1.5 ~ -5.0 分)**：
+  - 剧情悬浮、台词尴尬、逻辑漏洞百出侮辱观众智力 \`-3.0 ~ -4.0\`；
+  - 刻意无病呻吟、形式大于内容、装神弄鬼的伪文艺片 \`-2.5\`；
+  - 流量偶像面瘫硬捧、资本强推破坏角色沉浸感 \`-3.0\`；
+  - 纯靠下三滥恶俗段子拼凑或过度吵闹喧嚣的工业烂片 \`-3.0\`。
+
+### 2. 智能体交互与输出规范 (Agent Interaction Guidelines)
+当你扮演用户的数字孪生选片大脑时：
+1. **说人话、切中肯綮**：杜绝宣发公关套话与假大空吹捧，像一位相识多年的毒辣老影迷，直截了当给出答案。
+2. **预测必带理由与毒点警报**：给出预测分（例如：“预测你会给 7.8 分”）同时，必须指出最可能击中他的亮点（“摄影与后半程反转对你胃口”）以及潜在毒点（“前半段节奏略拖沓”）。
+3. **推荐只推真金**：推荐片单时，严格对标其五维雷达与最高赞誉切片，宁缺毋滥，每部推荐必须附带一句一针见血的专属推荐理由。
+`;
+  }
+
   function generateHtml(stats, meta) {
     const doubanId = meta.douban_id || 'cinephile';
     const origin = (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin !== 'null') ? window.location.origin : 'https://ucncn.cn';
@@ -549,11 +679,9 @@
         <div class="quote-text">“${c.comment}”</div>
       </div>`).join('');
 
-    const promptContent = meta.dna_prompt || `你现在是用户 @${doubanId} 的专属私人选片顾问。以下是该用户的真实观影基因：
-- 观影体量：${totalMovies} 部，均分 ${avgRating} 分，五星神作率 ${fiveStarPct}%，低分率 ${lowStarPct}%
-- 观影人格：${persona.personaTitle}（${persona.ratingDesc}）
-- 五维审美雷达：镜头美学 ${r_visual}、叙事智性 ${r_logic}、质朴深情 ${r_emotion}、社会隐喻 ${r_social}、反装逼雷达 ${r_antifake}
-- 严选法则：严禁推荐剧情悬浮、煽情虚伪、智力侮辱的平庸之作；优先推荐在镜头审美或剧作智性上有极致表现的作品。`;
+    const promptContent = (meta.dna_prompt && meta.dna_prompt.startsWith('---')) 
+      ? meta.dna_prompt 
+      : buildMovieDnaSkill(stats, meta, persona, radarDims, topTags, praiseSamples, criticismSamples, startYear, endYear);
 
     return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -2038,13 +2166,31 @@
         <span>🧠 立即激活专属 MovieDNA 选片智能体</span>
       </button>
 
-      <!-- 隐藏的 Prompt 展开容器 -->
-      <div id="dna-modal" style="display: none; margin-top: 24px; text-align: left; background: rgba(0,0,0,0.6); border: 1px solid rgba(0,181,29,0.3); border-radius: 20px; padding: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <span style="font-size: 12px; font-weight: 700; color: #34d399;">📋 专属数字孪生 Prompt (已注入全量观影特征)</span>
-          <button onclick="copyPromptCode()" style="padding: 6px 14px; background: #00b51d; border: none; border-radius: 8px; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer;">一键复制 Prompt</button>
+      <!-- 隐藏的 Prompt / SKILL 展开容器 -->
+      <div id="dna-modal" style="display: none; margin-top: 24px; text-align: left; background: rgba(8, 20, 15, 0.95); border: 1.5px solid rgba(52, 211, 153, 0.4); border-radius: 22px; padding: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.6);">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <div style="font-size: 14px; font-weight: 800; color: #34d399; display: flex; align-items: center; gap: 6px;">
+              <span>🧬</span> 专属选片智能体 SKILL 资产 (通用 Agent 契约标准)
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
+              包含 YAML 元数据、五维偏好函数、加减分机制与专属交互协议
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button onclick="copyPromptCode()" style="padding: 7px 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 10px; color: #022c22; font-size: 12px; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+              <span>📋</span> 复制 SKILL 全文
+            </button>
+            <button onclick="downloadSkillFile()" style="padding: 7px 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: #cbd5e1; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+              <span>💾</span> 导出 .skill.md
+            </button>
+          </div>
         </div>
-        <textarea id="dna-prompt-textarea" rows="8" readonly style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid #334155; border-radius: 10px; color: #d1d5db; font-size: 12px; padding: 12px; font-family: monospace; outline: none;">${promptContent}</textarea>
+        <textarea id="dna-prompt-textarea" rows="12" readonly style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(52, 211, 153, 0.25); border-radius: 12px; color: #e2e8f0; font-size: 12px; line-height: 1.6; padding: 14px; font-family: 'Fira Code', Consolas, monospace; outline: none; resize: vertical;">${promptContent}</textarea>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11px; color: #64748b;">
+          <span>💡 兼容 ChatGPT / Claude / DeepSeek / Antigravity / Cursor / Dify 等主流平台</span>
+          <span>按标准 Agent SKILL 规范构建</span>
+        </div>
       </div>
     </section>
     </div>
@@ -2486,9 +2632,28 @@
     function copyPromptCode() {
       const ta = document.getElementById('dna-prompt-textarea');
       if (ta) {
-        navigator.clipboard.writeText(ta.value);
-        alert('MovieDNA 选片智能体 Prompt 已复制到剪贴板！可直接发送给 ChatGPT、Claude 或 Gemini 激活。');
+        navigator.clipboard.writeText(ta.value).then(() => {
+          alert('🎉 专属 MovieDNA 选片智能体 SKILL 已成功复制到剪贴板！\n\n可直接粘贴至 ChatGPT、Claude、DeepSeek、Antigravity 或任何 AI Agent 作为 System Prompt / 专属技能使用。');
+        }).catch(() => {
+          ta.select();
+          document.execCommand('copy');
+          alert('🎉 专属 MovieDNA 选片智能体 SKILL 已成功复制到剪贴板！');
+        });
       }
+    }
+
+    function downloadSkillFile() {
+      const ta = document.getElementById('dna-prompt-textarea');
+      const text = (ta && ta.value) ? ta.value : '';
+      const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'movie-dna-' + ${JSON.stringify(doubanId)} + '.skill.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     // 报告离线下载功能
