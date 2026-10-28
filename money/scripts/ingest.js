@@ -51,6 +51,17 @@ if (filesToProcess.length === 0) {
   process.exit(0);
 }
 
+// 【防撞锁 1】：如果有推送需求，先自动 pull 对齐云端最新数据，防止冲掉云端 Bot 写入的内容
+if (shouldPush) {
+  try {
+    console.log('🔄 正在同步云端最新数据 (git pull --rebase)，防止多端冲突...');
+    execSync('git pull --rebase origin main', { stdio: 'inherit' });
+    console.log('✓ 云端最新状态已对齐！\n');
+  } catch (err) {
+    console.warn('⚠️ 尝试对齐云端时遇到提示（若无网络或无变更可忽略）');
+  }
+}
+
 console.log(`🔍 扫描到 ${filesToProcess.length} 个待入库文件，开始处理...`);
 
 // 校验单条数据函数
@@ -150,13 +161,21 @@ for (const src of processedFiles) {
 }
 console.log(`📦 已处理文件已自动移动到 inbox/archive/ 归档备份。`);
 
-// 自动发布
+// 自动发布（附带重试防撞机制）
 if (shouldPush) {
   try {
     console.log('\n🚀 正在推送到 GitHub，线上将自动部署发布...');
     execSync('git add money/data/projects.json money/inbox', { stdio: 'inherit' });
     execSync(`git commit -m "chore(money): auto-ingest ${totalAdded} projects via inbox"`, { stdio: 'inherit' });
-    execSync('git push origin main', { stdio: 'inherit' });
+    
+    try {
+      execSync('git push origin main', { stdio: 'inherit' });
+    } catch (pushErr) {
+      console.log('⚠️ 检测到云端刚产生新提交，正在自动执行 rebase 对齐并重试推送...');
+      execSync('git pull --rebase origin main', { stdio: 'inherit' });
+      execSync('git push origin main', { stdio: 'inherit' });
+    }
+
     console.log('\n=============================================');
     console.log('✅ 发布完成！稍后访问 https://ucncn.cn/money 查看更新。');
     console.log('=============================================');
