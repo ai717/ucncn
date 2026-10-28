@@ -264,19 +264,19 @@
         <span class="text-xs font-mono text-zinc-400 flex-shrink-0 flex items-center space-x-1 mr-1">
           <span>🎯 意图快筛:</span>
         </span>
-        <button onclick="setQuickFilter('ALL')" class="pill-btn px-3 py-1.5 text-xs font-mono rounded-lg transition-all active-pill bg-neon-green text-black font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+        <button onclick="setQuickFilter('ALL', this)" class="pill-btn px-3 py-1.5 text-xs font-mono rounded-lg transition-all active-pill bg-neon-green text-black font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)]">
           全部
         </button>
-        <button onclick="setQuickFilter('S_TIER')" class="pill-btn px-3 py-1.5 text-xs font-mono rounded-lg bg-obsidian-800 text-zinc-300 hover:text-white hover:bg-obsidian-700 border border-obsidian-700 transition-all">
+        <button onclick="setQuickFilter('S_TIER', this)" class="pill-btn px-3 py-1.5 text-xs font-mono rounded-lg bg-obsidian-800 text-zinc-300 hover:text-white hover:bg-obsidian-700 border border-obsidian-700 transition-all">
           💎 仅看S级 (90分+)
         </button>
-        <button onclick="setQuickFilter('FAST')" class="pill-btn px-3 py-1.5 text-xs font-mono rounded-lg bg-obsidian-800 text-zinc-300 hover:text-white hover:bg-obsidian-700 border border-obsidian-700 transition-all">
+        <button onclick="setQuickFilter('FAST', this)" class="pill-btn px-3 py-1.5 text-xs font-mono rounded-lg bg-obsidian-800 text-zinc-300 hover:text-white hover:bg-obsidian-700 border border-obsidian-700 transition-all">
           ⏱️ 7天极速验证
         </button>
-        <button onclick="setQuickFilter('ZERO_COST')" class="pill-btn px-3 py-1.5 text-xs font-mono rounded-lg bg-obsidian-800 text-zinc-300 hover:text-white hover:bg-obsidian-700 border border-obsidian-700 transition-all">
+        <button onclick="setQuickFilter('ZERO_COST', this)" class="pill-btn px-3 py-1.5 text-xs font-mono rounded-lg bg-obsidian-800 text-zinc-300 hover:text-white hover:bg-obsidian-700 border border-obsidian-700 transition-all">
           🪙 极低/零成本启动
         </button>
-        <button onclick="setQuickFilter('GLOBAL')" class="pill-btn px-3 py-1.5 text-xs font-mono rounded-lg bg-obsidian-800 text-zinc-300 hover:text-white hover:bg-obsidian-700 border border-obsidian-700 transition-all">
+        <button onclick="setQuickFilter('GLOBAL', this)" class="pill-btn px-3 py-1.5 text-xs font-mono rounded-lg bg-obsidian-800 text-zinc-300 hover:text-white hover:bg-obsidian-700 border border-obsidian-700 transition-all">
           🌍 出海赚美金
         </button>
       </div>
@@ -372,13 +372,13 @@
   </footer>
 
   <!-- 沉浸式居中指挥官解剖舱 (Modal Deck) -->
-  <div id="detail-modal" class="fixed inset-0 z-50 pointer-events-none opacity-0 transition-opacity duration-300 flex items-center justify-center p-3 sm:p-6">
+  <div id="detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 select-none">
     
     <!-- 全屏高斯模糊遮罩 -->
-    <div id="modal-backdrop" class="absolute inset-0 bg-black/85 backdrop-blur-md pointer-events-auto cursor-pointer"></div>
+    <div id="modal-backdrop" class="absolute inset-0 bg-black/85 backdrop-blur-md cursor-pointer"></div>
 
     <!-- 弹窗主体面板 -->
-    <div id="modal-panel" class="relative w-full max-w-3xl max-h-[90vh] bg-obsidian-900 border border-obsidian-700/90 rounded-3xl pointer-events-auto transform scale-95 transition-transform duration-300 overflow-hidden flex flex-col shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]">
+    <div id="modal-panel" class="relative w-full max-w-3xl max-h-[90vh] bg-obsidian-900 border border-obsidian-700/90 rounded-3xl overflow-hidden flex flex-col shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] z-10">
       
       <!-- 弹窗顶栏 -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-obsidian-800 bg-obsidian-950/70 backdrop-blur-md">
@@ -624,13 +624,24 @@
     }
 
     // 意图快筛设置
-    function setQuickFilter(intent) {
+    function setQuickFilter(intent, targetEl) {
       currentIntent = intent;
       // 更新样式
       document.querySelectorAll('.pill-btn').forEach(btn => {
         btn.className = 'pill-btn px-3 py-1.5 text-xs font-mono rounded-lg bg-obsidian-800 text-zinc-300 hover:text-white hover:bg-obsidian-700 border border-obsidian-700 transition-all';
       });
-      event.target.className = 'pill-btn px-3 py-1.5 text-xs font-mono rounded-lg transition-all active-pill bg-neon-green text-black font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+
+      if (!targetEl) {
+        // 自动按 intent 寻找对应的 button
+        const pillButtons = Array.from(document.querySelectorAll('.pill-btn'));
+        const intentMap = { 'ALL': 0, 'S_TIER': 1, 'FAST': 2, 'ZERO_COST': 3, 'GLOBAL': 4 };
+        const idx = intentMap[intent] ?? 0;
+        targetEl = pillButtons[idx];
+      }
+
+      if (targetEl) {
+        targetEl.className = 'pill-btn px-3 py-1.5 text-xs font-mono rounded-lg transition-all active-pill bg-neon-green text-black font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+      }
       applyFiltersAndRender();
     }
 
@@ -761,7 +772,7 @@
                 <div class="flex flex-wrap gap-1.5 max-w-[70%]">
                   ${(p.tags || []).slice(0, 3).map(tag => `
                     <span 
-                      onclick="event.stopPropagation(); filterByTag('${tag}')"
+                      onclick="handleTagClick(event, '${tag}')"
                       class="text-[10px] font-mono px-2 py-0.5 rounded bg-obsidian-800/80 hover:bg-obsidian-700 text-zinc-400 hover:text-neon-cyan transition-colors"
                       title="点击筛选 #${tag}"
                     >
@@ -881,29 +892,26 @@
         sourceBtn.classList.add('hidden');
       }
 
-      // 打开弹窗动画
+      // 打开弹窗
       const modal = document.getElementById('detail-modal');
-      const panel = document.getElementById('modal-panel');
-      modal.classList.remove('pointer-events-none', 'opacity-0');
-      modal.classList.add('pointer-events-auto', 'opacity-100');
-      panel.classList.remove('scale-95');
-      panel.classList.add('scale-100');
+      modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
 
     // 关闭沉浸式弹窗
     function closeProjectModal() {
       const modal = document.getElementById('detail-modal');
-      const panel = document.getElementById('modal-panel');
-      panel.classList.remove('scale-100');
-      panel.classList.add('scale-95');
-      modal.classList.remove('opacity-100');
-      modal.classList.add('opacity-0');
-      setTimeout(() => {
-        modal.classList.remove('pointer-events-auto');
-        modal.classList.add('pointer-events-none');
-        document.body.style.overflow = '';
-      }, 250);
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // 标签点击代理（安全阻止冒泡）
+    function handleTagClick(e, tag) {
+      if (e) {
+        if (e.stopPropagation) e.stopPropagation();
+        if (e.preventDefault) e.preventDefault();
+      }
+      filterByTag(tag);
     }
 
     // 复制当前项目摘要
