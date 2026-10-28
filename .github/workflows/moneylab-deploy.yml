@@ -1,0 +1,34 @@
+name: MoneyLab Dedicated Deploy (仅部署搞钱实验室)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'money/**'
+  workflow_dispatch:
+
+jobs:
+  deploy_money:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy money subproject to VPS
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          echo "🚀 仅打包 money 子项目静态文件..."
+          cd money
+          tar -czf /tmp/money_deploy.tar.gz .
+
+          echo "📡 传输至 VPS (/www/wwwroot/ucncn.cn/money)..."
+          scp -o StrictHostKeyChecking=no -P ${{ secrets.SERVER_PORT }} -i ~/.ssh/id_rsa /tmp/money_deploy.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/money_deploy.tar.gz
+
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /www/wwwroot/ucncn.cn/money && tar -xzf /tmp/money_deploy.tar.gz -C /www/wwwroot/ucncn.cn/money && rm -f /tmp/money_deploy.tar.gz"
+
+          echo "✅ 搞钱实验室 (ucncn.cn/money) 独立部署成功！未触碰主站任何文件。"
