@@ -1,5 +1,51 @@
 [
   {
+    "category": "出海/独立开发",
+    "created_at": "2026-10-28",
+    "deep_dive": {
+      "opportunity": "海外小团队极其依赖 Reddit 获客，但手动翻贴耗时且容易被当垃圾广告封号。",
+      "risk_and_pitfalls": "严格遵守 Reddit API 访问频次与社区规则，禁止任何群发营销刷屏。",
+      "tools": [
+        "Reddit API",
+        "Resend",
+        "FastAPI / Next.js"
+      ],
+      "workflow": [
+        "1. 监听源：通过 Reddit API 监控特定痛点关键词",
+        "2. 内容过滤：AI 评估购买意向得分 (0-100)",
+        "3. 自动化破冰：生成不带硬广的专业解答方案",
+        "4. 交付：推送至买家飞书/Slack 或自动发送 Outreach 邮件"
+      ]
+    },
+    "id": "ml-cloud-test-001",
+    "metrics": {
+      "cycle_time": "5~7 天",
+      "difficulty_stars": 2,
+      "est_monthly_profit": ",000 ~ ,000 / 月",
+      "initial_cost": "",
+      "revenue_model": "月度订阅 (/月) 或 单条线索购买"
+    },
+    "rating_tier": "S",
+    "score": 91,
+    "score_breakdown": {
+      "ceiling": 8,
+      "feasibility": 9,
+      "reliability": 9,
+      "velocity": 9
+    },
+    "slug": "reddit-leadgen-cold-email-bot",
+    "source_url": "https://reddit.com/r/SaaS",
+    "summary": "监听 Reddit 上高意向求购与求助贴，利用 AI 自动生成高情商破冰回复与销售线索，按线索条数或月费变现。",
+    "tags": [
+      "Reddit营销",
+      "线索挖掘",
+      "冷邮件",
+      "B2B获客"
+    ],
+    "title": "海外 Reddit 痛点自动化监听与冷邮件线索生成器",
+    "verdict": "极度契合当前出海 B2B 团队获客难的刚需，客单价高，验证周期快。"
+  },
+  {
     "id": "ml-20261028-006",
     "title": "基于开源 DeepSeek 打造冷门小语种跨境电商独立站本地化翻译插件",
     "slug": "deepseek-crossborder-localization-tool",
