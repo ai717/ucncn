@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
   <title>Linux Systemd 自建系统服务与进程守护崩溃自启指南 - 菜鸟笔记</title>
   <meta name="description" content="告别脆弱的 nohup 后台挂起，用标准 Systemd 托管 Node.js、Python 与 Go 服务实现开机自启与异常看门狗。">
   <meta name="author" content="菜鸟笔记 (ucncn.cn)">
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
   <link rel="canonical" href="https://ucncn.cn/notes/linux-systemd-service.html">
 
   <meta property="og:type" content="article">
@@ -14,29 +16,68 @@
   <meta property="og:description" content="告别脆弱的 nohup 后台挂起，用标准 Systemd 托管 Node.js、Python 与 Go 服务实现开机自启与异常看门狗。">
   <meta property="og:url" content="https://ucncn.cn/notes/linux-systemd-service.html">
   <meta property="og:site_name" content="菜鸟笔记">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ucncn.cn/assets/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Linux Systemd 自建系统服务与进程守护崩溃自启指南">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "Linux Systemd 自建系统服务与进程守护崩溃自启指南",
-    "description": "告别脆弱的 nohup 后台挂起，用标准 Systemd 托管 Node.js、Python 与 Go 服务实现开机自启与异常看门狗。",
-    "datePublished": "2026-07-08T10:00:00+08:00",
-    "dateModified": "2026-10-16T12:00:00+08:00",
-    "author": {
-      "@type": "Person",
-      "name": "菜鸟笔记"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "菜鸟笔记",
-      "url": "https://ucncn.cn"
-    },
-    "mainEntityOfPage": "https://ucncn.cn/notes/linux-systemd-service.html"
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Linux Systemd 自建系统服务与进程守护崩溃自启指南",
+        "description": "告别脆弱的 nohup 后台挂起，用标准 Systemd 托管 Node.js、Python 与 Go 服务实现开机自启与异常看门狗。",
+        "datePublished": "2026-07-08T10:00:00+08:00",
+        "dateModified": "2026-11-06T12:00:00+08:00",
+        "author": {
+          "@type": "Person",
+          "name": "菜鸟笔记"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "菜鸟笔记",
+          "url": "https://ucncn.cn"
+        },
+        "mainEntityOfPage": "https://ucncn.cn/notes/linux-systemd-service.html",
+        "image": "https://ucncn.cn/assets/images/og-cover.png",
+        "inLanguage": "zh-CN"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "菜鸟笔记",
+            "item": "https://ucncn.cn/#articles"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Linux Systemd 自建系统服务与进程守护崩溃自启指南"
+          }
+        ]
+      }
+    ]
   }
   </script>
 
   <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Linux Systemd 自建系统服务与进程守护崩溃自启指南 - 菜鸟笔记">
+  <meta name="twitter:description" content="告别脆弱的 nohup 后台挂起，用标准 Systemd 托管 Node.js、Python 与 Go 服务实现开机自启与异常看门狗。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
 </head>
 <body>
 

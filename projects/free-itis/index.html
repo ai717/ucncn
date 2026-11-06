@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
   <title>ITIS Free (免费开源数字资源导航) - 菜鸟笔记实验室</title>
   <meta name="description" content="ITIS Free (free.itis.chat) 是一个干净、无广告、社区驱动的中文数字免费资源导航 Wiki。汇聚全球精选免费开发云服务、媒体设计素材、AI 额度与实用避坑指南，100% Free · Open Source · 零套路。">
   <meta name="keywords" content="ITIS Free, 免费开源资源, 数字资源导航, 开发者免费工具, 开源导航, 白嫖神器, 免费API, 菜鸟笔记实验室">
   <meta name="author" content="菜鸟笔记 (ucncn.cn)">
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
   <link rel="canonical" href="https://ucncn.cn/projects/free-itis/">
 
   <!-- Open Graph -->
@@ -16,25 +18,56 @@
   <meta property="og:description" content="干净、无广告、社区驱动的中文数字免费资源导航 Wiki。100% Free · Open Source · 零套路。">
   <meta property="og:url" content="https://ucncn.cn/projects/free-itis/">
   <meta property="og:site_name" content="菜鸟笔记">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ucncn.cn/assets/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
 
   <!-- Schema.org 结构化数据 (WebSite / WebApplication) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "ITIS Free - 免费开源数字资源导航",
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "Web",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "CNY"
-    },
-    "description": "干净、无广告、社区驱动的中文数字免费资源导航 Wiki",
-    "author": {
-      "@type": "Organization",
-      "name": "ITIS Free 社区"
-    }
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "ITIS Free - 免费开源数字资源导航",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CNY"
+        },
+        "description": "干净、无广告、社区驱动的中文数字免费资源导航 Wiki",
+        "author": {
+          "@type": "Organization",
+          "name": "ITIS Free 社区"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "实验室",
+            "item": "https://ucncn.cn/#projects"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "ITIS Free (免费开源数字资源导航)"
+          }
+        ]
+      }
+    ]
   }
   </script>
 
@@ -172,6 +205,11 @@
       margin: 24px 0;
     }
   </style>
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ITIS Free (免费开源数字资源导航) - 菜鸟笔记实验室">
+  <meta name="twitter:description" content="ITIS Free (free.itis.chat) 是一个干净、无广告、社区驱动的中文数字免费资源导航 Wiki。汇聚全球精选免费开发云服务、媒体设计素材、AI 额度与实用避坑指南，100% Free · Open Source · 零套路。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
 </head>
 <body>
 

@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
   <title>电啵啵 (EVNote) - 新能源电车充电记账与能耗分析微信小程序 - 菜鸟笔记实验室</title>
   <meta name="description" content="电啵啵 (EVNote) 是一款专为新能源车主打造的轻量级充电记账与补能成本核算微信小程序。用最少字段精准记录每次充电，自动核算每公里真实电费成本、家充公桩对比与月度账单分析。">
   <meta name="keywords" content="电啵啵, EVNote, 电车充电记账, 新能源汽车小程序, 每公里电费, 充电成本统计, 菜鸟笔记">
   <meta name="author" content="菜鸟笔记 (ucncn.cn)">
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
   <link rel="canonical" href="https://ucncn.cn/projects/evnote/">
 
   <!-- Open Graph -->
@@ -16,25 +18,56 @@
   <meta property="og:description" content="用最少字段精准记录电车充电，秒级算清每公里补能成本。微信扫码即刻使用。">
   <meta property="og:url" content="https://ucncn.cn/projects/evnote/">
   <meta property="og:site_name" content="菜鸟笔记">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ucncn.cn/assets/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
 
   <!-- Schema.org 结构化数据 (SoftwareApplication) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "电啵啵 (EVNote)",
-    "applicationCategory": "UtilitiesApplication",
-    "operatingSystem": "WeChat Mini Program",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "CNY"
-    },
-    "description": "专为新能源车主打造的轻量级充电记账与补能成本核算微信小程序",
-    "author": {
-      "@type": "Person",
-      "name": "菜鸟笔记"
-    }
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "电啵啵 (EVNote)",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "WeChat Mini Program",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CNY"
+        },
+        "description": "专为新能源车主打造的轻量级充电记账与补能成本核算微信小程序",
+        "author": {
+          "@type": "Person",
+          "name": "菜鸟笔记"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "实验室",
+            "item": "https://ucncn.cn/#projects"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "电啵啵 (EVNote)"
+          }
+        ]
+      }
+    ]
   }
   </script>
 
@@ -169,6 +202,11 @@
       display: block;
     }
   </style>
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="电啵啵 (EVNote) - 新能源电车充电记账与能耗分析微信小程序 - 菜鸟笔记实验室">
+  <meta name="twitter:description" content="电啵啵 (EVNote) 是一款专为新能源车主打造的轻量级充电记账与补能成本核算微信小程序。用最少字段精准记录每次充电，自动核算每公里真实电费成本、家充公桩对比与月度账单分析。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
 </head>
 <body>
 

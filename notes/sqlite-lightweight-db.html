@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
   <title>SQLite 轻量数据库实战：从零构建单文件高并发只读缓存 - 菜鸟笔记</title>
   <meta name="description" content="解析轻量级 SQLite 的 WAL 模式配置、单文件数据库优势与百万级本地快速检索优化技巧。">
   <meta name="author" content="菜鸟笔记 (ucncn.cn)">
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
   <link rel="canonical" href="https://ucncn.cn/notes/sqlite-lightweight-db.html">
 
   <meta property="og:type" content="article">
@@ -14,29 +16,68 @@
   <meta property="og:description" content="解析轻量级 SQLite 的 WAL 模式配置、单文件数据库优势与百万级本地快速检索优化技巧。">
   <meta property="og:url" content="https://ucncn.cn/notes/sqlite-lightweight-db.html">
   <meta property="og:site_name" content="菜鸟笔记">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ucncn.cn/assets/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="SQLite 轻量数据库实战：从零构建单文件高并发只读缓存">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "SQLite 轻量数据库实战：从零构建单文件高并发只读缓存",
-    "description": "解析轻量级 SQLite 的 WAL 模式配置、单文件数据库优势与百万级本地快速检索优化技巧。",
-    "datePublished": "2026-08-01T10:00:00+08:00",
-    "dateModified": "2026-10-16T12:00:00+08:00",
-    "author": {
-      "@type": "Person",
-      "name": "菜鸟笔记"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "菜鸟笔记",
-      "url": "https://ucncn.cn"
-    },
-    "mainEntityOfPage": "https://ucncn.cn/notes/sqlite-lightweight-db.html"
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "SQLite 轻量数据库实战：从零构建单文件高并发只读缓存",
+        "description": "解析轻量级 SQLite 的 WAL 模式配置、单文件数据库优势与百万级本地快速检索优化技巧。",
+        "datePublished": "2026-08-01T10:00:00+08:00",
+        "dateModified": "2026-11-06T12:00:00+08:00",
+        "author": {
+          "@type": "Person",
+          "name": "菜鸟笔记"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "菜鸟笔记",
+          "url": "https://ucncn.cn"
+        },
+        "mainEntityOfPage": "https://ucncn.cn/notes/sqlite-lightweight-db.html",
+        "image": "https://ucncn.cn/assets/images/og-cover.png",
+        "inLanguage": "zh-CN"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "菜鸟笔记",
+            "item": "https://ucncn.cn/#articles"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "SQLite 轻量数据库实战：从零构建单文件高并发只读缓存"
+          }
+        ]
+      }
+    ]
   }
   </script>
 
   <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SQLite 轻量数据库实战：从零构建单文件高并发只读缓存 - 菜鸟笔记">
+  <meta name="twitter:description" content="解析轻量级 SQLite 的 WAL 模式配置、单文件数据库优势与百万级本地快速检索优化技巧。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
 </head>
 <body>
 

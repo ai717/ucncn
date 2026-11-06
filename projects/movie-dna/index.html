@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
   <title>豆瓣电影基因 (Movie DNA) - 菜鸟笔记实验室</title>
   <meta name="description" content="基于个人观影大数据构建的多维审美雷达、喜好标签拓扑与个人专属选片预测小工具。菜鸟笔记实验室个人独立项目。">
   <meta name="keywords" content="豆瓣电影基因, Movie DNA, 观影数据分析, 电影审美雷达, 菜鸟笔记">
   <meta name="author" content="菜鸟笔记 (ucncn.cn)">
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
   <link rel="canonical" href="https://ucncn.cn/projects/movie-dna/">
 
   <meta property="og:type" content="website">
@@ -15,24 +17,55 @@
   <meta property="og:description" content="基于个人观影大数据构建的多维审美雷达与选片预测小工具。">
   <meta property="og:url" content="https://ucncn.cn/projects/movie-dna/">
   <meta property="og:site_name" content="菜鸟笔记">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ucncn.cn/assets/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "豆瓣电影基因 (Movie DNA)",
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "Web",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "CNY"
-    },
-    "description": "基于个人观影大数据构建的多维审美雷达与选片预测小工具。",
-    "author": {
-      "@type": "Person",
-      "name": "菜鸟笔记"
-    }
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "豆瓣电影基因 (Movie DNA)",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CNY"
+        },
+        "description": "基于个人观影大数据构建的多维审美雷达与选片预测小工具。",
+        "author": {
+          "@type": "Person",
+          "name": "菜鸟笔记"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "实验室",
+            "item": "https://ucncn.cn/#projects"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "豆瓣电影基因 (Movie DNA)"
+          }
+        ]
+      }
+    ]
   }
   </script>
   <link rel="stylesheet" href="/assets/css/style.css">
@@ -102,6 +135,11 @@
       margin-top: 30px;
     }
   </style>
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="豆瓣电影基因 (Movie DNA) - 菜鸟笔记实验室">
+  <meta name="twitter:description" content="基于个人观影大数据构建的多维审美雷达、喜好标签拓扑与个人专属选片预测小工具。菜鸟笔记实验室个人独立项目。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
 </head>
 <body>
 

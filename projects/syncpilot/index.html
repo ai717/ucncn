@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
   <title>SyncPilot ⚡ - AI 代码块毫秒级直传本地工作区 Chrome 扩展 - 菜鸟笔记实验室</title>
   <meta name="description" content="SyncPilot 是一款纯前端、零后台常驻的 Chrome 浏览器扩展。基于现代 File System Access API，无需任何 Daemon 服务，直接将 Gemini、ChatGPT、Claude、DeepSeek、Kimi、豆包等生成的代码文件毫秒级落盘写入本地开发目录。">
   <meta name="keywords" content="SyncPilot, Chrome扩展, AI代码同步, Gemini代码直传, ChatGPT扩展, DeepSeek, File System Access API, 菜鸟笔记">
   <meta name="author" content="菜鸟笔记 (ucncn.cn)">
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
   <link rel="canonical" href="https://ucncn.cn/projects/syncpilot/">
 
   <!-- Open Graph -->
@@ -16,27 +18,58 @@
   <meta property="og:description" content="无需任何本地后台服务，直接将 AI 页面生成的代码块毫秒级落盘写入本地工作区。">
   <meta property="og:url" content="https://ucncn.cn/projects/syncpilot/">
   <meta property="og:site_name" content="菜鸟笔记">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ucncn.cn/assets/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
 
   <!-- Schema.org 结构化数据 (SoftwareApplication) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "SyncPilot",
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "Chrome, Edge, Chromium Browsers",
-    "softwareVersion": "2.3.0",
-    "downloadUrl": "https://ucncn.cn/projects/syncpilot/syncpilot-v2.3.0.zip",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "CNY"
-    },
-    "description": "基于原生 File System Access API 的 AI 代码块直写落盘 Chrome 浏览器扩展",
-    "author": {
-      "@type": "Person",
-      "name": "菜鸟笔记"
-    }
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "SyncPilot",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Chrome, Edge, Chromium Browsers",
+        "softwareVersion": "2.3.0",
+        "downloadUrl": "https://ucncn.cn/projects/syncpilot/syncpilot-v2.3.0.zip",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CNY"
+        },
+        "description": "基于原生 File System Access API 的 AI 代码块直写落盘 Chrome 浏览器扩展",
+        "author": {
+          "@type": "Person",
+          "name": "菜鸟笔记"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "实验室",
+            "item": "https://ucncn.cn/#projects"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "SyncPilot ⚡"
+          }
+        ]
+      }
+    ]
   }
   </script>
 
@@ -202,6 +235,11 @@
       position: relative;
     }
   </style>
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SyncPilot ⚡ - AI 代码块毫秒级直传本地工作区 Chrome 扩展 - 菜鸟笔记实验室">
+  <meta name="twitter:description" content="SyncPilot 是一款纯前端、零后台常驻的 Chrome 浏览器扩展。基于现代 File System Access API，无需任何 Daemon 服务，直接将 Gemini、ChatGPT、Claude、DeepSeek、Kimi、豆包等生成的代码文件毫秒级落盘写入本地开发目录。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
 </head>
 <body>
 

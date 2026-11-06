@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
   <title>原生 JavaScript Fetch API 异步请求与错误捕获标准封装 - 菜鸟笔记</title>
   <meta name="description" content="摒弃臃肿的第三方 Ajax 库，基于原生现代 Fetch API 与 AbortController 实现带超时控制、JSON 自动解析与网络错误拦截的标准请求工具函数。">
   <meta name="keywords" content="Fetch API, JavaScript异步, 原生JS, 前端网络请求, AbortController, 菜鸟笔记">
   <meta name="author" content="菜鸟笔记 (ucncn.cn)">
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
   <link rel="canonical" href="https://ucncn.cn/notes/js-async-fetch.html">
 
   <meta property="og:type" content="article">
@@ -15,29 +17,68 @@
   <meta property="og:description" content="基于原生 Fetch API 与 AbortController 打造带超时控制与错误捕获的标准请求函数。">
   <meta property="og:url" content="https://ucncn.cn/notes/js-async-fetch.html">
   <meta property="og:site_name" content="菜鸟笔记">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ucncn.cn/assets/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="原生 JavaScript Fetch API 异步请求与错误捕获标准封装">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "原生 JavaScript Fetch API 异步请求与错误捕获标准封装",
-    "description": "基于原生 Fetch API 与 AbortController 实现带超时控制与网络错误拦截的标准请求封装。",
-    "datePublished": "2026-08-22T16:00:00+08:00",
-    "dateModified": "2026-10-16T12:00:00+08:00",
-    "author": {
-      "@type": "Person",
-      "name": "菜鸟笔记"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "菜鸟笔记",
-      "url": "https://ucncn.cn"
-    },
-    "mainEntityOfPage": "https://ucncn.cn/notes/js-async-fetch.html"
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "原生 JavaScript Fetch API 异步请求与错误捕获标准封装",
+        "description": "基于原生 Fetch API 与 AbortController 实现带超时控制与网络错误拦截的标准请求封装。",
+        "datePublished": "2026-08-22T16:00:00+08:00",
+        "dateModified": "2026-11-06T12:00:00+08:00",
+        "author": {
+          "@type": "Person",
+          "name": "菜鸟笔记"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "菜鸟笔记",
+          "url": "https://ucncn.cn"
+        },
+        "mainEntityOfPage": "https://ucncn.cn/notes/js-async-fetch.html",
+        "image": "https://ucncn.cn/assets/images/og-cover.png",
+        "inLanguage": "zh-CN"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "菜鸟笔记",
+            "item": "https://ucncn.cn/#articles"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "原生 JavaScript Fetch API 异步请求与错误捕获标准封装"
+          }
+        ]
+      }
+    ]
   }
   </script>
 
   <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="原生 JavaScript Fetch API 异步请求与错误捕获标准封装 - 菜鸟笔记">
+  <meta name="twitter:description" content="摒弃臃肿的第三方 Ajax 库，基于原生现代 Fetch API 与 AbortController 实现带超时控制、JSON 自动解析与网络错误拦截的标准请求工具函数。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
 </head>
 <body>
 

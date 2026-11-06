@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
   <title>送你一张小卡片 (CardCraft Studio) - 苹果质感灵感卡片生成器微信小程序 - 菜鸟笔记实验室</title>
   <meta name="description" content="送你一张小卡片 (CardCraft Studio) 是一款高审美的灵感金句与知识卡片生成微信小程序。内置 8 大 Apple 级质感预设、全画幅社媒比例适配与 Canvas 2D 印刷级超清导出引擎，让文字更有温度。">
   <meta name="keywords" content="CardCraft, 送你一张小卡片, 卡片生成器, 知识卡片小程序, 金句卡片, 小红书卡片, 朋友圈图文, 菜鸟笔记">
   <meta name="author" content="菜鸟笔记 (ucncn.cn)">
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
   <link rel="canonical" href="https://ucncn.cn/projects/cardcraft/">
 
   <!-- Open Graph -->
@@ -22,20 +24,47 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "送你一张小卡片 (CardCraft Studio)",
-    "applicationCategory": "DesignApplication",
-    "operatingSystem": "WeChat Mini Program",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "CNY"
-    },
-    "description": "高审美的灵感金句与社交媒体知识卡片生成微信小程序",
-    "author": {
-      "@type": "Person",
-      "name": "菜鸟笔记"
-    }
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "送你一张小卡片 (CardCraft Studio)",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "WeChat Mini Program",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CNY"
+        },
+        "description": "高审美的灵感金句与社交媒体知识卡片生成微信小程序",
+        "author": {
+          "@type": "Person",
+          "name": "菜鸟笔记"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "实验室",
+            "item": "https://ucncn.cn/#projects"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "送你一张小卡片 (CardCraft Studio)"
+          }
+        ]
+      }
+    ]
   }
   </script>
 
@@ -188,6 +217,11 @@
       color: var(--text-main);
     }
   </style>
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="送你一张小卡片 (CardCraft Studio) - 苹果质感灵感卡片生成器微信小程序 - 菜鸟笔记实验室">
+  <meta name="twitter:description" content="送你一张小卡片 (CardCraft Studio) 是一款高审美的灵感金句与知识卡片生成微信小程序。内置 8 大 Apple 级质感预设、全画幅社媒比例适配与 Canvas 2D 印刷级超清导出引擎，让文字更有温度。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
 </head>
 <body>
 

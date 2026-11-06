@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
   <title>HTTP 状态码全景指南：常见 2xx、3xx、4xx、5xx 核心排错语义 - 菜鸟笔记</title>
   <meta name="description" content="系统整理 301 与 302 区别、401 与 403 权限边界、以及 502 Bad Gateway 常见 Nginx 后端故障成因。">
   <meta name="author" content="菜鸟笔记 (ucncn.cn)">
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
   <link rel="canonical" href="https://ucncn.cn/notes/http-status-codes.html">
 
   <meta property="og:type" content="article">
@@ -14,29 +16,68 @@
   <meta property="og:description" content="系统整理 301 与 302 区别、401 与 403 权限边界、以及 502 Bad Gateway 常见 Nginx 后端故障成因。">
   <meta property="og:url" content="https://ucncn.cn/notes/http-status-codes.html">
   <meta property="og:site_name" content="菜鸟笔记">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ucncn.cn/assets/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="HTTP 状态码全景指南：常见 2xx、3xx、4xx、5xx 核心排错语义">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "HTTP 状态码全景指南：常见 2xx、3xx、4xx、5xx 核心排错语义",
-    "description": "系统整理 301 与 302 区别、401 与 403 权限边界、以及 502 Bad Gateway 常见 Nginx 后端故障成因。",
-    "datePublished": "2026-05-10T10:00:00+08:00",
-    "dateModified": "2026-10-16T12:00:00+08:00",
-    "author": {
-      "@type": "Person",
-      "name": "菜鸟笔记"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "菜鸟笔记",
-      "url": "https://ucncn.cn"
-    },
-    "mainEntityOfPage": "https://ucncn.cn/notes/http-status-codes.html"
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "HTTP 状态码全景指南：常见 2xx、3xx、4xx、5xx 核心排错语义",
+        "description": "系统整理 301 与 302 区别、401 与 403 权限边界、以及 502 Bad Gateway 常见 Nginx 后端故障成因。",
+        "datePublished": "2026-05-10T10:00:00+08:00",
+        "dateModified": "2026-11-06T12:00:00+08:00",
+        "author": {
+          "@type": "Person",
+          "name": "菜鸟笔记"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "菜鸟笔记",
+          "url": "https://ucncn.cn"
+        },
+        "mainEntityOfPage": "https://ucncn.cn/notes/http-status-codes.html",
+        "image": "https://ucncn.cn/assets/images/og-cover.png",
+        "inLanguage": "zh-CN"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "菜鸟笔记",
+            "item": "https://ucncn.cn/#articles"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "HTTP 状态码全景指南：常见 2xx、3xx、4xx、5xx 核心排错语义"
+          }
+        ]
+      }
+    ]
   }
   </script>
 
   <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HTTP 状态码全景指南：常见 2xx、3xx、4xx、5xx 核心排错语义 - 菜鸟笔记">
+  <meta name="twitter:description" content="系统整理 301 与 302 区别、401 与 403 权限边界、以及 502 Bad Gateway 常见 Nginx 后端故障成因。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
 </head>
 <body>
 
