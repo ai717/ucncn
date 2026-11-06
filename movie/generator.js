@@ -292,7 +292,7 @@
       commentDesc = `留下了 ${commentCount} 篇笔力锋利的真实短评。爱憎分明、直击肯綮，文字是你与创作者之间最真诚的交锋。`;
     }
 
-    return { personaTitle, ratingDesc, volumeDesc, commentDesc };
+    return { personaTitle, title: personaTitle, ratingDesc, volumeDesc, commentDesc };
   }
 
   function analyzeRecords(records) {
@@ -2539,7 +2539,7 @@ ${criticLines}
 
         <!-- 用户名与总览 -->
         <div style="text-align: center; margin-bottom: 18px;">
-          <div style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px;">${persona.title}</div>
+          <div style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px;">${persona.personaTitle || persona.title}</div>
           <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">
             ${yearSpan} 年光影纪元 · 见证 ${totalMovies} 部传世光影
           </div>
