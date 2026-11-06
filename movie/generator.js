@@ -647,7 +647,7 @@ ${criticLines}
     activePosters = activePosters.slice(0, 64);
 
     const posterWallHtml = activePosters.map((p, idx) => {
-      const delay = +(((idx % 8) + Math.floor(idx / 8)) * 0.035).toFixed(3);
+      const delay = +(((idx % 8) + Math.floor(idx / 8)) * 0.045).toFixed(3);
       const ct = cleanTitle(p.title);
       const fullImg = p.img.startsWith('http') ? p.img : `${origin}${p.img}`;
       return `
@@ -759,7 +759,7 @@ ${criticLines}
       left: 0;
       display: flex;
       flex-direction: column;
-      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
       will-change: transform;
     }
 
@@ -1035,20 +1035,25 @@ ${criticLines}
       box-shadow: 0 10px 25px rgba(0,0,0,0.6), 0 0 25px rgba(52, 211, 153, 0.35);
     }
 
-    /* 全模块保证 100% 完整呈现，避免动效脚本未触发时空白隐形 */
-    .reveal-card {
-      opacity: 1;
-      transform: none;
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    /* 全模块在逐屏漫游模式下拥有典雅平缓的入场动效；在全景长卷下直接全显 */
+    body.story-mode .reveal-card {
+      opacity: 0.18;
+      transform: translateY(28px) scale(0.985);
+      transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
     }
-    .reveal-card.revealed {
+    body.story-mode .reveal-card.revealed {
       opacity: 1;
-      transform: none;
+      transform: translateY(0) scale(1);
+      transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.22s, transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.22s;
     }
-    .paper-section {
+    body.overview-mode .reveal-card {
       opacity: 1 !important;
       transform: none !important;
+      position: relative;
+    }
+    .paper-section {
+      position: relative;
     }
 
     /* 模块 1：深邃墨绿 & 典藏黄金私信殿堂 (纯正电影暗夜质感，杜绝白卡片割裂) */
@@ -1338,10 +1343,10 @@ ${criticLines}
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      opacity: 0.2;
-      transform: scale(0.92) translateY(8px);
-      transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s),
-                  transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s),
+      opacity: 0.15;
+      transform: scale(0.9) translateY(12px);
+      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--delay, 0s) + 0.28s),
+                  transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--delay, 0s) + 0.28s),
                   box-shadow 0.2s ease;
     }
     .blue-section.revealed .poster-card {
@@ -1507,7 +1512,7 @@ ${criticLines}
       height: 100%;
       border-radius: 14px;
       width: 0;
-      transition: width 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
     }
     .star-bar-fill::after {
@@ -1521,10 +1526,10 @@ ${criticLines}
     .reveal-card.revealed .star-bar-fill {
       width: var(--target-width);
     }
-    .dark-section.revealed .star-bar-row:nth-child(1) .star-bar-fill { transition-delay: 0.1s; }
-    .dark-section.revealed .star-bar-row:nth-child(2) .star-bar-fill { transition-delay: 0.25s; }
-    .dark-section.revealed .star-bar-row:nth-child(3) .star-bar-fill { transition-delay: 0.4s; }
-    .dark-section.revealed .star-bar-row:nth-child(4) .star-bar-fill { transition-delay: 0.55s; }
+    .dark-section.revealed .star-bar-row:nth-child(1) .star-bar-fill { transition-delay: 0.38s; }
+    .dark-section.revealed .star-bar-row:nth-child(2) .star-bar-fill { transition-delay: 0.56s; }
+    .dark-section.revealed .star-bar-row:nth-child(3) .star-bar-fill { transition-delay: 0.74s; }
+    .dark-section.revealed .star-bar-row:nth-child(4) .star-bar-fill { transition-delay: 0.92s; }
     .star-bar-num {
       width: 82px;
       flex-shrink: 0;
@@ -1629,22 +1634,22 @@ ${criticLines}
       background: linear-gradient(90deg, #38bdf8 0%, #ffffff 100%);
       box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
       width: 0;
-      transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: width 1.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .blue-section.revealed .bar-fill,
     .reveal-card.revealed .bar-fill {
       width: var(--target-width);
     }
-    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(1) .bar-fill { transition-delay: 0.05s; }
-    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(2) .bar-fill { transition-delay: 0.11s; }
-    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(3) .bar-fill { transition-delay: 0.17s; }
-    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(4) .bar-fill { transition-delay: 0.23s; }
-    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(5) .bar-fill { transition-delay: 0.29s; }
-    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(6) .bar-fill { transition-delay: 0.35s; }
-    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(7) .bar-fill { transition-delay: 0.41s; }
-    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(8) .bar-fill { transition-delay: 0.47s; }
-    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(9) .bar-fill { transition-delay: 0.53s; }
-    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(10) .bar-fill { transition-delay: 0.59s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(1) .bar-fill { transition-delay: 0.35s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(2) .bar-fill { transition-delay: 0.43s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(3) .bar-fill { transition-delay: 0.51s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(4) .bar-fill { transition-delay: 0.59s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(5) .bar-fill { transition-delay: 0.67s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(6) .bar-fill { transition-delay: 0.75s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(7) .bar-fill { transition-delay: 0.83s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(8) .bar-fill { transition-delay: 0.91s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(9) .bar-fill { transition-delay: 0.99s; }
+    .blue-section.revealed .genre-bars-grid .bar-row:nth-child(10) .bar-fill { transition-delay: 1.07s; }
     .bar-num {
       width: 52px;
       text-align: right;
@@ -1698,7 +1703,7 @@ ${criticLines}
     }
 
     /* 短评留痕 (杂志级单行规整排版，左右滑入交错动效) */
-    .quote-row {
+    body.story-mode .quote-row {
       background: rgba(10, 20, 14, 0.65);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1706,9 +1711,19 @@ ${criticLines}
       padding: 16px 18px;
       margin-bottom: 14px;
       border-left: 4px solid #00b51d;
-      opacity: 1;
-      transform: none;
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+      opacity: 0.15;
+      transform: translateX(18px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+    }
+    body.overview-mode .quote-row {
+      background: rgba(10, 20, 14, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      border-left: 4px solid #00b51d;
+      opacity: 1 !important;
+      transform: none !important;
     }
     .gold-quote {
       border-left-color: #f59e0b;
@@ -1718,16 +1733,16 @@ ${criticLines}
       border-left-color: #ef4444;
       box-shadow: 0 4px 16px rgba(239, 68, 68, 0.06);
     }
-    .quote-row {
+    .dark-section.revealed .quote-row {
       opacity: 1;
-      transform: none;
+      transform: translateX(0);
     }
-    .dark-section.revealed .gold-quote:nth-child(2) { transition-delay: 0.1s; }
-    .dark-section.revealed .gold-quote:nth-child(3) { transition-delay: 0.25s; }
-    .dark-section.revealed .gold-quote:nth-child(4) { transition-delay: 0.4s; }
-    .dark-section.revealed .red-quote:nth-child(2) { transition-delay: 0.15s; }
-    .dark-section.revealed .red-quote:nth-child(3) { transition-delay: 0.3s; }
-    .dark-section.revealed .red-quote:nth-child(4) { transition-delay: 0.45s; }
+    .dark-section.revealed .gold-quote:nth-child(2) { transition-delay: 0.35s; }
+    .dark-section.revealed .gold-quote:nth-child(3) { transition-delay: 0.52s; }
+    .dark-section.revealed .gold-quote:nth-child(4) { transition-delay: 0.69s; }
+    .dark-section.revealed .red-quote:nth-child(2) { transition-delay: 0.42s; }
+    .dark-section.revealed .red-quote:nth-child(3) { transition-delay: 0.59s; }
+    .dark-section.revealed .red-quote:nth-child(4) { transition-delay: 0.76s; }
     .quote-row:hover {
       transform: translateX(3px) !important;
       background: rgba(15, 30, 20, 0.8);
@@ -2219,7 +2234,7 @@ ${criticLines}
           radarChart = echarts.init(radarEl, 'dark');
           radarChart.setOption({
             animation: true,
-            animationDuration: 1400,
+            animationDuration: 1800,
             animationEasing: 'cubicOut',
             backgroundColor: 'transparent',
             tooltip: { trigger: 'item' },
@@ -2315,7 +2330,7 @@ ${criticLines}
           timelineChart = echarts.init(timelineEl, 'dark');
           timelineChart.setOption({
             animation: true,
-            animationDuration: 1600,
+            animationDuration: 2000,
             animationEasing: 'cubicOut',
             backgroundColor: 'transparent',
             tooltip: {
@@ -2378,50 +2393,60 @@ ${criticLines}
       function triggerCardReveal(target) {
         if (!target) return;
         target.classList.add('revealed');
-        // 触发数字跳动
+
+        // 触发数字平滑滚动跳动动效 (350ms 后启动，持续 1.4 秒，easeOutCubic 拟真减速阻尼)
         target.querySelectorAll('.counter').forEach(counter => {
           if (counter.dataset.animated) return;
           counter.dataset.animated = "true";
           const targetVal = +counter.getAttribute('data-target') || 0;
           if (!targetVal) return;
-          let count = 0;
-          const inc = Math.max(1, Math.floor(targetVal / 40));
-          const timer = setInterval(() => {
-            count += inc;
-            if (count >= targetVal) {
-              counter.innerText = targetVal;
-              clearInterval(timer);
-            } else {
-              counter.innerText = count;
+          
+          setTimeout(() => {
+            const startTime = performance.now();
+            const duration = 1400;
+            function step(now) {
+              const elapsed = now - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const ease = 1 - Math.pow(1 - progress, 3);
+              const current = Math.round(targetVal * ease);
+              counter.innerText = current.toLocaleString();
+              if (progress < 1) {
+                requestAnimationFrame(step);
+              } else {
+                counter.innerText = targetVal.toLocaleString();
+              }
             }
-          }, 20);
+            requestAnimationFrame(step);
+          }, 350);
         });
 
-        // 触发信笺诗意金句打字机效果 (只触发一次)
+        // 触发信笺诗意金句打字机效果 (延时 500ms 启动，每字 42ms，只触发一次)
         const typingEl = target.querySelector('#typing-quote');
         if (typingEl && !typingEl.dataset.typed) {
           typingEl.dataset.typed = "true";
           const fullText = typingEl.innerText;
           typingEl.innerText = "";
           let charIndex = 0;
-          const typingInterval = setInterval(() => {
-            if (charIndex < fullText.length) {
-              typingEl.innerText += fullText.charAt(charIndex);
-              charIndex++;
-            } else {
-              clearInterval(typingInterval);
-            }
-          }, 35);
+          setTimeout(() => {
+            const typingInterval = setInterval(() => {
+              if (charIndex < fullText.length) {
+                typingEl.innerText += fullText.charAt(charIndex);
+                charIndex++;
+              } else {
+                clearInterval(typingInterval);
+              }
+            }, 42);
+          }, 500);
         }
 
-        // 模块三：滑动到五维观影决策雷达时，开启动态展开渲染
+        // 模块三：滑动到五维观影决策雷达时，开启动态展开渲染 (延时 350ms 优雅铺展)
         if (target.querySelector('#chart-radar')) {
-          initRadarChart();
+          setTimeout(initRadarChart, 350);
         }
 
-        // 模块五：滑动到光影足迹历年走势时，开启柱状图拔地而起动效
+        // 模块五：滑动到光影足迹历年走势时，开启柱状图拔地而起动效 (延时 350ms 逐根升起)
         if (target.querySelector('#chart-timeline')) {
-          initTimelineChart();
+          setTimeout(initTimelineChart, 350);
         }
       }
 
@@ -2494,11 +2519,11 @@ ${criticLines}
           if (card) triggerCardReveal(card);
         }
 
-        // 调整图表尺寸
+        // 调整图表尺寸 (延时待滑屏与卡片入场稳定后重设)
         setTimeout(() => {
           if (index === 3 && radarChart) radarChart.resize();
           if (index === 5 && timelineChart) timelineChart.resize();
-        }, 300);
+        }, 500);
       };
 
       window.goToNextSlide = function() {
@@ -2559,7 +2584,7 @@ ${criticLines}
         if (Math.abs(e.deltaY) < 18) return;
 
         isScrollingLock = true;
-        setTimeout(() => { isScrollingLock = false; }, 650);
+        setTimeout(() => { isScrollingLock = false; }, 1000);
 
         if (e.deltaY > 0) {
           goToNextSlide();
@@ -2602,8 +2627,15 @@ ${criticLines}
         }
       });
 
-      // 初始化第一屏指示器
+      // 初始化第一屏指示器并触发第一屏优雅入场
       updateNavDots(1);
+      const firstSlide = document.getElementById('slide-1');
+      if (firstSlide) {
+        const firstCard = firstSlide.querySelector('.reveal-card');
+        if (firstCard) {
+          setTimeout(() => triggerCardReveal(firstCard), 80);
+        }
+      }
 
       window.addEventListener('resize', () => {
         if (radarChart) radarChart.resize();
