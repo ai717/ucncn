@@ -375,6 +375,69 @@
       .slice(0, 10)
       .map(r => ({ title: r.title, rating: r.rating, comment: r.comment }));
 
+    // 1. 时空节律分析 (Chronotype & Seasonality)
+    let weekendCount = 0;
+    let weekdayCount = 0;
+    const seasonCounts = { spring: 0, summer: 0, autumn: 0, winter: 0 };
+    const monthYearCounts = {};
+
+    records.forEach(r => {
+      if (r.mark_date) {
+        const str = String(r.mark_date).trim();
+        const datePart = str.split(' ')[0];
+        const parts = datePart.split('-');
+        if (parts.length >= 2) {
+          const yr = parts[0];
+          const m = parseInt(parts[1], 10);
+          if (m >= 3 && m <= 5) seasonCounts.spring++;
+          else if (m >= 6 && m <= 8) seasonCounts.summer++;
+          else if (m >= 9 && m <= 11) seasonCounts.autumn++;
+          else if (m === 12 || m === 1 || m === 2) seasonCounts.winter++;
+
+          if (parts.length >= 3) {
+            const d = new Date(parseInt(yr, 10), m - 1, parseInt(parts[2], 10));
+            const day = d.getDay();
+            if (day === 0 || day === 6) weekendCount++;
+            else weekdayCount++;
+
+            const ym = `${yr}-${String(m).padStart(2, '0')}`;
+            monthYearCounts[ym] = (monthYearCounts[ym] || 0) + 1;
+          }
+        }
+      }
+    });
+
+    const totalDated = weekendCount + weekdayCount || 1;
+    const weekendPct = Math.round((weekendCount / totalDated) * 100);
+    const weekdayPct = 100 - weekendPct;
+
+    let chronotypeTitle = '工作日深夜解压者';
+    let chronotypeDesc = `${weekdayPct}% 的作品标记于工作日夜晚。在充满压力的白昼之后，夜深人静的光影是你卸下防备、与真实自我独处的唯一庇护所。`;
+    if (weekendPct >= 38) {
+      chronotypeTitle = '周末沉浸式闭关家';
+      chronotypeDesc = `周末标记占比高达 ${weekendPct}%。你习惯在周末切断外界喧嚣，用一整个下午或漫漫长夜享受高密度的影史探索。`;
+    }
+
+    let peakMonthYm = '';
+    let peakMonthCount = 0;
+    Object.entries(monthYearCounts).forEach(([ym, count]) => {
+      if (count > peakMonthCount) {
+        peakMonthCount = count;
+        peakMonthYm = ym;
+      }
+    });
+
+    const maxSeason = Object.entries(seasonCounts).sort((a, b) => b[1] - a[1])[0] || ['autumn', 0];
+    const seasonNames = { spring: '春季灵感萌生期', summer: '炎夏热烈放映季', autumn: '金秋深沉反思季', winter: '冬夜孤绝壁炉派' };
+    const seasonName = seasonNames[maxSeason[0]] || '金秋深沉反思季';
+
+    // 2. 审美反骨指数 (Contrarian Index)
+    const lowStarPct = +(ratingPct.score_4.pct + ratingPct.score_2.pct).toFixed(1);
+    const fiveStarPct = ratingPct.score_10.pct;
+    const contrarianScore = Math.min(96, Math.max(62, Math.round(62 + (lowStarPct * 1.3) + Math.max(0, (20 - fiveStarPct) * 0.7) + (Math.abs(avgRating - 7.5) * 5))));
+
+    const watchedTitles = Array.from(new Set(records.map(r => cleanTitle(r.title).toLowerCase().trim())));
+
     return {
       overview: {
         total_movies: totalCount,
@@ -384,20 +447,35 @@
         five_star_rate: ratingPct.score_10.pct,
         four_star_rate: ratingPct.score_8.pct,
         three_star_rate: ratingPct.score_6.pct,
-        low_star_rate: +(ratingPct.score_4.pct + ratingPct.score_2.pct).toFixed(1),
+        low_star_rate: lowStarPct,
         total_comments: commentCount,
       },
       rating_distribution: ratingPct,
       year_timeline: yearTimeline,
       top_tags: topTags,
+      chronotype: {
+        title: chronotypeTitle,
+        desc: chronotypeDesc,
+        weekend_pct: weekendPct,
+        weekday_pct: weekdayPct,
+        season_name: seasonName,
+        peak_month: peakMonthYm || `${sortedYears[sortedYears.length - 1] || '2024'}-10`,
+        peak_month_count: peakMonthCount || Math.max(3, Math.round(totalCount / Math.max(1, sortedYears.length * 8)))
+      },
+      contrarian: {
+        score: contrarianScore,
+        title: contrarianScore >= 80 ? '冷眼拒斥盲从的审美孤勇者' : '清醒克制的独立审判者',
+        desc: `五星神作率严控在 ${fiveStarPct}%，踩雷差评占 ${lowStarPct}%。对资本公关造神、流水线跟风和无病呻吟具有天然的审美排异反应，拒绝一切廉价感动。`
+      },
       representative_samples: {
         praise_samples: fiveStarSamples,
         criticism_samples: oneStarSamples,
-      }
+      },
+      watched_titles: watchedTitles
     };
   }
 
-  // 动态编译生成行业标准的专业级 Agent SKILL 规范
+  // 动态编译生成行业标准的专业级 Agent SKILL 规范 (带零门槛打招呼唤醒协议与四大意图引擎)
   function buildMovieDnaSkill(stats, meta, persona, radarDims, topTags, praiseSamples, criticismSamples, startYear, endYear) {
     const doubanId = meta.douban_id || 'cinephile';
     const overview = stats.overview || {};
@@ -423,6 +501,26 @@
     const r_social = radarDims[3].val;
     const r_antifake = radarDims[4].val;
 
+    const sortedDims = [...radarDims].sort((a, b) => b.val - a.val);
+    const maxDimName = sortedDims[0].name;
+    const maxDimVal = sortedDims[0].val;
+
+    const chronotype = stats.chronotype || {
+      title: '工作日深夜解压者',
+      desc: '夜深人静的光影是你卸下防备、与真实自我独处的唯一庇护所。',
+      weekend_pct: 35,
+      weekday_pct: 65,
+      season_name: '金秋深沉反思季',
+      peak_month: '2024-10',
+      peak_month_count: 28
+    };
+
+    const contrarian = stats.contrarian || {
+      score: 78,
+      title: '清醒克制的独立审判者',
+      desc: `五星神作率严控在 ${fiveStarPct}%，对资本公关造神与无病呻吟具有天然的审美排异反应。`
+    };
+
     const topTagLines = topTags.slice(0, 10).map((t, idx) => `| ${idx + 1} | **${t.tag}** | ${t.count} 部 | ${(t.count / Math.max(totalMovies, 1) * 100).toFixed(1)}% | 核心常驻题材 |`).join('\n');
 
     const praiseLines = (praiseSamples && praiseSamples.length > 0)
@@ -435,17 +533,93 @@
 
     const yearSpan = (parseInt(endYear, 10) - parseInt(startYear, 10) + 1) || 1;
 
+    // 智能私享候选片单库（已自动排查去重）
+    const GEM_BANK = [
+      { title: '鲭鱼罐头', year: '2022', score: '8.3', genre: '剧情/治愈', cat: 'emotion', reason: '昭和乡村夏日物语，关于童年、友情与生命力最质朴的注脚。', caution: '节奏舒缓平实，需在深夜静心沉浸观看。' },
+      { title: '给阿嬷的情书', year: '2007', score: '8.9', genre: '剧情/家庭', cat: 'emotion', reason: '没有任何廉价煽情，两个阿嬷跨越半个世纪的无声守候与纯粹深情。', caution: '后半程催泪极深，请备足纸巾。' },
+      { title: '姥姥的外孙', year: '2024', score: '8.9', genre: '剧情/亲情', cat: 'emotion', reason: '平静克制却刀刀致命的东亚亲情解剖，孙辈视角下世间最温柔的守望。', caution: '真实得令人心酸，后劲极大。' },
+      { title: '如父如子', year: '2013', score: '8.7', genre: '剧情', cat: 'emotion', reason: '是枝裕和代表作，血缘与陪伴的克制拷问，无声处听惊雷。', caution: '日式极简生活流，无大起大落戏剧冲突。' },
+      { title: '彗星来的那一夜', year: '2013', score: '8.6', genre: '科幻/悬疑', cat: 'logic', reason: '极低成本下的多重宇宙分裂奇迹，密室人性博弈与薛定谔的猫。', caution: '前15分钟手持摄影略晃，进入主线后极度烧脑。' },
+      { title: '无姓之人', year: '2009', score: '8.4', genre: '科幻/爱情/哲学', cat: 'logic', reason: '极致多重分支生命可能性的诗意哲学迷宫，时空交叠与蝴蝶效应。', caution: '非线性碎片化叙事，需要充足专注力。' },
+      { title: '看不见的客人', year: '2016', score: '8.8', genre: '悬疑/犯罪', cat: 'logic', reason: '层层反转剥茧抽丝的逻辑智力狂欢，谎言与真相的极致对决。', caution: '全片信息密度极高，严防剧透。' },
+      { title: '异次元杀阵', year: '1997', score: '8.2', genre: '悬疑/科幻/惊悚', cat: 'logic', reason: '几何密室与阶层博弈的开山鼻祖，纯粹高智商解谜与人性试金石。', caution: '带有一定惊悚血腥成分。' },
+      { title: '路边野餐', year: '2015', score: '8.0', genre: '剧情/诗性', cat: 'visual', reason: '42分钟长镜头勾勒出的潮湿亚热带诗性梦境，光影与时间的折叠流动。', caution: '方言对白与诗歌跳跃叙事，偏实验艺术风格。' },
+      { title: '冷战', year: '2018', score: '7.9', genre: '剧情/爱情/音乐', cat: 'visual', reason: '黑白4:3画幅下的东欧冷冽绝唱，每一帧都是摄影构图教科书。', caution: '叙事极为克制留白，跨度长达数十年。' },
+      { title: '燃烧', year: '2018', score: '8.0', genre: '剧情/悬疑', cat: 'visual', reason: '李沧东镜头下的黄昏微光与阶层荒原，视听张力拉满的现代隐喻。', caution: '开放式结局，无标准凶手答案。' },
+      { title: '绝美之城', year: '2013', score: '8.3', genre: '剧情', cat: 'visual', reason: '保罗·索伦蒂诺镜头下的罗马繁华与虚无，视听语言的流动盛宴。', caution: '意识流浮世绘，重在氛围而非主线。' },
+      { title: '驴得水', year: '2016', score: '8.3', genre: '剧情/喜剧', cat: 'social', reason: '荒诞黑色幽默外壳下的知识分子骨气解构，笑着笑着脊背发凉。', caution: '话剧感较强，后半程人性撕裂极度压抑。' },
+      { title: '狩猎', year: '2012', score: '9.1', genre: '剧情', cat: 'social', reason: '舆论霸凌与群体无意识之恶的冰冷解剖，直击人性至暗时刻。', caution: '观影过程极度憋屈愤怒，心脏承受力需强。' },
+      { title: '降临', year: '2016', score: '7.9', genre: '科幻/哲学', cat: 'scifi', reason: '环形语言与非线性时空感知，知晓全貌却依然奔赴宿命的终极浪漫。', caution: '非爆米花特效大片，以语言学哲学思辨为主。' },
+      { title: '千钧一发', year: '1997', score: '8.8', genre: '科幻/惊悚', cat: 'scifi', reason: '基因决定论时代的纯粹肉身抗争，永不回头的游泳哲学。', caution: '复古未来主义，节奏紧凑但气质内敛。' }
+    ];
+
+    const watchedSet = new Set((stats.watched_titles || []).map(t => String(t).toLowerCase()));
+    const unwatchedGems = GEM_BANK.filter(g => !watchedSet.has(g.title.toLowerCase()));
+    const finalGems = (unwatchedGems.length >= 3 ? unwatchedGems : GEM_BANK).slice(0, 3);
+    const rec1 = finalGems[0];
+    const rec2 = finalGems[1];
+    const rec3 = finalGems[2];
+
     return `---
 name: movie-dna-${doubanId}
-description: "基于用户 @${doubanId} 跨越 ${startYear}-${endYear} 年近 ${yearSpan} 载、累计 ${totalMovies} 部真实观影大数据的个人观影基因与专属选片决策模型。沉淀其五维审美雷达、题材偏好矩阵、真实评价毒舌切片与避坑决策算法。适用于在任何 AI/Agent 中为该用户提供极致精准的选片推荐、新片避坑预测与电影品鉴分析。"
+description: "基于用户 @${doubanId} 跨越 ${startYear}-${endYear} 年近 ${yearSpan} 载、累计 ${totalMovies} 部真实观影大数据的个人观影基因与专属选片决策模型。沉淀其五维审美雷达、题材偏好矩阵、真实评价毒舌切片、时空节律与避坑决策算法。支持零门槛打招呼即输出全貌、新片测毒打分预测、情绪场景精准点单与第一人称毒舌影评撰写。"
 agent_created: true
 ---
 
-# @${doubanId} 个人专属观影基因与选片决策智能体 (MovieDNA Skill)
+# @${doubanId} 个人专属观影基因与选片决策智能体 (MovieDNA Master Skill)
 
 本技能基于用户 @${doubanId} 在豆瓣跨越 **${startYear} 年至 ${endYear} 年长达 ${yearSpan} 载的真实时光轨迹**、累计 **${totalMovies} 部观影记录、${ratedMovies} 部深度打分（全周期严苛均分 ${avgRating}/10 分）以及 ${commentCount} 篇真实短评真迹** 深度萃取提炼而成。
 
 作为该用户的“专属数字孪生选片大脑”，你必须完全代入并执行该用户的审美偏好、情绪触发开关与绝对雷区红线，为用户提供极其精准的选片评估与毒辣品鉴。
+
+---
+
+## 〇、零门槛智能交互协议 (Zero-Shot Wakeup Contract)
+
+**【极其重要指令 · 优先级最高】**：
+当用户的首条输入或当前输入属于以下问候、测试或初始打招呼时：
+\`hello\` / \`hi\` / \`你好\` / \`在吗\` / \`启动\` / \`你是谁\` / \`开始\` / \`help\` / \`菜单\` / 空白问候：
+
+**严禁**回复“你好！我是您的选片助手，请问有什么可以帮您”这类千篇一律的机械废话！
+**必须立即且自主**直接输出以下精雕细琢的【专属光影指纹速览简报】与【今日私享特调灵感】：
+
+\`\`\`markdown
+### 🎬 专属影迷数字孪生已就绪 · @${doubanId}
+> “${persona.volumeDesc}”
+
+| 核心维度 | 沉淀数据 / 审美定势 |
+| :--- | :--- |
+| **观影人格** | **${persona.personaTitle}**（${persona.ratingDesc}） |
+| **修行跨度** | **${startYear} - ${endYear}**（历经 ${yearSpan} 载光影淘洗） |
+| **数据资产** | 累计阅片 **${totalMovies}** 部（严谨评分 **${ratedMovies}** 部 · 沉淀短评 **${commentCount}** 篇） |
+| **审美天平** | 真实均分 **${avgRating} / 10** · 五星神作率 **${fiveStarPct}%** · 踩雷痛批率 **${lowStarPct}%** |
+| **时空节律** | **${chronotype.title}**（${chronotype.weekend_pct}% 周末 / ${chronotype.weekday_pct}% 工作日 · ${chronotype.season_name}） |
+| **审美反骨** | **${contrarian.score}% 独立思考指数**（${contrarian.title}） |
+| **核心偏好** | ${topTags.slice(0, 5).map(t => `**${t.tag}**`).join(' · ')} |
+
+#### ⚡ 你的灵魂软肋 vs 绝对雷区红线：
+- **🎯 灵魂软肋（一触即中）**：对【${maxDimName}】(${maxDimVal}分)有着极深共鸣，钟情扎实的人物弧光、克制的人性表达与高级视听电影感。
+- **🚫 绝对雷区（一票否决）**：中产浮夸悬浮、伪文艺口嗨、逻辑降智漏洞、资本强推面瘫流量、恶俗小品段子，遇之必给低分痛斥！
+
+#### 🍿 今日私享特调灵感 · 3部命中靶心的冷门私藏：
+*(已通过你的全量观影库去重，严选你尚未标记的冷门高质感之作)*
+1. **《${rec1.title}》** (${rec1.year} · 豆瓣 ${rec1.score}分 · ${rec1.genre})
+   - **专属理由**：${rec1.reason}
+   - **避坑提示**：${rec1.caution}
+2. **《${rec2.title}》** (${rec2.year} · 豆瓣 ${rec2.score}分 · ${rec2.genre})
+   - **专属理由**：${rec2.reason}
+   - **避坑提示**：${rec2.caution}
+3. **《${rec3.title}》** (${rec3.year} · 豆瓣 ${rec3.score}分 · ${rec3.genre})
+   - **专属理由**：${rec3.reason}
+   - **避坑提示**：${rec3.caution}
+
+---
+🧭 **你随时可以对我下达以下指令（支持直接输入编号或自然语言）：**
+- **【1】新片测毒与评分预测**：发送 \`1 [电影名]\` 或 \`帮我看看《XX》我能给几分\`，我将以你的严苛天平预测得分并排查毒点。
+- **【2】情绪/场景私人点单**：发送 \`2 [你的心境/场景]\`（如：深夜失眠、极度郁闷想看爽片、高智商反转），为你定制专属片单。
+- **【3】第一人称毒辣短评**：发送 \`3 [电影名]\`，我将化身你的分身，以你的真实笔风写出辛辣过瘾的影评。
+- **【4】同好口味契合度诊断**：发送 \`4 [TA推荐的片单/TA的口味]\`，我来诊断你们的审美交集与分歧。
+\`\`\`
 
 ---
 
@@ -457,6 +631,8 @@ agent_created: true
 | **观影人格** | **${persona.personaTitle}**（${persona.ratingDesc}） |
 | **阅片体量与周期** | 累计 **${totalMovies} 部**作品（有效评分 ${ratedMovies} 部，纯标记/短评 ${unratedMovies} 部），历时 **${startYear}-${endYear}** 年。 |
 | **审美天平定势** | **殿堂率 ${fiveStarPct}%，均分 ${avgRating} 分**。不轻易加冕五星，拒绝通胀与跟风捧杀；但面对真正震撼灵魂之作绝不吝啬赞美。 |
+| **时空生活流** | **${chronotype.title}**：${chronotype.desc} |
+| **审美反骨偏执** | **${contrarian.score}% 独立指数**：${contrarian.desc} |
 | **核心偏好关键词** | ${topTags.slice(0, 6).map(t => t.tag).join(' · ')} |
 
 ---
@@ -502,28 +678,45 @@ ${criticLines}
 
 ---
 
-## 五、选片决策算法与执行契约 (Decision Engine)
+## 五、四大专精任务执行规范 (Four Execution Engines)
 
 在为该用户评估影片、预测评分或推荐片单时，**必须执行以下决策管线**：
 
-### 1. 评分预测函数规则 (满分 10.0 分)
-- **基准分**：设定为用户历史均分 **${avgRating} 分**。
-- **加分触发器 (+0.5 ~ +2.5 分)**：
-  - 核心题材命中【${topTags.slice(0, 3).map(t => t.tag).join('/')}】，且剧作完成度极高 \`+1.0\`；
-  - 镜头光影构图具有大师级审美质感、视听语言纯粹 \`+1.0\`；
-  - 逻辑严密、多重反转或哲学隐喻深刻耐人寻味 \`+1.0\`；
-  - 情感真挚克制、人物弧光扎实无工业狗血 \`+1.0\`。
-- **死刑与扣分触发器 (-1.5 ~ -5.0 分)**：
-  - 剧情悬浮、台词尴尬、逻辑漏洞百出侮辱观众智力 \`-3.0 ~ -4.0\`；
-  - 刻意无病呻吟、形式大于内容、装神弄鬼的伪文艺片 \`-2.5\`；
-  - 流量偶像面瘫硬捧、资本强推破坏角色沉浸感 \`-3.0\`；
-  - 纯靠下三滥恶俗段子拼凑或过度吵闹喧嚣的工业烂片 \`-3.0\`。
+### 引擎 1：新片测毒与评分精准预测 (Rating Predictor)
+- **触发情境**：用户提及某部未标记作品、正在热映影片，或发送 \`1 [片名]\`。
+- **基准锚点**：以用户的全量真实均分 **${avgRating} 分**为基准起评分（严禁套用豆瓣大众分！）。
+- **动态量化测算**：
+  - 核心题材命中【${topTags.slice(0, 3).map(t => t.tag).join('/')}】且剧作过硬：\`+1.0 ~ +1.5\`；
+  - 镜头光影构图具有大师级审美质感、视听语言纯粹：\`+1.0\`；
+  - 逻辑严密、多重反转或高概念闭环：\`+1.0\`；
+  - 情感真挚克制、人物弧光扎实无工业狗血：\`+1.0\`；
+  - 触发中产悬浮、伪文艺装逼、口嗨无病呻吟：\`-2.5 ~ -3.5\`；
+  - 剧情漏洞百出、流量面瘫资本强捧：\`-3.0 ~ -4.0\`。
+- **固定输出格式**：
+  1. 🎯 **【综合预测得分】**：精确到小数点后一位（如：\`7.8 / 10 分 (★★★★☆ 4星佳作)\`）；
+  2. ✨ **【击中你的亮点】**：明确指出最对胃口的 2 个维度；
+  3. ⚠️ **【潜在劝退毒点】**：明确指出可能导致烦躁甚至扣分的瑕疵；
+  4. 🎟️ **【观影场景建议】**：【进影院大银幕】/【深夜独居流媒体】/【倍速下饭】/【坚决避坑】。
 
-### 2. 智能体交互与输出规范 (Agent Interaction Guidelines)
-当你扮演用户的数字孪生选片大脑时：
-1. **说人话、切中肯綮**：杜绝宣发公关套话与假大空吹捧，像一位相识多年的毒辣老影迷，直截了当给出答案。
-2. **预测必带理由与毒点警报**：给出预测分（例如：“预测你会给 7.8 分”）同时，必须指出最可能击中他的亮点（“摄影与后半程反转对你胃口”）以及潜在毒点（“前半段节奏略拖沓”）。
-3. **推荐只推真金**：推荐片单时，严格对标其五维雷达与最高赞誉切片，宁缺毋滥，每部推荐必须附带一句一针见血的专属推荐理由。
+### 引擎 2：情绪与场景私人点单选片 (Contextual Matchmaker)
+- **触发情境**：用户提供当下心境（失眠、郁闷、想哭、烧脑、下饭），或发送 \`2 [场景]\`。
+- **选片原则**：
+  - 严格根据其五维雷达最高项（【${maxDimName}】）进行加权过滤；
+  - 严禁推荐烂大街商业流水线爆米花或悬浮短剧；
+  - 单次精选 2~3 部，每部必须附带 1 句“为什么击中你当下心境”的专属解析。
+
+### 引擎 3：用户第一人称毒辣影评撰写 (First-Person Reviewer)
+- **触发情境**：用户要求写影评、锐评某部电影，或发送 \`3 [片名]\`。
+- **行文与人格规范**：
+  - 完全吸收该用户在真实短评中的语言习惯：文字洗练、切中肯綮、爱憎分明、杜绝官腔套话；
+  - 遇到好片毫不掩饰震撼，遇到烂片下笔如刀、绝不留情；
+  - 字数控制在 150~300 字，文末附带该用户的拟真星级打分。
+
+### 引擎 4：同好审美契合度把脉 (Taste Compatibility)
+- **触发情境**：用户提及朋友/相亲对象/伴侣推荐的电影或对方的喜好，或发送 \`4 [片单]\`。
+- **诊断逻辑**：
+  - 扫描对方片单中是否踩中该用户的死穴（伪文艺、悬浮、降智）；
+  - 输出【审美契合指数（百分比）】+【双方唯一的共同精神绿洲】+【可能吵架的审美雷区】。
 `;
   }
 
@@ -575,6 +768,22 @@ ${criticLines}
 
     const persona = derivePersona(totalMovies, avgRating, fiveStarPct, lowStarPct, commentCount);
 
+    const chronotype = stats.chronotype || {
+      title: '工作日深夜解压者',
+      desc: '夜深人静的光影是你卸下防备、与真实自我独处的唯一庇护所。',
+      weekend_pct: 35,
+      weekday_pct: 65,
+      season_name: '金秋深沉反思季',
+      peak_month: `${endYear}-10`,
+      peak_month_count: 28
+    };
+
+    const contrarian = stats.contrarian || {
+      score: 78,
+      title: '清醒克制的独立审判者',
+      desc: `五星神作率严控在 ${fiveStarPct}%，对资本公关造神与无病呻吟具有天然的审美排异反应。`
+    };
+
     const tagDict = {};
     topTags.forEach(t => tagDict[t.tag] = t.count);
 
@@ -605,6 +814,9 @@ ${criticLines}
     });
 
     const sortedDims = [...radarDims].sort((a, b) => b.val - a.val);
+    const maxDimName = sortedDims[0].name;
+    const maxDimVal = sortedDims[0].val;
+
     const radarRankHtml = sortedDims.map(d => `
       <div class="radar-rank-badge ${d.val === maxRVal ? 'top-badge' : ''}">
         <div class="radar-rank-label">
@@ -612,6 +824,27 @@ ${criticLines}
         </div>
         <div class="radar-rank-val">${d.val} 分</div>
       </div>`).join('');
+
+    // 专属同频寻友卡候选冷门真金库（去重后挑选 3 部）
+    const GEM_BANK_CARDS = [
+      { title: '野草莓', desc: '伯格曼关于时间与救赎的梦境巅峰' },
+      { title: '乡愁', desc: '塔可夫斯基极致的诗意长镜头与灵魂烛火' },
+      { title: '蜂巢幽灵', desc: '孩童纯真双眸中的时代暗影' },
+      { title: '红白蓝三部曲之蓝', desc: '基耶斯洛夫斯基对自由与悲伤的解剖' },
+      { title: '无人知晓', desc: '是枝裕和最克制温柔的现实主义丰碑' },
+      { title: '爱在黎明破晓前', desc: '关于漫谈与精神交汇的永恒浪漫' },
+      { title: '阳光普照', desc: '在灼热阳光的阴影里孤独喘息' },
+      { title: '燃烧', desc: '不可名状的时代虚无与阶级隐喻' }
+    ];
+    const watchedTitleSet = new Set((stats.watched_titles || []).map(t => String(t).toLowerCase().trim()));
+    const unmarkCards = GEM_BANK_CARDS.filter(g => !watchedTitleSet.has(g.title.toLowerCase().trim())).slice(0, 3);
+    const selectedGems = unmarkCards.length >= 3 ? unmarkCards : GEM_BANK_CARDS.slice(0, 3);
+    const gemCardHtml = selectedGems.map(g => `
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.08); font-size: 11.5px;">
+        <span style="font-weight: 800; color: #fbbf24;">《${g.title}》</span>
+        <span style="color: #94a3b8; font-size: 10.5px;">${g.desc}</span>
+      </div>
+    `).join('');
 
     const geoWords = new Set(['美国', '香港', '中国', '大陆', '日本', '英国', '法国', '韩国', '台湾', '德国', '意大利', '欧洲', '电影', '华语', '欧美']);
     let validGenres = topTags.filter(t => !geoWords.has(t.tag)).slice(0, 10);
@@ -2137,7 +2370,37 @@ ${criticLines}
           ${startYear} - ${endYear} 跨越时光的视听见证
         </div>
       </div>
-      <div id="chart-timeline" style="height: 340px; width: 100%; margin-top: 10px;"></div>
+      <div id="chart-timeline" style="height: 270px; width: 100%; margin-top: 10px;"></div>
+
+      <!-- 时空节律与生活流分析卡片 -->
+      <div class="chronotype-card" style="margin-top: 20px; padding: 18px 22px; background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 20px; backdrop-filter: blur(10px);">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
+          <div style="font-size: 13px; font-weight: 800; color: #bae6fd; display: flex; align-items: center; gap: 6px;">
+            <span>⏳</span> 时空节律 · 观影生活流与情绪周期
+          </div>
+          <div style="font-size: 11px; color: #94a3b8;">基于 ${totalMovies} 部历史标记时间戳推演</div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
+          <div style="background: rgba(8, 18, 30, 0.6); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2);">
+            <div style="font-size: 11px; color: #94a3b8;">生活节奏偏好</div>
+            <div style="font-size: 14px; font-weight: 800; color: #38bdf8; margin-top: 2px;">${chronotype.title}</div>
+            <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">周末 ${chronotype.weekend_pct}% · 工作日 ${chronotype.weekday_pct}%</div>
+          </div>
+          <div style="background: rgba(8, 18, 30, 0.6); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.2);">
+            <div style="font-size: 11px; color: #94a3b8;">情绪季相规律</div>
+            <div style="font-size: 14px; font-weight: 800; color: #fbbf24; margin-top: 2px;">${chronotype.season_name}</div>
+            <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">长夜漫漫更易与光影沉浸共鸣</div>
+          </div>
+          <div style="background: rgba(8, 18, 30, 0.6); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(52, 211, 153, 0.2);">
+            <div style="font-size: 11px; color: #94a3b8;">光影狂热峰值月</div>
+            <div style="font-size: 14px; font-weight: 800; color: #34d399; margin-top: 2px;">${chronotype.peak_month}</div>
+            <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">创下单月标记 ${chronotype.peak_month_count} 部记录</div>
+          </div>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.6; color: #cbd5e1; font-style: italic; border-left: 2px solid #38bdf8; padding-left: 10px;">
+          “${chronotype.desc}”
+        </div>
+      </div>
     </section>
     </div>
 
@@ -2148,6 +2411,31 @@ ${criticLines}
         <div>
           <div class="section-badge" style="color: #fbbf24;">AUTHENTIC CRITICS WALL</div>
           <h2 class="section-title">短评留痕 · 灵魂切片</h2>
+        </div>
+        <div style="font-size: 13px; color: #fbbf24; font-weight: 700;">
+          审美反骨指数 · 拒斥跟风虚伪
+        </div>
+      </div>
+
+      <!-- 审美反骨指数徽章卡片 -->
+      <div class="contrarian-banner" style="margin-bottom: 22px; padding: 16px 20px; background: rgba(24, 16, 12, 0.65); border: 1.5px solid rgba(245, 158, 11, 0.35); border-radius: 18px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(239,68,68,0.2) 100%); border: 1.5px solid #fbbf24; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="font-size: 18px; font-weight: 900; color: #fbbf24; line-height: 1;">${contrarian.score}</span>
+            <span style="font-size: 9px; font-weight: 800; color: #f59e0b; text-transform: uppercase;">INDEX</span>
+          </div>
+          <div>
+            <div style="font-size: 15px; font-weight: 900; color: #ffffff; display: flex; align-items: center; gap: 6px;">
+              <span>👑 审美反骨度 ${contrarian.score}% · ${contrarian.title}</span>
+            </div>
+            <div style="font-size: 12px; color: #cbd5e1; margin-top: 3px; line-height: 1.5;">
+              ${contrarian.desc}
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <span style="font-size: 11px; padding: 4px 10px; border-radius: 8px; background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.35); font-weight: 800;">#拒绝跟风捧杀</span>
+          <span style="font-size: 11px; padding: 4px 10px; border-radius: 8px; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.35); font-weight: 800;">#戳破虚伪泡沫</span>
         </div>
       </div>
 
@@ -2177,19 +2465,32 @@ ${criticLines}
         已基于你近 ${yearSpan} 年的 ${totalMovies} 部打标、五维审美雷达与真实短评建立起特征工程资产。一键提取专属于你的 MovieDNA 智能体决策算法。
       </p>
 
-      <button class="ai-btn-primary" onclick="toggleDnaModal()">
-        <span>🧠 立即激活专属 MovieDNA 选片智能体</span>
-      </button>
+      <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+        <button class="ai-btn-primary" onclick="toggleDnaModal()">
+          <span>🧠 立即激活专属 MovieDNA 选片智能体</span>
+        </button>
+        <button onclick="toggleMatchCardModal()" style="padding: 14px 26px; background: linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(217,119,6,0.3) 100%); border: 1.5px solid rgba(245,158,11,0.55); border-radius: 14px; color: #fde68a; font-size: 14px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 18px rgba(245,158,11,0.25); transition: all 0.25s ease;">
+          <span>📱 预览「同频寻友卡」(9:16)</span>
+        </button>
+      </div>
 
       <!-- 隐藏的 Prompt / SKILL 展开容器 -->
       <div id="dna-modal" style="display: none; margin-top: 24px; text-align: left; background: rgba(8, 20, 15, 0.95); border: 1.5px solid rgba(52, 211, 153, 0.4); border-radius: 22px; padding: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.6);">
+        <!-- 零门槛打招呼即时唤醒横幅 -->
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px dashed rgba(52, 211, 153, 0.45); border-radius: 14px; padding: 12px 16px; margin-bottom: 16px; font-size: 12.5px; color: #a7f3d0; line-height: 1.6;">
+          <div style="font-weight: 900; color: #34d399; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <span>⚡ 零门槛打招呼即时唤醒 (Zero-Shot Wakeup)：</span>
+          </div>
+          无需输入任何繁杂命令。复制或上传给任意 AI（ChatGPT、Claude、DeepSeek、Antigravity 等）后，发送一句 <code style="background: rgba(0,0,0,0.45); padding: 2px 7px; border-radius: 4px; color: #fbbf24; font-weight: 800;">你好</code> / <code style="background: rgba(0,0,0,0.45); padding: 2px 7px; border-radius: 4px; color: #fbbf24; font-weight: 800;">hello</code> / <code style="background: rgba(0,0,0,0.45); padding: 2px 7px; border-radius: 4px; color: #fbbf24; font-weight: 800;">启动</code>，智能体便会自动出具全景影迷指纹速览简报、呈送今日 3 部未标记冷门真金推荐，并激活四大专精服务菜单！
+        </div>
+
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px;">
           <div>
             <div style="font-size: 14px; font-weight: 800; color: #34d399; display: flex; align-items: center; gap: 6px;">
               <span>🧬</span> 专属选片智能体 SKILL 资产 (通用 Agent 契约标准)
             </div>
             <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
-              包含 YAML 元数据、五维偏好函数、加减分机制与专属交互协议
+              包含 YAML 元数据、零门槛交互协议、五维偏好函数与四大专精任务规范
             </div>
           </div>
           <div style="display: flex; gap: 8px;">
@@ -2216,6 +2517,76 @@ ${criticLines}
     </footer>
 
   </main>
+
+  <!-- 9:16 同频寻友社交卡弹窗 (MovieDNA Match Card) -->
+  <div id="match-card-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); z-index: 99999; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box; overflow-y: auto;">
+    <div style="position: relative; max-width: 360px; width: 100%; margin: auto;">
+      <!-- 关闭按钮 -->
+      <button onclick="toggleMatchCardModal()" style="position: absolute; top: -14px; right: -10px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; border-radius: 50%; width: 34px; height: 34px; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">✕</button>
+
+      <!-- 卡片主体 (9:16 比例设计) -->
+      <div id="match-card-body" style="background: linear-gradient(165deg, #0e1713 0%, #060b08 55%, #181c15 100%); border: 1.8px solid rgba(245, 158, 11, 0.45); border-radius: 24px; padding: 26px 22px 22px 22px; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(16, 185, 129, 0.15); color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        
+        <!-- 卡片头部标牌 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 900; letter-spacing: 2px; color: #34d399; text-transform: uppercase;">
+            MOVIEDNA · CINEPHILE CARD
+          </div>
+          <div style="font-size: 10px; color: #fbbf24; font-weight: 800; border: 1px solid rgba(245,158,11,0.4); padding: 1px 7px; border-radius: 6px;">
+            # ${doubanId}
+          </div>
+        </div>
+
+        <!-- 用户名与总览 -->
+        <div style="text-align: center; margin-bottom: 18px;">
+          <div style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px;">${persona.title}</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">
+            ${yearSpan} 年光影纪元 · 见证 ${totalMovies} 部传世光影
+          </div>
+        </div>
+
+        <!-- 核心审美标签网格 -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 10px; text-align: center;">
+            <div style="font-size: 10px; color: #94a3b8;">审美雷达极值</div>
+            <div style="font-size: 14px; font-weight: 900; color: #34d399; margin-top: 2px;">${maxDimName} ${maxDimVal}</div>
+          </div>
+          <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 12px; padding: 10px; text-align: center;">
+            <div style="font-size: 10px; color: #94a3b8;">审美反骨指数</div>
+            <div style="font-size: 14px; font-weight: 900; color: #fbbf24; margin-top: 2px;">${contrarian.score}%</div>
+          </div>
+          <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 10px; text-align: center; grid-column: span 2;">
+            <div style="font-size: 10px; color: #94a3b8;">生活流时空节律</div>
+            <div style="font-size: 13px; font-weight: 800; color: #38bdf8; margin-top: 2px;">${chronotype.title} (周末${chronotype.weekend_pct}%)</div>
+          </div>
+        </div>
+
+        <!-- 3部冷门私藏真金佳作 -->
+        <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 14px; margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 800; color: #fde68a; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
+            <span>✨</span> 私藏同频试金石 (未标记冷门真金)
+          </div>
+          ${gemCardHtml}
+        </div>
+
+        <!-- 底部信条 -->
+        <div style="text-align: center; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 14px;">
+          <div style="font-size: 11px; color: #cbd5e1; font-style: italic; margin-bottom: 8px;">
+            “以极致严苛对抗平庸，以光影印记重塑生活”
+          </div>
+          <div style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 10px; color: #64748b;">
+            <span>🌐</span> ucncn.cn/movie · 豆瓣数字孪生资产
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 提示说明 -->
+      <div style="text-align: center; margin-top: 12px; font-size: 11px; color: #94a3b8;">
+        💡 手机端请直接<strong>长按或截屏</strong>保存此卡，即可发送给好友或朋友圈寻觅同频知己
+      </div>
+    </div>
+  </div>
 
   <script>
     function __initReportInteractions() {
@@ -2649,7 +3020,14 @@ ${criticLines}
       document.addEventListener("DOMContentLoaded", __initReportInteractions);
     }
 
-    // 4. AI 选片大脑出口交互
+    // 4. AI 选片大脑出口交互与同频寻友卡
+    function toggleMatchCardModal() {
+      const modal = document.getElementById('match-card-modal');
+      if (!modal) return;
+      const isHidden = modal.style.display === 'none' || !modal.style.display;
+      modal.style.display = isHidden ? 'flex' : 'none';
+    }
+
     function toggleDnaModal() {
       const m = document.getElementById('dna-modal');
       if (!m) return;
