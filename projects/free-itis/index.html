@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITIS Free (免费开源数字资源导航) - 菜鸟笔记实验室</title>
+  <meta name="description" content="ITIS Free (free.itis.chat) 是一个干净、无广告、社区驱动的中文数字免费资源导航 Wiki。汇聚全球精选免费开发云服务、媒体设计素材、AI 额度与实用避坑指南，100% Free · Open Source · 零套路。">
+  <meta name="keywords" content="ITIS Free, 免费开源资源, 数字资源导航, 开发者免费工具, 开源导航, 白嫖神器, 免费API, 菜鸟笔记实验室">
+  <meta name="author" content="菜鸟笔记 (ucncn.cn)">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="canonical" href="https://ucncn.cn/projects/free-itis/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ITIS Free (免费开源数字资源导航) - 菜鸟笔记实验室">
+  <meta property="og:description" content="干净、无广告、社区驱动的中文数字免费资源导航 Wiki。100% Free · Open Source · 零套路。">
+  <meta property="og:url" content="https://ucncn.cn/projects/free-itis/">
+  <meta property="og:site_name" content="菜鸟笔记">
+
+  <!-- Schema.org 结构化数据 (WebSite / WebApplication) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ITIS Free - 免费开源数字资源导航",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "CNY"
+    },
+    "description": "干净、无广告、社区驱动的中文数字免费资源导航 Wiki",
+    "author": {
+      "@type": "Organization",
+      "name": "ITIS Free 社区"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .itis-hero {
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 40px 30px;
+      margin-bottom: 36px;
+      text-align: center;
+      position: relative;
+    }
+    .itis-badge-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .itis-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #0284c7;
+      background: rgba(2, 132, 199, 0.12);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .itis-badge.green {
+      color: #059669;
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .itis-badge.amber {
+      color: #d97706;
+      background: rgba(245, 158, 11, 0.12);
+    }
+    .itis-title {
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .itis-title span {
+      background: linear-gradient(135deg, #0284c7, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .itis-sub {
+      font-size: 1.08rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+    }
+    .cta-button-group {
+      display: inline-flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+    .primary-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #0284c7, #059669);
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 12px 28px;
+      border-radius: 30px;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .primary-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.45);
+    }
+    .secondary-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-surface);
+      color: var(--text-main) !important;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 12px 22px;
+      border-radius: 30px;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .secondary-cta-btn:hover {
+      border-color: #0284c7;
+      color: #0284c7 !important;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(2, 132, 199, 0.4);
+    }
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    .feature-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .info-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 头部导航 -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../../" class="logo-area">
+        <img src="/assets/images/favicon.svg" alt="菜鸟笔记 Logo" width="28" height="28" style="vertical-align:middle; border-radius: 6px;">
+        <span class="logo-text">菜鸟笔记 · 实验室</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="../../" class="nav-link">返回主站</a>
+        <a href="../../#articles" class="nav-link">菜鸟笔记</a>
+        <a href="../../#projects" class="nav-link">其他项目</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="切换深浅模式" title="切换深浅模式"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        <a href="../../">首页</a>
+        <span>/</span>
+        <a href="../../#projects">实验室</a>
+        <span>/</span>
+        <span>ITIS Free (免费开源数字资源导航)</span>
+      </div>
+
+      <!-- Hero 介绍区 -->
+      <section class="itis-hero">
+        <div class="itis-badge-wrap">
+          <span class="itis-badge">🌐 开源公益导航</span>
+          <span class="itis-badge green">✨ 100% 免费 · 零广告</span>
+          <span class="itis-badge amber">🤝 社区驱动 Wiki</span>
+        </div>
+        <h1 class="itis-title">ITIS Free <span>数字免费资源导航</span></h1>
+        <p class="itis-sub">
+          互联网上干净、无广告、社区驱动的中文数字免费资源导航 Wiki。专注发掘高质量免费服务、开发者基础设施与白嫖避坑指南，开源共建，拒绝一切套路！
+        </p>
+
+        <div class="cta-button-group">
+          <a href="https://free.itis.chat/" target="_blank" rel="noopener noreferrer" class="primary-cta-btn">
+            <span>🌐 立即直达 ITIS Free 官网 (free.itis.chat) &#8599;</span>
+          </a>
+          <a href="../../#projects" class="secondary-cta-btn">
+            <span>&larr; 返回实验室目录</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- 核心亮点卡片 -->
+      <section class="prose">
+        <h2>核心定位与设计原则</h2>
+        <p>
+          在当代互联网环境中，搜索“免费工具”往往会遭遇层层弹窗、诱导注册、假免费真收费或强制关注引流。
+          <strong>ITIS Free</strong> 的初衷就是打造一个<strong>真正干净、透明、纯粹的数字免费资源目录</strong>，所有收录条目均坚持以下标准：
+        </p>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <div class="feature-name">纯净无广与真免费</div>
+            <div class="feature-desc">
+              拒绝一切伪免费和强制推广弹窗，严格甄别并标注入门门槛、真实免费额度与收费限制，彻底避坑。
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-name">开发者云与基础设施</div>
+            <div class="feature-desc">
+              精选免费云主机、Serverless 容器计算、CDN 边缘加速、免费域名托管、对象存储与公共 API 资源。
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <div class="feature-name">影音媒体与设计生产力</div>
+            <div class="feature-desc">
+              汇总 CC0 无版权高画质图库、商用开源字体、矢量 SVG 图标库、音效素材与纯前端无损压缩利器。
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🤝</div>
+            <div class="feature-name">社区驱动与极速架构</div>
+            <div class="feature-desc">
+              采用现代静态站点技术构建，毫秒级快速响应。项目完全由社区极客共同审阅与维护，持久保鲜。
+            </div>
+          </div>
+        </div>
+
+        <h2>收录分类全览</h2>
+        <ul>
+          <li><strong>云服务与部署：</strong>免费 VPS、Vercel/Cloudflare Pages 类静态托管、免费容器运行时、免费 PostgreSQL/MySQL 数据库。</li>
+          <li><strong>AI 与大模型配额：</strong>提供免费调用额度、免费 API Key 或永久免费层的高质量大模型平台与中转服务。</li>
+          <li><strong>效率工具与替代品：</strong>各类昂贵商业专有软件的开源自托管/免费 Web 替代品（如在线 PDF 工具、格式转换、离线画板等）。</li>
+          <li><strong>开发调试利器：</strong>临时邮箱、免费 Webhook 接收器、正则调试器、DNS 查询与免费 SSL 证书服务。</li>
+        </ul>
+
+        <div class="info-box">
+          <h3 style="margin-top:0; font-size:1.15rem; color:var(--text-main);">💡 菜鸟笔记实验室收录结语</h3>
+          <p style="margin-bottom:0; color:var(--text-muted); font-size:0.95rem; line-height:1.7;">
+            「菜鸟笔记」(ucncn.cn) 始终倡导纯粹、实用、无广告的极客分享精神。ITIS Free 团队所秉持的“去商业化污染、开源共建、真实利他”理念与本站不谋而合。欢迎前往 <strong>free.itis.chat</strong> 探索海量优质免费资源！
+          </p>
+        </div>
+
+        <div style="text-align: center; margin: 36px 0;">
+          <a href="https://free.itis.chat/" target="_blank" rel="noopener noreferrer" class="primary-cta-btn" style="padding: 14px 36px; font-size: 1.1rem;">
+            <span>🚀 前往体验 ITIS Free (free.itis.chat) &#8599;</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 底部合规声明 -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-nav">
+        <a href="../../">首页</a>
+        <span>·</span>
+        <a href="../../#articles">菜鸟笔记</a>
+        <span>·</span>
+        <a href="../../#projects">项目实验室</a>
+      </div>
+      <div>
+        &copy; 2024-2026 菜鸟笔记 (ucncn.cn) 版权所有
+      </div>
+      <div>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="beian-link">
+          苏ICP备2024150485号-5
+        </a>
+      </div>
+      <p class="footer-disclaimer">
+        声明：本站为个人非营利性技术学习笔记本，不提供用户注册及公众言论发布功能。
+      </p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
