@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ea580c">
+  <title>Meta Muse 实战案例库 (muse.itis.chat) - 真实用户案例与现成Prompt - 菜鸟笔记实验室</title>
+  <meta name="description" content="Meta Muse 实战案例库 (muse.itis.chat) 收录数十个 Meta Muse 个人 AI 助手真实用户实战案例，涵盖日常订阅审计、10项日常自动化、二手车砍价、编程代码库整站修复与从零搭建全栈，提供现成 Prompt 提示词与避坑复现指南。">
+  <meta name="keywords" content="Meta Muse, Muse实战, Muse案例, Muse prompt, 个人AI助手, Muse自动化, Muse Code, AI提效, 菜鸟笔记实验室">
+  <meta name="author" content="菜鸟笔记 (ucncn.cn)">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
+  <link rel="canonical" href="https://ucncn.cn/projects/muse-itis/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Meta Muse 实战案例库 (muse.itis.chat) - 真实用户案例与现成Prompt - 菜鸟笔记实验室">
+  <meta property="og:description" content="收录数十个 Meta Muse 个人 AI 助手真实用户实战案例，提供现成 Prompt 提示词与避坑复现指南。">
+  <meta property="og:url" content="https://ucncn.cn/projects/muse-itis/">
+  <meta property="og:site_name" content="菜鸟笔记">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ucncn.cn/assets/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Meta Muse 实战案例库 (muse.itis.chat) - 真实用户案例与现成Prompt">
+  <meta name="twitter:description" content="收录数十个 Meta Muse 个人 AI 助手真实用户实战案例，带现成 Prompt 与复现指南。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
+
+  <!-- Schema.org 结构化数据 (WebSite / WebApplication) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Meta Muse 实战案例库 (muse.itis.chat)",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CNY"
+        },
+        "description": "收录数十个 Meta Muse 个人 AI 助手真实用户实战案例，提供现成 Prompt 提示词与复现指南",
+        "author": {
+          "@type": "Organization",
+          "name": "Muse 实战案例库"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "实验室",
+            "item": "https://ucncn.cn/#projects"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Meta Muse 实战案例库 (muse.itis.chat)"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .muse-hero {
+      background: linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, rgba(245, 158, 11, 0.08) 50%, rgba(225, 29, 72, 0.06) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 40px 30px;
+      margin-bottom: 36px;
+      text-align: center;
+      position: relative;
+    }
+    .muse-badge-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .muse-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #ea580c;
+      background: rgba(234, 88, 12, 0.12);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .muse-badge.amber {
+      color: #d97706;
+      background: rgba(245, 158, 11, 0.12);
+    }
+    .muse-badge.rose {
+      color: #e11d48;
+      background: rgba(225, 29, 72, 0.12);
+    }
+    .muse-title {
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .muse-title span {
+      background: linear-gradient(135deg, #ea580c, #f59e0b, #e11d48);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .muse-sub {
+      font-size: 1.08rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+    }
+    .cta-button-group {
+      display: inline-flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+    .primary-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #ea580c, #f59e0b);
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 12px 28px;
+      border-radius: 30px;
+      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .primary-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(234, 88, 12, 0.45);
+    }
+    .secondary-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-surface);
+      color: var(--text-main) !important;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 12px 22px;
+      border-radius: 30px;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .secondary-cta-btn:hover {
+      border-color: #ea580c;
+      color: #ea580c !important;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(234, 88, 12, 0.4);
+    }
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    .feature-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .info-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 头部导航 -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../../" class="logo-area">
+        <img src="/assets/images/favicon.svg" alt="菜鸟笔记 Logo" width="28" height="28" style="vertical-align:middle; border-radius: 6px;">
+        <span class="logo-text">菜鸟笔记 · 实验室</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="../../" class="nav-link">返回主站</a>
+        <a href="../../#articles" class="nav-link">菜鸟笔记</a>
+        <a href="../../#projects" class="nav-link">其他项目</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="切换深浅模式" title="切换深浅模式"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        <a href="../../">首页</a>
+        <span>/</span>
+        <a href="../../#projects">实验室</a>
+        <span>/</span>
+        <span>Meta Muse 实战案例库 (muse.itis.chat)</span>
+      </div>
+
+      <!-- Hero 介绍区 -->
+      <section class="muse-hero">
+        <div class="muse-badge-wrap">
+          <span class="muse-badge">💡 Meta Muse 实战</span>
+          <span class="muse-badge amber">📋 现成 Prompt 提示词</span>
+          <span class="muse-badge rose">🛠️ 真实落地场景</span>
+        </div>
+        <h1 class="muse-title">Meta Muse <span>实战案例库</span></h1>
+        <p class="muse-sub">
+          精选收录数十个 Meta Muse 个人 AI 助手真实用户实战案例。涵盖日常订阅审计、10项日常自动化、二手车砍价、代码库整站修复与从零搭全栈，带现成 Prompt 与复现指南。
+        </p>
+
+        <div class="cta-button-group">
+          <a href="https://muse.itis.chat/" target="_blank" rel="noopener noreferrer" class="primary-cta-btn">
+            <span>💡 立即直达 Muse 案例库 (muse.itis.chat) &#8599;</span>
+          </a>
+          <a href="../../#projects" class="secondary-cta-btn">
+            <span>&larr; 返回实验室目录</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- 核心亮点卡片 -->
+      <section class="prose">
+        <h2>核心定位与实用价值</h2>
+        <p>
+          在 AI Agent（智能代理）由理论走向日常落地的关键阶段，许多人困惑于“AI 助手到底能在我的实际工作中干什么”。
+          <strong>Meta Muse 实战案例库 (muse.itis.chat)</strong> 汇聚了全球真实用户经过实测检验的高价值案例，杜绝虚假营销，专注于可复现的生产力飞跃。
+        </p>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <div class="feature-name">真实高频生活与职场落地</div>
+            <div class="feature-desc">
+              收录订阅扣费深度审计、二手车精准砍价策略、家庭财务自动化与日常日程代办等真刀真枪的生活场景。
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📝</div>
+            <div class="feature-name">开箱即用 Prompt 提示词</div>
+            <div class="feature-desc">
+              每个案例均包含经过实战调优、结构严密的成熟 Prompt 模板，一键复制即可在 Meta Muse 中立即生效运行。
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-name">代码库整站修复与全栈开发</div>
+            <div class="feature-desc">
+              从遗留老项目 Bug 自动化巡检、依赖冲突排查到从零搭建全栈 Web 应用，全面展示 AI 在代码工程中的实操表现。
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <div class="feature-name">避坑指南与原始信源核对</div>
+            <div class="feature-desc">
+              真实记录模型在长上下文处理中的边界限制与踩坑点，并附带外网报道与社交媒体原始信源链接，客观求真。
+            </div>
+          </div>
+        </div>
+
+        <h2>收录案例方向全览</h2>
+        <ul>
+          <li><strong>生活与消费自动化：</strong>流媒体与 SaaS 账单审计、智能砍价助手、私人健身教练、个性化旅行规划。</li>
+          <li><strong>软件开发与架构演进：</strong>大型 GitHub 仓库代码诊断、单元测试批量生成、API 文档逆向提取、全栈快速原型搭建。</li>
+          <li><strong>知识管理与研究工作流：</strong>长篇 PDF 论文交叉对比、竞品情报动态监控、行业会议纪要结构化提炼。</li>
+          <li><strong>自动化流程与 Agent 协同：</strong>跨应用数据同步、邮件智能分类回复、定时任务监控与自动化警报。</li>
+        </ul>
+
+        <div class="info-box">
+          <h3 style="margin-top:0; font-size:1.15rem; color:var(--text-main);">💡 菜鸟笔记实验室收录结语</h3>
+          <p style="margin-bottom:0; color:var(--text-muted); font-size:0.95rem; line-height:1.7;">
+            「菜鸟笔记」(ucncn.cn) 始终专注技术实操与编程经验沉淀。Meta Muse 作为新一代个人 AI 助手与代理平台，其真实案例库展现了 AI 真正赋能日常自动化与工程开发的可能性。欢迎前往 <strong>muse.itis.chat</strong> 探索丰富的前沿实战案例！
+          </p>
+        </div>
+
+        <div style="text-align: center; margin: 36px 0;">
+          <a href="https://muse.itis.chat/" target="_blank" rel="noopener noreferrer" class="primary-cta-btn" style="padding: 14px 36px; font-size: 1.1rem;">
+            <span>🚀 前往体验 Meta Muse 实战案例库 (muse.itis.chat) &#8599;</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 底部合规声明 -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-nav">
+        <a href="../../">首页</a>
+        <span>·</span>
+        <a href="../../#articles">菜鸟笔记</a>
+        <span>·</span>
+        <a href="../../#projects">项目实验室</a>
+      </div>
+      <div>
+        &copy; 2024-2026 菜鸟笔记 (ucncn.cn) 版权所有
+      </div>
+      <div>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="beian-link">
+          苏ICP备2024150485号-5
+        </a>
+      </div>
+      <p class="footer-disclaimer">
+        声明：本站为个人非营利性技术学习笔记本，不提供用户注册及公众言论发布功能。
+      </p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
