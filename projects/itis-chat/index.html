@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6366f1">
+  <title>AI星球旅行指南 (itis.chat) - AI工具导航与应用推荐平台 - 菜鸟笔记实验室</title>
+  <meta name="description" content="AI星球旅行指南 (itis.chat) 是一个专注于 AI 工具导航与应用推荐的精选平台。全景收录实用的人工智能网站、生产力产品和学习资源，涵盖 AI 写作、AI 绘画、AI 办公与开发提效，助你轻松探索前沿 AI 宇宙。">
+  <meta name="keywords" content="AI星球旅行指南, itis.chat, AI工具导航, AI应用推荐, 人工智能网站, AI写作工具, AI绘画工具, AI办公提效, 菜鸟笔记实验室">
+  <meta name="author" content="菜鸟笔记 (ucncn.cn)">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/images/favicon.svg">
+  <link rel="canonical" href="https://ucncn.cn/projects/itis-chat/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AI星球旅行指南 (itis.chat) - AI工具导航与应用推荐平台 - 菜鸟笔记实验室">
+  <meta property="og:description" content="专注于 AI 工具导航与应用推荐的精选平台。全景收录实用的人工智能网站、产品和学习资源，助你轻松探索 AI 宇宙。">
+  <meta property="og:url" content="https://ucncn.cn/projects/itis-chat/">
+  <meta property="og:site_name" content="菜鸟笔记">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="https://ucncn.cn/assets/images/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter 社交卡片 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI星球旅行指南 (itis.chat) - AI工具导航与应用推荐平台">
+  <meta name="twitter:description" content="专注于 AI 工具导航与应用推荐的精选平台。全景收录实用的人工智能网站、产品和学习资源。">
+  <meta name="twitter:image" content="https://ucncn.cn/assets/images/og-cover.png">
+
+  <!-- Schema.org 结构化数据 (WebSite / WebApplication) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "AI星球旅行指南 (itis.chat)",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CNY"
+        },
+        "description": "专注于 AI 工具导航与应用推荐的精选平台，收录实用的人工智能网站、产品和学习资源",
+        "author": {
+          "@type": "Organization",
+          "name": "AI星球旅行指南"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "首页",
+            "item": "https://ucncn.cn/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "实验室",
+            "item": "https://ucncn.cn/#projects"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "AI星球旅行指南 (itis.chat)"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .planet-hero {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.09) 0%, rgba(168, 85, 247, 0.08) 50%, rgba(236, 72, 153, 0.06) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 40px 30px;
+      margin-bottom: 36px;
+      text-align: center;
+      position: relative;
+    }
+    .planet-badge-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .planet-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #6366f1;
+      background: rgba(99, 102, 241, 0.12);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .planet-badge.purple {
+      color: #a855f7;
+      background: rgba(168, 85, 247, 0.12);
+    }
+    .planet-badge.pink {
+      color: #ec4899;
+      background: rgba(236, 72, 153, 0.12);
+    }
+    .planet-title {
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .planet-title span {
+      background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .planet-sub {
+      font-size: 1.08rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+    }
+    .cta-button-group {
+      display: inline-flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+    .primary-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 12px 28px;
+      border-radius: 30px;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .primary-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    }
+    .secondary-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-surface);
+      color: var(--text-main) !important;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 12px 22px;
+      border-radius: 30px;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .secondary-cta-btn:hover {
+      border-color: #6366f1;
+      color: #6366f1 !important;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    .feature-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .info-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 头部导航 -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../../" class="logo-area">
+        <img src="/assets/images/favicon.svg" alt="菜鸟笔记 Logo" width="28" height="28" style="vertical-align:middle; border-radius: 6px;">
+        <span class="logo-text">菜鸟笔记 · 实验室</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="../../" class="nav-link">返回主站</a>
+        <a href="../../#articles" class="nav-link">菜鸟笔记</a>
+        <a href="../../#projects" class="nav-link">其他项目</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="切换深浅模式" title="切换深浅模式"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        <a href="../../">首页</a>
+        <span>/</span>
+        <a href="../../#projects">实验室</a>
+        <span>/</span>
+        <span>AI星球旅行指南 (itis.chat)</span>
+      </div>
+
+      <!-- Hero 介绍区 -->
+      <section class="planet-hero">
+        <div class="planet-badge-wrap">
+          <span class="planet-badge">🪐 AI 工具导航</span>
+          <span class="planet-badge purple">🚀 实用应用推荐</span>
+          <span class="planet-badge pink">✨ 生产力进化雷达</span>
+        </div>
+        <h1 class="planet-title">AI星球旅行指南 <span>(itis.chat)</span></h1>
+        <p class="planet-sub">
+          专注于 AI 工具导航与应用推荐的精选平台。全景收录实用的人工智能网站、生产力产品和学习资源，涵盖 AI 写作、AI 绘画、AI 办公与开发提效，助你快速发现好用的 AI 应用。
+        </p>
+
+        <div class="cta-button-group">
+          <a href="https://itis.chat/" target="_blank" rel="noopener noreferrer" class="primary-cta-btn">
+            <span>🪐 立即直达 AI星球官网 (itis.chat) &#8599;</span>
+          </a>
+          <a href="../../#projects" class="secondary-cta-btn">
+            <span>&larr; 返回实验室目录</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- 核心亮点卡片 -->
+      <section class="prose">
+        <h2>核心定位与收录特色</h2>
+        <p>
+          在人工智能日新月异的浪潮中，各类大模型与垂直应用层出不穷。
+          <strong>AI星球旅行指南 (itis.chat)</strong> 致力于为广大职场人、创作者与开发者建立一个清晰、系统且持续更新的<strong>AI 应用全景地图</strong>。
+        </p>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <div class="feature-name">全域 AI 对话与大模型</div>
+            <div class="feature-desc">
+              收录国内外领先的大语言模型、智能搜索引擎、多轮会话 Agent 与智能问答助手，一览行业顶尖算力。
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <div class="feature-name">AI 绘画与多模态创作</div>
+            <div class="feature-desc">
+              汇聚文生图、图像重绘、AI 视频生成、虚拟数字人、声音克隆与音视频处理前沿神器，激发无限创作灵感。
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">💼</div>
+            <div class="feature-name">职场办公与效率革命</div>
+            <div class="feature-desc">
+              精选 AI 文章润色、PPT 智能生成、会议纪要提取、表格数据自动化与知识库管理工具，大幅释放生产力。
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">💻</div>
+            <div class="feature-name">开发者工具与学习资源</div>
+            <div class="feature-desc">
+              汇总 AI 辅助编程、API 接口聚合平台、提示词工程（Prompt）指南与开源模型学习文档，为技术人员深度赋能。
+            </div>
+          </div>
+        </div>
+
+        <h2>热门分类一览</h2>
+        <ul>
+          <li><strong>AI 写作与文案：</strong>智能改写、多语言翻译、营销文案生成、学术论文辅助与 SEO 文章创作。</li>
+          <li><strong>AI 图像与设计：</strong>Midjourney、FLUX、Stable Diffusion 生态工具、商用生图、老照片修复与智能抠图。</li>
+          <li><strong>AI 编程与开发：</strong>代码自动补全、Bug 智能排查、架构设计生成、SQL 智能转换与智能终端。</li>
+          <li><strong>AI 音视频合成：</strong>文字转语音 TTS、声音克隆、AI 脚本剪辑、画质超分与多语种配音。</li>
+        </ul>
+
+        <div class="info-box">
+          <h3 style="margin-top:0; font-size:1.15rem; color:var(--text-main);">💡 菜鸟笔记实验室收录结语</h3>
+          <p style="margin-bottom:0; color:var(--text-muted); font-size:0.95rem; line-height:1.7;">
+            「菜鸟笔记」(ucncn.cn) 始终关注前沿技术演进与开发者效能工具。面对爆炸式涌现的人工智能产品，「AI星球旅行指南」以清晰的分类与客观的评测，帮助用户在繁杂的信息海洋中迅速锁定最契合自身的生产力利器。欢迎前往 <strong>itis.chat</strong> 探索属于你的 AI 宇宙！
+          </p>
+        </div>
+
+        <div style="text-align: center; margin: 36px 0;">
+          <a href="https://itis.chat/" target="_blank" rel="noopener noreferrer" class="primary-cta-btn" style="padding: 14px 36px; font-size: 1.1rem;">
+            <span>🚀 前往体验 AI星球旅行指南 (itis.chat) &#8599;</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 底部合规声明 -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-nav">
+        <a href="../../">首页</a>
+        <span>·</span>
+        <a href="../../#articles">菜鸟笔记</a>
+        <span>·</span>
+        <a href="../../#projects">项目实验室</a>
+      </div>
+      <div>
+        &copy; 2024-2026 菜鸟笔记 (ucncn.cn) 版权所有
+      </div>
+      <div>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="beian-link">
+          苏ICP备2024150485号-5
+        </a>
+      </div>
+      <p class="footer-disclaimer">
+        声明：本站为个人非营利性技术学习笔记本，不提供用户注册及公众言论发布功能。
+      </p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
