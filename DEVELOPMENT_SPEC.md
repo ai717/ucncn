@@ -85,6 +85,9 @@ flowchart TD
 | `projects/` | **模式 B**（主站子实验室） | `https://ucncn.cn/projects/*` | 否 | **是** | 主站实验室集合（详见 `projects/README.md`） |
 | `money/` | **模式 A**（独立二级域名） | `https://m.ucncn.cn/` | **是** | **否**（.gitignore） | MoneyLab 搞钱实验室（独立仓库/独立CNAME） |
 | `md/` | **模式 A**（独立二级域名） | `https://md.ucncn.cn/` | **是** | **否**（.gitignore） | **MD2Post Markdown 微信排版工具（已上线独立站点，已挂载至主站实验室卡片）** |
+| `tools/` | **模式 A**（独立二级域名） | `https://tools.ucncn.cn/` | **是** | **否**（.gitignore） | **不烧心免费在线工具箱（已上线独立站点，已挂载至主站实验室卡片）** |
+| `time/` | **模式 A**（独立二级域名） | `https://time.ucncn.cn/` | **是** | **否**（.gitignore） | **专注时钟 & 倒计时（已上线独立站点，已挂载至主站实验室卡片）** |
+| `star/` | **模式 A**（独立二级域名） | `https://star.ucncn.cn/` | **是** | **否**（.gitignore） | **太空偷窥局侦察与反抓捕雷达（已上线独立站点，已挂载至主站实验室卡片）** |
 
 ---
 
